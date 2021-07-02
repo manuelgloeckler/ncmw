@@ -1,8 +1,8 @@
 
-import matplotlib as plt 
+import matplotlib.pyplot as plt 
 import pandas as pd
 
-def plot_full_fva(fva:pd.DataFrame, label_only_at_flux:int=5):
+def plot_full_fva(fva:pd.DataFrame, save_path:str, label_only_at_flux:int=5):
     """Plots all exchange fluxes, but only labels the one with large flux values.
 
     Args:
@@ -16,10 +16,10 @@ def plot_full_fva(fva:pd.DataFrame, label_only_at_flux:int=5):
     _ = plt.xticks(high_vals, rotation=90)
     plt.tight_layout()
     plt.ylabel("Flux")
-    fig.savefig("fva_all_fluxes.pdf")
+    fig.savefig(save_path)
 
-def plot_medium_fva_range(model, growth_threshold = 1.0):
-    fva_ex = model.summary(fva=growth_threshold)
+def plot_medium_fva_range(model, save_path, growth_fraction = 1.0):
+    fva_ex = model.summary(fva=growth_fraction)
     fva_ex = fva_ex.to_frame()
     medium = model.medium
 
@@ -28,7 +28,7 @@ def plot_medium_fva_range(model, growth_threshold = 1.0):
     y_min_flux = []
     y_max_flux = []
     for _, data in fva_ex.iterrows():
-        id = str(data.metabolite[:-2])
+        id = data.reaction
         f = data.factor*data.flux 
         f_min = data.factor*data.minimum 
         f_max = data.factor*data.maximum
@@ -38,6 +38,7 @@ def plot_medium_fva_range(model, growth_threshold = 1.0):
             y_fluxes.append(f)
             y_min_flux.append(f_min)
             y_max_flux.append(f_max)
+
     
     fig = plt.figure(figsize=(10,5), dpi= 160)
     plt.vlines(x=x, ymin=y_min_flux, ymax=y_max_flux, alpha=0.8, color="C0")
@@ -57,5 +58,5 @@ def plot_medium_fva_range(model, growth_threshold = 1.0):
     plt.xticks(x,rotation=90)
     plt.grid(linestyle='--', alpha=0.5)
     plt.ylabel("$Flux$")
-    plt.show()
-    fig.savefig("ex_flux.pdf")
+    plt.tight_layout()
+    fig.savefig(save_path)

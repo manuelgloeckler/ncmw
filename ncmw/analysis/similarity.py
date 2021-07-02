@@ -2,6 +2,8 @@ from typing import Iterable
 from cobra.core import Model
 import pandas as pd
 
+import numpy as np
+
 def get_shared_metabolites_counts(model1:Model, model2:Model):
     """This method return the number of unique metabolites in both models .
 
@@ -56,11 +58,11 @@ def jaccard_similarity(model1:Model, model2:Model):
     """
     total_mets, common_mets = get_shared_metabolites_counts(model1,model2)
     total_recs, common_recs = get_shared_reactions_counts(model1,model2)
-    j_met = total_mets/common_mets
-    j_rec = total_recs/common_recs
+    j_met = common_mets/total_mets
+    j_rec = common_recs/total_recs
     return j_met, j_rec
 
-def jaccard_similarity_matrix(models: Iterable):
+def jaccard_similarity_matrices(models: Iterable):
     """The methods takes an Iterable of cobra models and returns a dictionary
     containing all pairwise jaccard similarities.
 
@@ -68,15 +70,50 @@ def jaccard_similarity_matrix(models: Iterable):
         models (Iterable): List of cobra models
 
     Returns:
-        (dict): Dictionary of all similarities indexed by the model ids!
+        (df): DataFrame of all jaccard similarities for metabolites indexed by the model ids.
+        (df): DataFrame of all jaccard similarities for reaction indexed by the model ids.
+        (df): DataFrame for resourece overlap indexed by the model ids.
     """    
-    similarities = dict()
+    N = len(models)
+    matrix_met = np.eye(N)
+    matrix_rec = np.eye(N)
+    matrix_ro = np.eye(N)
+    index = [model.id for model in models]
     for i, model1 in enumerate(models):
-        for model2 in models[i:]:
-            j_index = jaccard_similarity(model1,model2)
-            similarities[(model1.id,model2.id)] = j_index
-            similarities[(model2.id,model1.id)] = j_index
-    return similarities
+        for j,model2 in zip(range(i+1,N),models[i+1:]):
+            ji_met, ji_rec = jaccard_similarity(model1,model2)
+            ji_ro = resource_overlap(model1,model2)
+            matrix_met[i,j] = ji_met
+            matrix_met[j,i] = ji_met
+            matrix_rec[i,j] = ji_rec 
+            matrix_rec[j,i] = ji_rec
+            matrix_ro[i,j] = ji_ro 
+            matrix_ro[j,i] = ji_ro
+
+    df1 = pd.DataFrame(matrix_met, index=index, columns=index)
+    df2 = pd.DataFrame(matrix_rec, index=index, columns=index)
+    df3 = pd.DataFrame(matrix_ro, index=index, columns=index)
+
+    return df1,df2,df3
+
+
+def resource_overlap(model1: Model, model2:Model):
+    """Coputes the resource overlap between two models
+
+    Args:
+        model1 (Model): Cobra model
+        model2 (Model): Cobra model
+
+    Returns:
+        (float): Jacard index of resource overlap
+    """
+    in_ex1 = set([ex.id for ex in model1.exchanges if ex.lower_bound < 0])
+    in_ex2 = set([ex.id for ex in model2.exchanges if ex.lower_bound < 0])
+
+    common = in_ex1.intersection(in_ex2)
+    union = in_ex1.union(in_ex2)
+
+    return len(common)/len(union)
 
 
 def write_out_common_metabolites(model1:Model, model2, prefix:str="common_reactions.csv"):

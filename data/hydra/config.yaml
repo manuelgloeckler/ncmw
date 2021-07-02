@@ -1,5 +1,6 @@
 name: "default_project_name"
 seed: 1
-eps: 1e-6  # Value at which a model is consider to have zero growth
+eps: 0.01  # Value at which a model is consider to have zero growth
 defaults:
-  - setup: "setup"
+  - setup: setup
+  - analysis: analysis

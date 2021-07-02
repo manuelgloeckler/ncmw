@@ -24,14 +24,13 @@ def get_model_paths(folder:str):
     return files
 
 def save_model(model, path:str):
-    with open(path, "w") as f:
-        write_sbml_model(model,f)
+    write_sbml_model(model,path)
 
 
 
-def get_models(folder:str):
+def get_models(folder:str, prefix=DATA_PATH):
     """ Returns all models in the directory """
-    directory = DATA_PATH + folder
+    directory = prefix + folder
     models = []
     for filename in os.listdir(directory):
         if filename.endswith(".xml"): 
@@ -43,6 +42,7 @@ def get_models(folder:str):
         elif filename.endswith(".mat"):
             model = load_matlab_model(directory + SEPERATOR + filename)
         else:
-            raise NotImplementedError("We only suppport models that follow the sbml, json, yaml or matlab format.")
+            pass
         models.append(model)
     return models
+

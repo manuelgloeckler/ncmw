@@ -1,0 +1,3 @@
+- setup.memote_evaluation=False
+- setup.gapfill=medium
+- setup.fastcc=False

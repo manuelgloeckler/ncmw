@@ -5,7 +5,7 @@ import pandas as pd
 
 import subprocess
 
-from .utils import get_default_configs, get_default_medium
+from .utils import get_default_configs, get_default_medium, get_biomass_reaction
 
 
 def gapfill_model(model:Model, eps=1e-6, fill_model_base="ecoli"):
@@ -18,6 +18,7 @@ def gapfill_model(model:Model, eps=1e-6, fill_model_base="ecoli"):
 
     Returns:
         (Model): Cobra model that has growth if algorithm succeeds
+        (List): List of reactions that were added
     """
     growth = model.slim_optimize()
     if growth > eps:
@@ -34,10 +35,75 @@ def gapfill_model(model:Model, eps=1e-6, fill_model_base="ecoli"):
 
     assert model.slim_optimize() > eps, "The model still have no growth..."
 
-    return model
+    return model, solution
 
 def gapfill_medium(model:Model, eps=1e-6):
-    raise NotImplementedError()
+    """This will add the minimal set of exchange reactions such that the model
+    has more than eps growth.
+
+    Args:
+        model (Model): Cobra model which has less than eps growth
+        eps ([type], optional): Value for which we consider the model to have zero growth . Defaults to 1e-6.
+
+    Returns:
+        (Model): Cobra model with extended medium 
+        (List): List of extended metabolites
+    """
+    model_help = model.copy()
+    # if model_help.slim_optimize() > eps:
+    #     # Already feasible model.
+    #     return model, []
+    # We can gapfill any exchange reaction that currently is not in the medium
+    gapfillable = set([ex.id for ex in model_help.exchanges]).difference(set(model.medium.keys()))
+    print(f"There are {len(gapfillable)} many metabolites to fill the medium")
+
+    biomass = get_biomass_reaction(model_help)
+    # Binary variables: Theta_i 
+    # This is an indicator which is zero if the metabolite should be added to the medium
+    thetas = []
+    for i in range(len(gapfillable)):
+        thetas.append(model_help.problem.Variable('theta_'+str(i), type="binary"))
+
+
+    # Constraints for exchanges, which are turned of for theta_i = 1
+    theta_constraints = []
+    for i,id in enumerate(gapfillable):
+        reaction = model_help.reactions.get_by_id(id)
+        min_bound = -10
+        reaction.lower_bound = min_bound
+        cons = model_help.problem.Constraint(
+            (reaction.flux_expression + min_bound*thetas[i]),
+            lb=min_bound,
+            ub=1000)
+        theta_constraints.append(cons)
+
+    # Constraints for growth rates, which must be at least 10% MBR
+    constraint_growth = model_help.problem.Constraint(
+        biomass.flux_expression,
+        lb=eps,
+        ub=1000)
+
+    # Adding new variables and constraints.
+    model_help.add_cons_vars(thetas)
+    model_help.add_cons_vars(theta_constraints)
+    model_help.add_cons_vars(constraint_growth)
+
+    # Objevtive is maximising turned of exchanges, that is sum of theta_is
+    objective = model_help.problem.Objective(sum(thetas), direction="max")
+    model_help.objective = objective
+    model_help.solver.update()
+
+    # Model optimization 
+    sol = model_help.optimize()
+    # Change medium and check if it worked
+    new_exchanges = [ex.id for ex in model_help.exchanges if ex.flux < 0 and ex.id not in model.medium]
+    extended_medium = model.medium 
+    for id in new_exchanges:
+        extended_medium[id] = 10
+    model.medium = extended_medium
+    #assert model.slim_optimize() > eps, "The medium extension failed for some reason..."
+
+    return model, new_exchanges
 
 
 def set_default_configs_and_snm3_medium(model:Model, configs:str="default.json", medium="snm3.json"):
@@ -51,6 +117,7 @@ def set_default_configs_and_snm3_medium(model:Model, configs:str="default.json",
     Returns:
         (Model): Cobra model
     """    
+    # Set bounds
     configs_dict = get_default_configs(configs)
     medium_dict = get_default_medium(medium)
     for key, val in configs_dict.items():
@@ -58,11 +125,15 @@ def set_default_configs_and_snm3_medium(model:Model, configs:str="default.json",
         if "reactions" in key[0]:
             for reaction in model.reactions:
                 reaction_dic = reaction.__dict__
-                reaction_dic["_" + key[1]] = val
+                if reaction_dic["_" + key[1]] != 0:
+                    reaction_dic["_" + key[1]] = val
         else:
             reaction = model.reactions.get_by_id(key[0])
             reaction_dic = reaction.__dict__
-            reaction_dic["_" + key[1]] = val
+            if reaction_dic["_" + key[1]] != 0:
+                    reaction_dic["_" + key[1]] = val
+
+    # Set medium
     exchanges = [ex.id for ex in model.exchanges]
     model_medium = dict()
     for key in medium_dict:

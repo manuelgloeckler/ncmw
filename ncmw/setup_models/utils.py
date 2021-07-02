@@ -18,3 +18,14 @@ def get_default_medium(medium:str="snm3.json"):
     with open(DATA_PATH + "medium" + SEPERATOR + medium, "r") as f:
         medium_dict = json.load(f)
     return medium_dict
+
+def get_biomass_reaction(model):
+    """ Return the biomass reaction of a model """
+    with model:
+        for ex in model.exchanges:
+            ex.lower_bound=-10
+    
+        growth = model.slim_optimize()
+        for rec in model.reactions:
+            if rec.flux == growth:
+                return rec

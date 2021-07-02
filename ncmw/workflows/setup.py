@@ -13,6 +13,7 @@ import random
 import numpy as np
 import os 
 import pandas as pd
+from copy import deepcopy
 
 
 from utils import get_models, get_result_path, SEPERATOR, save_model, get_model_paths
@@ -62,7 +63,6 @@ def run_setup(cfg : DictConfig) -> None:
         reports = []
         for model in models:
             cmodel, df = create_consistent_model(model)
-            cobra.io.write_sbml_model(cmodel, PATH + SEPERATOR + "snm3_models" + SEPERATOR + "consistent_" + cmodel.id)
             consistent_models.append(cmodel)
             reports.append(df)
             log.info(df)
@@ -75,8 +75,8 @@ def run_setup(cfg : DictConfig) -> None:
     
     log.info(f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium}")
     files = []
-    for model in models:
-        model = set_default_configs_and_snm3_medium(model, cfg.setup.configs, cfg.setup.medium)
+    for model_i in models:
+        model = set_default_configs_and_snm3_medium(deepcopy(model_i), cfg.setup.configs, cfg.setup.medium)
         growth = model.slim_optimize()
         log.info(f"Growth on SNM3: {growth}")
         if growth < cfg.eps:
@@ -84,20 +84,25 @@ def run_setup(cfg : DictConfig) -> None:
 
             if cfg.setup.gapfill == "model":
                 # Todo add capability to different gapfilling models...
-                model = gapfill_model(model, cfg.eps)
+                model, gapfilled_reactions = gapfill_model(model, cfg.eps)
+                log.info(f"Following reactions were added to the model: {gapfilled_reactions}")
             elif cfg.setup.gapfill == "medium":
-                model = gapfill_medium(model, cfg.eps)
+                model, extended_exchanges = gapfill_medium(model, cfg.eps)
+                print(model)
+                log.info(f"Following metabolites were added to the medium: {extended_exchanges}")
             elif cfg.setup.gapfill==False:
                 pass
             else:
                 raise ValueError("We only support gapfilling strategies 'model' or 'medium'!")
             growth = model.slim_optimize()
+            log.info("You may have to check if the extensions are 'plausible'...")
             log.info(f"Gapfilling succeded, Growth: {growth}")
             
         model.id += "_snm3"
         file = PATH + SEPERATOR + "snm3_models" + SEPERATOR + model.id + ".xml"
         files.append(file)
         save_model(model,file)
+
 
         
 

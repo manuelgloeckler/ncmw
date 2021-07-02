@@ -1,0 +1,13 @@
+setup:
+  fastcc: true
+  memote_evaluation: false
+  memote_solver_time_out: 5000
+  gapfill: model
+  configs: default.json
+  medium: snm3.json
+  models: models
+analysis:
+  fva_fraction: 1.0
+name: default_project_name
+seed: 1
+eps: 1.0e-06
