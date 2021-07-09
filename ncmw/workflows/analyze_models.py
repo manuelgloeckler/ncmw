@@ -17,7 +17,7 @@ import json
 
 from utils import get_models, get_result_path, SEPERATOR, save_model, get_model_paths
 from analysis import compute_fvas, jaccard_similarity_matrices, compute_COMPM
-from visualization import plot_full_fva, plot_medium_fva_range, jacard_index_similarity_heatmap
+from visualization import plot_full_fva, plot_medium_fva_range, jacard_index_similarity_heatmap, plot_scaled_medium_growth
 
 import cobra
 
@@ -43,6 +43,7 @@ def run_analysis(cfg : DictConfig) -> None:
         os.mkdir(PATH)
         os.mkdir(PATH)
         os.mkdir(PATH + SEPERATOR + "medium")
+        os.mkdir(PATH + SEPERATOR + "growth")
         os.mkdir(PATH + SEPERATOR + "flux_analysis")
         os.mkdir(PATH + SEPERATOR + "similarity")
     except:
@@ -78,6 +79,10 @@ def run_analysis(cfg : DictConfig) -> None:
     fig = jacard_index_similarity_heatmap(df_met,df_rec,df_ro)
     fig.savefig(PATH + SEPERATOR + "similarity" + SEPERATOR + "similarity_summary.pdf")
 
+    log.info("Computing scaled medium growth plot")
+    kwargs = cfg.visualization.scaled_medium_growth_plot
+    fig = plot_scaled_medium_growth(models, kwargs.min_scale, kwargs.max_scale, kwargs.evaluations)
+    fig.savefig(PATH + SEPERATOR + "growth" + SEPERATOR + "scaled_medium_growth_plot.pdf")
  
 
     log.info("Computing Uptake Sekretions + Transports")

@@ -1,0 +1,4 @@
+scaled_medium_growth_plot:
+  min_scale: 0.1
+  max_scale: 100
+  evaluations: 1000

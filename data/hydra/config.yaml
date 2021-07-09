@@ -4,3 +4,4 @@ eps: 0.01  # Value at which a model is consider to have zero growth
 defaults:
   - setup: setup
   - analysis: analysis
+  - visualization: visualization
