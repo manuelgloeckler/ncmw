@@ -22,4 +22,7 @@ def plot_scaled_medium_growth(models, min_scale=0.1, max_scale=100, evaluations=
         plt.plot(K, growths)
     plt.legend([model.id for model in models])
     return fig
+
+
+
         

@@ -1,12 +1,17 @@
-import pandas as pd
-import cobra
-import numpy as np
-import matplotlib.pyplot as plt
+import cobra 
+import numpy as np 
+import scipy 
 
-from scipy.optimize import linprog
-import scipy
+from mip import xsum, maximize, BINARY
 import mip
-from copy import deepcopy
+
+from abc import ABC, abstractmethod, abstractproperty
+import typing
+
+import sys, os
+import tempfile
+
+import pandas as pd
 
 def create_stoichiometry_matrix(model):
     """ This creates a stoichiometry matrix"""
@@ -21,305 +26,328 @@ def create_stoichiometry_matrix(model):
         for metabolite, stoich in reaction.metabolites.items():
             met_id[metabolite.id] = int(metabolites.index(metabolite))
             S[metabolites.index(metabolite), i] = stoich
+    # Compress as sparse matrix
+    S = scipy.sparse.csr_matrix(S)
     return S, met_id, rec_id 
 
+def get_biomass_reaction(model):
+    """ Return the biomass reaction of a model """
+    objective_str = str(list(model.objective.variables)[0])
+    for rec in model.reactions:
+        if rec.id in objective_str:
+            return rec
 
-class Model():
-    def __init__(self, model, biomass_function):
-        """ This is a new class of metabolic model, capable of flux balance analysis
-        Attributes:
-        models (list): CobraPy models of single organisms which will be used in construction
-        biomass_reactions (list): List of strings containing the ids for the growth reactions
-        """
-        self.biomass_function = biomass_function
-        self.model = model
-        self.id = model.id
-        # Compute stoichimetry_matrix
-        S, met_id, rec_id = create_stoichiometry_matrix(model)
-        self.num_reactions = S.shape[1]
-        self.num_metabolites = S.shape[0]
-        self.stoichiometry_matrix = scipy.sparse.csr_matrix(S)
-        self.met_id = met_id
-        self.rec_id = rec_id 
-        # Set objective
-        idx = self.rec_id[biomass_function]
-        c = np.zeros(self.num_reactions)
-        c[idx] = 1
-        self.objective_c = c
-        # Set bounds
-        self._reset_bounds()
-    
-    @property
-    def reactions(self):
-        return self.model.reactions
-    @property
-    def exchanges(self):
-        return self.model.exchanges
-    @property
-    def metabolites(self):
-        return self.model.metabolites
+class CommunityModel(ABC):
+    """This gives the backbone of any community model.
+    """
     @property
     def medium(self):
-        return self.model.medium
+        return self._medium 
 
-    def set_medium(self, medium):
-        ex_ids = [ex.id for ex in self.exchanges]
-        new_med = {}
-        for key,val in medium.items():
-            if key in ex_ids:
-                new_med[key] = val
-        self.model.medium = new_med
-        self._reset_bounds()
-        
-    def optimize(self, disp=False):
-        sol = linprog(-self.objective_c, A_eq=self.stoichiometry_matrix, b_eq=np.zeros(self.num_metabolites), bounds=self.bounds, method="highs", options={"disp":disp})
-        sol["fun"] = -sol["fun"] # As we have to minimize
-        return sol 
+    @medium.setter
+    def medium(self, medium):
+        return self._set_medium(medium)
     
-    def slim_optimize(self, disp=False):
-        sol = self.optimize(disp=disp)
-        return sol["fun"]
+    @abstractmethod
+    def _set_medium(self, medium):
+        """ This method should set the medium properly"""
+        pass
+
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, weights):
+        return self._set_weights(weights)
+    
+    @abstractmethod
+    def _set_weights(self, weights):
+        """ This method should set the weights properly"""
+        pass
+
+    @abstractmethod
+    def slim_optimize(self):
+        """ This method returns the current objective value"""
+        pass
+
+    @abstractmethod
+    def single_optimize(self, idx):
+        """ This method returns the current objective value"""
+        pass
+    
+    @abstractmethod
+    def optimize(self):
+        """ This method return the current objective value and additional information """
+        pass
+
+    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True):
+        """ This method computes the COOPM medium """
+        raise NotImplementedError("This method is not implemented fro your current model")
 
     def summary(self):
-        sol = self.optimize()
-        flux = sol["x"]
-        ex_ids = [ex.id for ex in self.exchanges]
-        fluxes = []
-        for ex in ex_ids:
-            idx = self.rec_id[ex]
-            fluxes.append(flux[idx])
-        summary_df = pd.DataFrame({"Exchange reaction": ex_ids, "Flux": fluxes})
-        summary_df.sort_values(["Flux"], inplace=True)
-        return summary_df
+        """ This method should report a summary of the model"""
+        raise NotImplementedError("This method is not implemented for your current model")
 
-    def _reset_bounds(self):
-        self.bounds = []
-        for rec in self.model.reactions:
-            self.bounds.append((rec.lower_bound, rec.upper_bound))
 
-    def __add__(self, model2):
-        """ Adding another model creates a community model """
-        return CommunityModel([self,model2], [1.,1.])
-
-class CommunityModel(Model):
-    def __init__(self, models, weight, shared_exchanges=None):
+class BagOfReactionsModel(CommunityModel):
+    """This is a community model, which treats the community as a bag of all reactions that at least one the species has. 
+    """
+    def __init__(self, models:list):
+        self.community_model = cobra.Model("Community__" + "".join([model.id + "__" for model in models]))
+        for model in models:
+            self.community_model += model
         self.models = models
-        self.id = "|".join([model.id for model in models])
-        self.weight = weight
-        if shared_exchanges == None:
+        self._weights = np.ones(len(models))
+        self._medium = self.community_model.medium
+        self.biomass_reactions = [get_biomass_reaction(model) for model in models]
+        self.objective = sum([f.flux_expression for f in self.biomass_reactions])
+        self.community_model.objective = self.objective
+
+    def _set_medium(self, medium):
+        self.community_model.medium = medium 
+        self._medium = medium 
+
+    def _set_weights(self, weights):
+        assert len(weights) == len(self.models), "You need to specify for each species in the community a weights..."
+        self._weights = weights 
+        self.objective = sum([weights[i]*self.biomass_reactions[i].flux_expression for i in range(len(self.weights))])
+        self.community_model.objective = self.objective
+
+    def slim_optimize(self):
+        return self.community_model.slim_optimize()
+
+    def optimize(self):
+        sol = self.community_model.optimize()
+        return sol 
+
+    def single_optimize(self, idx):
+        weights = np.zeros(len(self.models))
+        weights[idx] = 1. 
+        old_weights = self._weights
+        self._set_weights(weights)
+        growth = self.slim_optimize()
+        self._set_weights(old_weights)
+
+        return growth
+
+    def summary(self):
+        return self.community_model.summary()
+
+    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True):
+        model = self.community_model.copy()
+        minMBR = fraction*MBR
+        medium = list(model.medium.keys())
+        biomass = [model.reactions.get_by_id(f.id).flux_expression for f in self.biomass_reactions]
+
+        # Binary variables: Theta_i 
+        thetas = []
+        for i in range(len(medium)):
+            thetas.append(model.problem.Variable('theta_'+str(i), type="binary"))
+
+        # Constraints for exchanges, which are turned of for theta_i = 1
+        theta_constraints = []
+        for i,id in enumerate(medium):
+            reaction = model.reactions.get_by_id(id)
+            min_bound = model.reactions.get_by_id(id).lower_bound
+            cons = model.problem.Constraint(
+                (reaction.flux_expression + min_bound*thetas[i]),
+                lb=min_bound,
+                ub=1000)
+            theta_constraints.append(cons)
+
+        # Constraints for growth rates, which must be at least 10% MBR
+        if enforce_survival:
+            constraint_growth = [model.problem.Constraint(
+            self.weights[i]*f,
+            lb=minMBR,
+            ub=1000) for i,f in enumerate(biomass)]
+        else:
+            constraint_growth = model.problem.Constraint(
+            sum(biomass),
+            lb=minMBR,
+            ub=1000)
+
+        # Adding new variables and constraints.
+        model.add_cons_vars(thetas)
+        model.add_cons_vars(theta_constraints)
+        model.add_cons_vars(constraint_growth)
+
+        # Objevtive is maximising turned of exchanges, that is sum of theta_is
+        objective = model.problem.Objective(sum(thetas), direction="max")
+        model.objective = objective
+        model.solver.update()
+
+        sol = model.optimize()
+        COOPM = dict()
+        for id in medium:
+            if sol.fluxes[id] < 0:
+                COOPM[id] = abs(sol.fluxes[id])
+
+        return COOPM 
+
+class ShuttleCommunityModel(CommunityModel):
+    def __init__(self,models, shared_exchanges=None):
+        # Set up model data
+        self.models = models
+        self.stoichiometry_matrixes = []
+        self.rec_id_dicts = []
+        self.met_id_dicts = []
+        self._medium = []
+        for model in models:
+            S, met_id, rec_id = create_stoichiometry_matrix(model)
+            self.stoichiometry_matrixes.append(S)
+            self.rec_id_dicts.append(rec_id)
+            self.met_id_dicts.append(met_id)
+            self._medium += list(model.medium.items())
+        self._medium = dict(self._medium)
+        self._bounds = self._get_bounds()
+
+
+
+        # Set shuttle reactions to all exchanges if not specified
+        if shared_exchanges is None:
             self.shared_exchanges = []
             for model in models:
-                for rec in model.exchanges:
-                    if rec.id not in self.shared_exchanges:
-                        self.shared_exchanges.append(rec.id)
-        else:
-            self.shared_exchanges = shared_exchanges
-        # Create community stoichimetry matrix with shuttel reactions!
-        self._shifts = [len(self.shared_exchanges)]
-        for i,model in enumerate(models):
-            self._shifts.append(self._shifts[i] + model.num_reactions)
-        S_EX = -np.eye(self._shifts[0])
-        matrices = [S_EX] + [m.stoichiometry_matrix.todense() for m in models]
-        S = scipy.linalg.block_diag(*matrices)
-        self.num_reactions = S.shape[1]
-        self.num_metabolites = S.shape[0]
-        for i, id in enumerate(self.shared_exchanges):
-            for j,model in enumerate(models):
-                if id in model.rec_id:
-                    S[i,self._shifts[j] + model.rec_id[id]] = 1
-        self.stoichiometry_matrix = scipy.sparse.csr_matrix(S)
-        # Cretae objective:
-        self._weighted_objective(weight)
-        # Create bounds
-        self._reset_bounds()
-    
-    @property
-    def reactions(self):
-        return [model.reactions for model in self.models]
-    @property
-    def exchanges(self):
-        return self.shared_exchanges
-    @property
-    def metabolites(self):
-        return [model.metabolites for model in self.models]
-    @property
-    def medium(self):
-        medium = {}
-        for model in self.models:
-            for key,val in model.medium:
-                medium[key] = val
-        return medium
+                for ex in model.exchanges:
+                    if ex.id not in self.shared_exchanges:
+                        self.shared_exchanges.append(ex.id)
 
-    def _weighted_objective(self, weight):
-        self.weight = weight
-        self.objective_c = np.zeros(self._shifts[0])
-        for i,model in enumerate(self.models):
-            self.objective_c = np.append(self.objective_c, weight[i]*model.objective_c)
-    def _reset_bounds(self):
-        self.bounds = []
-        for id in self.shared_exchanges:
-            min_lower_bound = 0
-            for model in self.models:
-                if id in model.rec_id:
-                    rec = model.reactions.get_by_id(id)
-                    if rec.lower_bound < min_lower_bound:
-                        min_lower_bound = rec.lower_bound 
-            self.bounds.append((min_lower_bound, 1000))
-        for model in self.models:
-            self.bounds += model.bounds
+        self._weights = np.ones(len(models))
+        self.biomass_reactions = [get_biomass_reaction(model) for model in models]
+        self.biomass_ids = [self.rec_id_dicts[i][self.biomass_reactions[i].id] for i in range(len(models))]
 
-    def set_medium(self, medium):
-        for model in self.models:
-            model.set_medium(medium)
-        self._reset_bounds()
-
-    def compute_alpha_weightings(self, alpha, maxbiomass=0.1):
-        assert alpha <= 1 and alpha >= 0
-        assert len(self.models) == 2
-        alphas = np.array([alpha,1-alpha])
-        # Alpha objective...
-        c = np.zeros(self._shifts[0])
-        for i, model in enumerate(self.models):
-            c = np.append(c, model.objective_c)
-        # Biomoss constraints
-        c_mask = (c > 0)
-        A_ub = np.zeros((2,len(c)))
-        A_ub[0,c_mask] = np.array([1,0])
-        A_ub[1,c_mask] = np.array([0,1])
-        b_ub = alphas*maxbiomass
-        sol = linprog(-c, A_eq=self.stoichiometry_matrix, b_eq=np.zeros(self.num_metabolites), A_ub = A_ub, b_ub=b_ub, bounds=self.bounds, method="highs")
-        fluxes = sol["x"]
-        growths = fluxes[c > 0]
-        summary = self.summary(sol)
-        return growths, fluxes,summary
-
-    def summary(self, sol=None):
-        if sol == None:
-            sol = self.optimize()
-        flux = sol["x"]
-        ex_ids = self.shared_exchanges
-        ex_flux = flux[:len(ex_ids)]
-        df_ex = pd.DataFrame({"Exchanges": ex_ids, "Flux": ex_flux})
-        df_ex.sort_values(["Flux"], inplace=True)
-        for i,model in enumerate(self.models):
-            shuttel_ids = self.shared_exchanges
-            id = str(model.id) + " Shuttel Flux"
-            df_ex[id] = 0.
-            for sh in shuttel_ids:
-                idx = model.rec_id[sh]
-                df_ex[id][ex_ids.index(sh)] = flux[self._shifts[i] +idx]
-        
-        return df_ex
-    
-    def set_weights(self, weight):
-        self._weighted_objective(weight)
-    
-    def get_model_growths(self):
-        mask = self.objective_c != 0
-        sol = self.optimize()
-        flux = sol["x"]
-        return flux[mask]
-    
-
-from mip import xsum, maximize, BINARY
-import mip
-
-class MIP_community_model():
-    def __init__(self, model1, model2, weights = [1.,1.]):
-        # Necessary information of model1
-        self.S1 = model1.stoichiometry_matrix.todense()
-        self.S1_dict = model1.rec_id 
-        self.bounds1 = model1.bounds 
-        self.obj1 = np.where(model1.objective_c > 0)[0][0]
-
-        self.S2 = model2.stoichiometry_matrix.todense()
-        self.S2_dict = model2.rec_id 
-        self.bounds2 = model2.bounds
-        self.obj2 = np.where(model2.objective_c > 0)[0][0]
-
-        self.medium = dict(list(model1.medium.items()) + list(model2.medium.items()))
-
-        self.comm_model = mip.Model()
+        self.comm_model = mip.Model("Community Model")
         self.build_mip_model()
-        self.comm_model.write("model.lp")
 
-        self.weights = weights
+    def _set_weights(self, weights):
+        self._weights = weights 
+        self.objective = xsum([self.weights[i]*self.xs[i][self.biomass_ids[i]] for i in range(len(self.xs))])
+        self.comm_model.objective = maximize(self.objective)
 
-    def reset_model(self):
+    def _set_medium(self, medium):
+        self._medium = medium
+        for key in self.shuttel_reactions:
+            if key in medium:
+                self.shuttel_reactions[key].lb = -medium[key]
+                self.medium[key] = -medium[key]
+            else:
+                self.shuttel_reactions[key].lb = 0.
+                self.medium[key] = 0.
+
+    def optimize(self):
+        self.comm_model.optimize()
+        return None
+
+    def single_optimize(self, idx):
+        weights = np.zeros(len(self.models))
+        weights[idx] = 1. 
+        old_weights = self._weights
+        self._set_weights(weights)
+        growth = self.slim_optimize()
+        self._set_weights(old_weights)
+        return growth
+
+    def slim_optimize(self):
+        self.comm_model.optimize()
+        return self.objective.x
+
+    def _get_exchange_flux(self):
+        exchanges = []
+        for j,rec_id in enumerate(self.rec_id_dicts):
+            ex_dict ={}
+            for key, val in rec_id.items():
+                if "EX_" in key:
+                    ex_dict[key] = self.xs[j][val].x 
+            exchanges.append(ex_dict)
+    
+        return exchanges
+
+
+    def summary(self):
+        self.optimize()
+        exchanges = self._get_exchange_flux()
+        shared_ex = set(exchanges[0].keys()).intersection(*[set(ex.keys()) for ex in exchanges[1:]])
+        titles = [model.id + " flux" for model in self.models]
+        columns = [[] for _ in range(len(self.models))]
+        interchange = dict(zip(titles,columns))
+        index = shared_ex
+        for key in index:
+            for i in range(len(titles)):
+                interchange[titles[i]].append(exchanges[i][key])
+        df = pd.DataFrame(interchange)
+        df.index = index 
+        print("Objective: ", self.objective.x)
+        for i in range(len(self.models)):
+            print(self.models[i].id + " : ", self.xs[i][self.biomass_ids[i]].x, " with weights ", self.weights[i])
+        return df
+
+    def _reset_model(self):
         model = mip.Model()
-        model.read("model.lp")
-        for key in self.medium:
+        model.read(self.path)
+        for key in self.shared_exchanges:
             x = model.var_by_name(key)
-            self.shuttel_reactions[key] = x
-        x1 = []
-        for i in range(len(self.bounds1)):
-            x = model.var_by_name("x1" + str(i))
-            x1 += [x]
-        x2 = []
-        for i in range(len(self.bounds2)):
-            x = model.var_by_name("x2" + str(i))
-            x2 += [x]
-        self.x1 = x1
-        self.x2 = x2
+            self.shuttle_reactions[key] = x
+        for j,x in enumerate(self.xs):
+            for i in range(len(self._bounds[i])):
+                x_i = model.var_by_name(f"x{j}" + str(i))
+                x[i] += [x_i]
+      
         self.comm_model = model
 
     def build_mip_model(self):
+        ids = [[] for _ in range(len(self.rec_id_dicts))]
         x_sh = []
-        id1 = []
-        id2 = []
         x_sh_dict = {}
-        for key, val in self.medium.items():
+        for key in self.shared_exchanges:
+            if key in self._medium:
+                val = self._medium[key]
+            else:
+                val = 0
             x = self.comm_model.add_var(lb=-val, ub=1000, name=key)
-            x_sh +=[x]
             x_sh_dict[key] = x
-            if key in self.S1_dict:
-                id1 += [self.S1_dict[key]]
-            else:
-                id1 += [None]
-            if key in self.S2_dict:
-                id2 += [self.S2_dict[key]]
-            else:
-                id2 += [None]
+            x_sh += [x]
+            for j, rec_id in enumerate(self.rec_id_dicts):
+                if key in rec_id:
+                    ids[j] += [rec_id[key]]
+                else:
+                    ids[j] += [None]
 
         # Flux first model
-        x1 = []
-        for i, (lb, ub) in enumerate(self.bounds1): 
-            x1 += [self.comm_model.add_var(lb = lb, ub=ub, name="x1" + str(i))]
+        xs = []
+        for j,bounds in enumerate(self._bounds):
+            xs_j = []
+            for i, (lb, ub) in enumerate(bounds): 
+                xs_j += [self.comm_model.add_var(lb = lb, ub=ub, name=f"x{j}" + str(i))]
+            xs.append(xs_j)
 
-        # Flux second model
-        x2 = []
-        for i, (lb, ub) in enumerate(self.bounds2): 
-            x2 += [self.comm_model.add_var(lb = lb, ub=ub, name="x2" + str(i))]
         # Stoichiometry
-        for i in range(self.S1.shape[0]):
-            self.comm_model.add_constr(xsum(self.S1[i,j]*x1[j] for j in range(self.S1.shape[1])) == 0)
-
-        for i in range(self.S2.shape[0]):
-            self.comm_model.add_constr(xsum(self.S2[i,j]*x2[j] for j in range(self.S2.shape[1])) == 0)
+        for k, S in enumerate(self.stoichiometry_matrixes):
+            for i in range(S.shape[0]):
+                self.comm_model.add_constr(xsum(S[i,j]*xs[k][j] for j in range(S.shape[1])) == 0)
 
         # Shuttel constraints
-        for i,key in enumerate(self.medium):
-            if id1[i] is not None and id2[i] is not None:
-                idx1 = id1[i]
-                idx2 = id2[i]
-                self.comm_model.add_constr(-x_sh[i] + x1[idx1] + x2[idx2] == 0)
-            elif id1[i] is not None:
-                idx = id1[i]
-                self.comm_model.add_constr(-x_sh[i] + x1[idx] == 0)
-            else:
-                idx = id2[i]
-                self.comm_model.add_constr(-x_sh[i] + x2[idx] == 0)
+        for i,key in enumerate(self.shared_exchanges):
+            exchanges = [xs[k][ids[k][i]] for k in range(len(ids)) if ids[k][i] is not None]
+            self.comm_model.add_constr(-x_sh[i] + xsum(exchanges) == 0)
 
-        self.shuttel_reactions = x_sh_dict
-        self.x1 = x1
-        self.x2 = x2
+        fd, path = tempfile.mkstemp()
+        path = path + ".lp"
+        self.comm_model.write(path)
+            
+        self.path = path
+        self.shuttle_reactions = x_sh_dict
+        self.xs = xs
+        self.objective = xsum([self.weights[i]*self.xs[i][self.biomass_ids[i]] for i in range(len(self.xs))])
+        self.comm_model.objective = maximize(self.objective)
 
-    def compute_coopm(self, enforce_survival=True):
-        minMBR = 0.1*self.optimize()
+    def computeCOOPM(self, MBR, fraction=0.1,enforce_survival=True):
+        minMBR = fraction*MBR
         # thetas
         thetas = []
         thetas_constraint = []
         for key,x in self.shuttel_reactions.items():
+            # TODO SET THIS TO THE MEDIUM??? Thats actually wrong...
             V_min = -10
             if key == "EX_o2_e":
                 V_min = -20
@@ -330,10 +358,10 @@ class MIP_community_model():
             thetas.append(theta)
         # Both must grow
         if enforce_survival:
-            self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] >= minMBR)
-            self.comm_model.add_constr(self.weights[1]*self.x2[self.obj2] >= minMBR)
+            for i in range(len(self.models)):
+                self.comm_model.add_constr(self.weights[i]*self.xs[i][self.biomass_ids[i]] >= minMBR)
         else:
-            self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] + self.weights[1]*self.x2[self.obj2] >= minMBR)
+            self.comm_model.add_constr(self.objective >= minMBR)
 
         self.comm_model.objective = maximize(xsum(thetas))
         self.comm_model.optimize()
@@ -344,69 +372,23 @@ class MIP_community_model():
                 coopm[key] = abs(x.x)
         self.reset_model()
         return coopm
-        
 
-    def optimize(self):
-        self.comm_model.objective = maximize(self.weights[0]*self.x1[self.obj1] + self.weights[1]*self.x2[self.obj2])
-        self.comm_model.optimize()
-        return self.weights[0]*self.x1[self.obj1].x + self.weights[1]*self.x2[self.obj2].x
-
-    def optimize_single(self, model_idx):
-        if model_idx == 0:
-            self.comm_model.objective = maximize(self.x1[self.obj1])
-            self.comm_model.optimize()
-            return self.x1[self.obj1].x
-        else:
-            self.comm_model.objective = maximize(self.x2[self.obj2])
-            self.comm_model.optimize()
-            return self.x2[self.obj2].x
-
-    def get_exchange_flux(self):
-        dic1 ={}
-        for key, val in self.S1_dict.items():
-            if "EX_" in key:
-                dic1[key] = self.x1[val].x
-        dic2 ={}
-        for key, val in self.S2_dict.items():
-            if "EX_" in key:
-                dic2[key] = self.x2[val].x
-        return dic1, dic2
-
-    def summary(self):
-        self.optimize()
-        ex1, ex2 = self.get_exchange_flux()
-        shared_ex = list(set(ex1.keys()).intersection(set(ex2.keys())))
-        interchange = {"DP flux":[], "SA flux":[]}
-        index = shared_ex
-        for key in index:
-            interchange["DP flux"].append(ex1[key])
-            interchange["SA flux"].append(ex2[key])
-        df = pd.DataFrame(interchange)
-        df.index = index 
-        return df
-             
-
-    def set_medium(self, medium):
-        for key in self.shuttel_reactions:
-            if key in medium:
-                self.shuttel_reactions[key].lb = -medium[key]
-                self.medium[key] = -medium[key]
-            else:
-                self.shuttel_reactions[key].lb = 0.
-                self.medium[key] = 0.
-        
-    def compute_alpha_weightings(self, alpha, maxbiomass=0.1):
-        assert alpha <= 1 and alpha >= 0
+    def compute_convex_combination(self, alphas, maxbiomass=0.1):
+        assert sum(alphas) == 1, "The weights must sum to one!"
+        assert len(alphas) == len(self.models), "Scpecify a weight for each model..."
+        assert max([self.single_optimize(i) for i in range(len(alphas))]) > maxbiomass, "Each of the models must reach the maxbiomass..."
         # Alpha objective...
-        self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] <= alpha*maxbiomass)
-        self.comm_model.add_constr(self.weights[1]*self.x2[self.obj2] <= (1-alpha)*maxbiomass)
+        for i in range(len(alphas)):
+            self.comm_model.add_constr(self.weights[i]*self.x1[self.obj1] <= alphas[i]*maxbiomass)
         growth = self.optimize()
         summary = self.summary()
         self.reset_model()
         return growth, summary
 
-    def compute_alpha_coopm(self, alpha, maxbiomass=0.1, enforce_survival=True):
-        minMBR = maxbiomass*0.1
+    def compute_convex_COOPM(self, alphas, maxbiomass=0.1, fraction=0.1, enforce_survival=True):
+        assert sum(alphas) == 1, "The weights must sum to one!"
+        assert len(alphas) == len(self.models), "Scpecify a weight for each model..."
+        minMBR = maxbiomass*fraction
         thetas = []
         thetas_constraint = []
         for key,x in self.shuttel_reactions.items():
@@ -419,14 +401,14 @@ class MIP_community_model():
             thetas_constraint += [self.comm_model.add_constr(x + V_min*theta >= V_min)]
             thetas.append(theta)
         # Growth constraints
-        self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] <= alpha*maxbiomass)
-        self.comm_model.add_constr(self.weights[1]*self.x2[self.obj2] <= (1-alpha)*maxbiomass)
+        for i in range(len(alphas)):
+            self.comm_model.add_constr(self.weights[i]*self.x1[self.obj1] <= alphas[i]*maxbiomass)
         # Both must grow
         if enforce_survival:
-            self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] >= alpha*minMBR)
-            self.comm_model.add_constr(self.weights[1]*self.x2[self.obj2] >= (1-alpha)*minMBR)
+            for i in range(len(self.models)):
+                self.comm_model.add_constr(self.weights[i]*self.xs[i][self.biomass_ids[i]] >= alphas[i]*minMBR)
         else:
-            self.comm_model.add_constr(self.weights[0]*self.x1[self.obj1] + self.weights[1]*self.x2[self.obj2] >= minMBR)
+            self.comm_model.add_constr(self.objective >= minMBR)
 
         self.comm_model.objective = maximize(xsum(thetas))
         self.comm_model.optimize()
@@ -438,76 +420,13 @@ class MIP_community_model():
         self.reset_model()
         return coopm
 
-def create_bag_of_react_model(models, biomass_functions, weights="auto"):
-    # Bag of words model
-    model = models[0] + models[1]
+    def _get_bounds(self):
+        all_bounds = []
+        for model in self.models:
+            bounds = []
+            for rec in model.reactions:
+                bounds.append((rec.lower_bound, rec.upper_bound))
+            all_bounds.append(bounds)
+        return all_bounds
 
-    if weights == "auto":
-        biomass = []
-        for model_i in models:
-            biomass.append(model_i.slim_optimize())
-        max_biomass = np.max(biomass)
-        weights = [max_biomass/g for g in biomass]
-    
-    # Set objective as sum of growth
-    objective = []
-    for i, growth in enumerate(biomass_functions):
-        v_i = weights[i] * model.reactions.get_by_id(growth).flux_expression
-        objective.append(v_i)
-    model.objective = sum(objective)
-    return model
 
-# Custum optimization
-
-def optimize_coopm_community(model, MBR, biomass_reactions, weights, enforce_survival=True):
-    model = model.copy()
-    minMBR = 0.1*MBR
-    medium = list(model.medium.keys())
-    biomass = []
-    for i,id in enumerate(biomass_reactions):
-        biomass.append(weights[i]*model.reactions.get_by_id(id).flux_expression)
-    # Binary variables: Theta_i 
-    thetas = []
-    for i in range(len(medium)):
-        thetas.append(model.problem.Variable('theta_'+str(i), type="binary"))
-
-    # Constraints for exchanges, which are turned of for theta_i = 1
-    theta_constraints = []
-    for i,id in enumerate(medium):
-        reaction = model.reactions.get_by_id(id)
-        min_bound = model.reactions.get_by_id(id).lower_bound
-        cons = model.problem.Constraint(
-            (reaction.flux_expression + min_bound*thetas[i]),
-            lb=min_bound,
-            ub=1000)
-        theta_constraints.append(cons)
-
-    # Constraints for growth rates, which must be at least 10% MBR
-    if enforce_survival:
-        constraint_growth = [model.problem.Constraint(
-        f,
-        lb=minMBR,
-        ub=1000) for i,f in enumerate(biomass)]
-    else:
-        constraint_growth = model.problem.Constraint(
-        sum(biomass),
-        lb=minMBR,
-        ub=1000)
-
-    # Adding new variables and constraints.
-    model.add_cons_vars(thetas)
-    model.add_cons_vars(theta_constraints)
-    model.add_cons_vars(constraint_growth)
-
-    # Objevtive is maximising turned of exchanges, that is sum of theta_is
-    objective = model.problem.Objective(sum(thetas), direction="max")
-    model.objective = objective
-    model.solver.update()
-
-    sol = model.optimize()
-    COOPM = dict()
-    for id in medium:
-        if sol.fluxes[id] < 0:
-            COOPM[id] = abs(sol.fluxes[id])
-
-    return COOPM

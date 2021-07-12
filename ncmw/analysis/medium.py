@@ -41,3 +41,26 @@ def compute_COMPM(models: list, fvas: list=None):
 
     return mediums
 
+def compute_exchange_medium(models, fvas, default=-10):
+    if fvas is None:
+        fvas = compute_fvas(models, 1.0)
+    df = pd.concat(fvas)
+    df_min = df.groupby(df.index).min()
+    df_max = df.groupby(df.index).max()
+
+    exchanges = set()
+    for model in models:
+        for ex in model.exchanges:
+            exchanges.add(ex.id)
+    # TODO This may is wrong...
+    mediums = []
+    for model in models:
+        medium = dict()
+        for ex in list(exchanges):
+            if ex in df_min.index and ex in df_max.index: 
+                if df_min.loc[ex].minimum != 0 or df_min.loc[ex].maximum != 0:
+                    if ex in [ex.id for ex in model.exchanges]:
+                        medium[ex] = default 
+
+
+
