@@ -1,0 +1,26 @@
+setup:
+  fastcc: true
+  memote_evaluation: true
+  memote_solver_time_out: 5000
+  gapfill: model
+  configs: default.json
+  medium: snm3.json
+  models: models
+analysis:
+  fva_fraction: 1.0
+community:
+  bag_of_reactions_model: true
+  shuttle_reactions_model: false
+  save_models: true
+  weights:
+    one_to_one: true
+    fair: true
+    custom: []
+visualization:
+  scaled_medium_growth_plot:
+    min_scale: 0.1
+    max_scale: 100
+    evaluations: 1000
+name: default_project_name
+seed: 1
+eps: 0.01

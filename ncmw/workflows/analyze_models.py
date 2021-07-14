@@ -2,7 +2,6 @@ import hydra
 from omegaconf import DictConfig, OmegaConf 
 
 import logging
-import coloredlogs
 import socket
 import importlib
 
@@ -38,6 +37,7 @@ def run_analysis(cfg : DictConfig) -> None:
 
     PATH_res = get_result_path(name)  
     PATH = PATH_res + SEPERATOR +  "analysis"
+    log.info(f"Working directory: {PATH}")
     
     try:
         os.mkdir(PATH)

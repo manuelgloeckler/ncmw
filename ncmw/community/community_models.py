@@ -11,6 +11,8 @@ import typing
 import sys, os
 import tempfile
 
+import pickle
+
 import pandas as pd
 
 def create_stoichiometry_matrix(model):
@@ -89,6 +91,14 @@ class CommunityModel(ABC):
         """ This method should report a summary of the model"""
         raise NotImplementedError("This method is not implemented for your current model")
 
+    def save(self, path):
+        """ This saves the model using pickle. For other format overwrite this function"""
+        with open(path + ".pkl","wb+") as f:
+            pickle.dump(self,f)
+    def load(self, path):
+        with open(path + ".pkl","wb") as f:
+            self = pickle.load(f)
+
 
 class BagOfReactionsModel(CommunityModel):
     """This is a community model, which treats the community as a bag of all reactions that at least one the species has. 
@@ -119,7 +129,9 @@ class BagOfReactionsModel(CommunityModel):
 
     def optimize(self):
         sol = self.community_model.optimize()
-        return sol 
+        total_growth = self.community_model.slim_optimize()
+        single_growths = [sol[r.id] for r in self.biomass_reactions]
+        return total_growth, single_growths
 
     def single_optimize(self, idx):
         weights = np.zeros(len(self.models))
@@ -159,8 +171,8 @@ class BagOfReactionsModel(CommunityModel):
         # Constraints for growth rates, which must be at least 10% MBR
         if enforce_survival:
             constraint_growth = [model.problem.Constraint(
-            self.weights[i]*f,
-            lb=minMBR,
+            f,
+            lb=self.weights[i]*minMBR,
             ub=1000) for i,f in enumerate(biomass)]
         else:
             constraint_growth = model.problem.Constraint(
@@ -237,7 +249,11 @@ class ShuttleCommunityModel(CommunityModel):
 
     def optimize(self):
         self.comm_model.optimize()
-        return None
+        total_growth = self.objective.x 
+        single_growths = []
+        for x, id in zip(self.xs, self.biomass_ids):
+            single_growths.append(x[id].x)
+        return total_growth, single_growths
 
     def single_optimize(self, idx):
         weights = np.zeros(len(self.models))
@@ -359,7 +375,7 @@ class ShuttleCommunityModel(CommunityModel):
         # Both must grow
         if enforce_survival:
             for i in range(len(self.models)):
-                self.comm_model.add_constr(self.weights[i]*self.xs[i][self.biomass_ids[i]] >= minMBR)
+                self.comm_model.add_constr(self.xs[i][self.biomass_ids[i]] >= self.weights[i]*minMBR)
         else:
             self.comm_model.add_constr(self.objective >= minMBR)
 
@@ -429,4 +445,10 @@ class ShuttleCommunityModel(CommunityModel):
             all_bounds.append(bounds)
         return all_bounds
 
+    def save(self, path):
+        """ This saves the model using pickle. For other format overwrite this function"""
+        self.comm_model.write(path + ".lp")
+    def load(self, path):
+        self.path = path + ".lp"
+        self._reset_model()
 

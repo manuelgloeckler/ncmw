@@ -1,0 +1,8 @@
+bag_of_reactions_model: True
+shuttle_reactions_model: True
+save_models: True
+weights:
+  one_to_one: True
+  fair: True
+  dominant_weights: True
+  custom: []

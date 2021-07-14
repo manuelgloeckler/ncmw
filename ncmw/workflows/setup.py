@@ -3,7 +3,6 @@ import hydra
 from omegaconf import DictConfig, OmegaConf 
 
 import logging
-import coloredlogs
 import socket
 import importlib
 

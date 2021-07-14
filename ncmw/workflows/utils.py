@@ -26,7 +26,13 @@ def get_model_paths(folder:str):
 def save_model(model, path:str):
     write_sbml_model(model,path)
 
-
+def get_mediums(folder, prefix=DATA_PATH):
+    directory = prefix + folder
+    mediums = dict()
+    for filename in os.listdir(directory):
+        with open(directory + SEPERATOR + filename, "r") as f:
+            mediums[filename] = json.load(f)
+    return mediums
 
 def get_models(folder:str, prefix=DATA_PATH):
     """ Returns all models in the directory """
