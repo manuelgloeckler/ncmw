@@ -1,15 +1,18 @@
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import numpy as np
 
-def compute_pairwise_growth_relation_per_weight(community_model, idx1, idx2, num_alphas = 1000):
-    weights = community_model.weights 
+
+def compute_pairwise_growth_relation_per_weight(
+    community_model, idx1, idx2, num_alphas=1000
+):
+    weights = community_model.weights
     N = len(weights)
     weight_mask1 = np.zeros(N)
-    weight_mask1[idx1] = 1.
+    weight_mask1[idx1] = 1.0
     weight_mask2 = np.zeros(N)
-    weight_mask2[idx2] = 1.
-    alpha = np.linspace(0,1,num_alphas).reshape(-1, 1).repeat(N,1)
-    alpha_weights = alpha*weight_mask1 + (1-alpha)*weight_mask2 
+    weight_mask2[idx2] = 1.0
+    alpha = np.linspace(0, 1, num_alphas).reshape(-1, 1).repeat(N, 1)
+    alpha_weights = alpha * weight_mask1 + (1 - alpha) * weight_mask2
 
     growth1 = np.zeros(num_alphas)
     growth2 = np.zeros(num_alphas)

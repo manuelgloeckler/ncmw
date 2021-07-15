@@ -1,19 +1,21 @@
 from pandas import DataFrame
-import pandas as pd 
+import pandas as pd
 from cobra.medium import minimal_medium
 from cobra.flux_analysis import flux_variability_analysis
 
 from typing import Iterable, Callable
 
-def compute_fvas(models:Iterable, fraction:float):
+
+def compute_fvas(models: Iterable, fraction: float):
     dfs = []
     for model in models:
         fva = flux_variability_analysis(model, fraction_of_optimum=fraction)
         dfs.append(fva)
     return dfs
 
-def compute_COMPM(models: list, fvas: list=None):
-    """ Computes the COMPM medium, given all the fva results
+
+def compute_COMPM(models: list, fvas: list = None):
+    """Computes the COMPM medium, given all the fva results
 
     Args:
         fvas (list): [description]
@@ -35,11 +37,14 @@ def compute_COMPM(models: list, fvas: list=None):
     for model, medium in zip(models, mediums):
         with model as m:
             max_growth = m.slim_optimize()
-            m.medium = medium 
+            m.medium = medium
             growth = m.slim_optimize()
-            assert max_growth == growth, "In the COMPM medium all community members must reach maximum growth rate, check the input!"
+            assert (
+                max_growth == growth
+            ), "In the COMPM medium all community members must reach maximum growth rate, check the input!"
 
     return mediums
+
 
 def compute_exchange_medium(models, fvas, default=-10):
     if fvas is None:
@@ -57,10 +62,7 @@ def compute_exchange_medium(models, fvas, default=-10):
     for model in models:
         medium = dict()
         for ex in list(exchanges):
-            if ex in df_min.index and ex in df_max.index: 
+            if ex in df_min.index and ex in df_max.index:
                 if df_min.loc[ex].minimum != 0 or df_min.loc[ex].maximum != 0:
                     if ex in [ex.id for ex in model.exchanges]:
-                        medium[ex] = default 
-
-
-
+                        medium[ex] = default

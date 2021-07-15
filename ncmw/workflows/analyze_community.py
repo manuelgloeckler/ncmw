@@ -1,5 +1,5 @@
 import hydra
-from omegaconf import DictConfig, OmegaConf 
+from omegaconf import DictConfig, OmegaConf
 
 import logging
 import socket
@@ -7,21 +7,35 @@ import importlib
 
 import time
 
-import random 
+import random
 import numpy as np
-import os 
+import os
 import pandas as pd
 import json
 
 
-from utils import get_models, get_result_path, SEPERATOR, save_model, get_model_paths, get_mediums
-from community import BagOfReactionsModel, ShuttleCommunityModel, compute_pairwise_growth_relation_per_weight, compute_fair_weights, compute_community_summary, compute_dominant_weights
+from utils import (
+    get_models,
+    get_result_path,
+    SEPERATOR,
+    save_model,
+    get_model_paths,
+    get_mediums,
+)
+from community import (
+    BagOfReactionsModel,
+    ShuttleCommunityModel,
+    compute_pairwise_growth_relation_per_weight,
+    compute_fair_weights,
+    compute_community_summary,
+    compute_dominant_weights,
+)
 
 import cobra
 
 
 @hydra.main(config_path="../../data/hydra", config_name="config.yaml")
-def run_community(cfg : DictConfig) -> None:
+def run_community(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
@@ -32,27 +46,35 @@ def run_community(cfg : DictConfig) -> None:
     log.info(f"Random seed: {seed}")
 
     start_time = time.time()
-    name = cfg.name 
+    name = cfg.name
 
-    PATH_res = get_result_path(name)  
-    PATH = PATH_res + SEPERATOR +  "community"
+    PATH_res = get_result_path(name)
+    PATH = PATH_res + SEPERATOR + "community"
     log.info(f"Working directory: {PATH}")
     try:
-        if not os.path.exists(PATH): os.mkdir(PATH)
-        if not os.path.exists(PATH + SEPERATOR + "community_models"): os.mkdir(PATH + SEPERATOR + "community_models")
-        if not os.path.exists(PATH + SEPERATOR + "medium"): os.mkdir(PATH + SEPERATOR + "medium")
-        if not os.path.exists(PATH + SEPERATOR + "experiments"): os.mkdir(PATH + SEPERATOR + "experiments")
+        if not os.path.exists(PATH):
+            os.mkdir(PATH)
+        if not os.path.exists(PATH + SEPERATOR + "community_models"):
+            os.mkdir(PATH + SEPERATOR + "community_models")
+        if not os.path.exists(PATH + SEPERATOR + "medium"):
+            os.mkdir(PATH + SEPERATOR + "medium")
+        if not os.path.exists(PATH + SEPERATOR + "experiments"):
+            os.mkdir(PATH + SEPERATOR + "experiments")
         log.info("Created folder structure successfully")
     except:
-        pass 
+        pass
 
     log.info("Loading models from setup")
     try:
-        models = get_models("snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR)
+        models = get_models(
+            "snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR
+        )
         num_models = len(models)
     except:
-        raise ValueError("We require snm3 models for the next steps, please run the setup!")
-    
+        raise ValueError(
+            "We require snm3 models for the next steps, please run the setup!"
+        )
+
     log.info("Generating community models")
     community_models = []
     if cfg.community.bag_of_reactions_model:
@@ -69,8 +91,8 @@ def run_community(cfg : DictConfig) -> None:
             m.save(path)
             log.info(f"Saving community models: {path}")
 
-    # Medias 
-    medium_prefix=PATH_res + SEPERATOR + "analysis" + SEPERATOR
+    # Medias
+    medium_prefix = PATH_res + SEPERATOR + "analysis" + SEPERATOR
     mediums = get_mediums("medium", medium_prefix)
 
     # Weights to consider
@@ -85,10 +107,11 @@ def run_community(cfg : DictConfig) -> None:
             ws.extend(compute_dominant_weights(m))
         if cfg.community.weights.custom != []:
             for weight in cfg.community.weights:
-                assert len(weight) == num_models, "The custom weights must have dimension equal to the number of models in the community!"
+                assert (
+                    len(weight) == num_models
+                ), "The custom weights must have dimension equal to the number of models in the community!"
                 ws.append(weight)
         weights.append(ws)
-
 
     log.info(f"Compute community COMPM")
     COMPMS = []
@@ -100,51 +123,84 @@ def run_community(cfg : DictConfig) -> None:
                 COMPM = {**COMPM, **mediums[medium]}
         COMPMS.append(COMPM)
         # COMPMS
-        path = PATH + SEPERATOR + "medium" + SEPERATOR + "COMPM_" + type(m).__name__ + ".json"
+        path = (
+            PATH
+            + SEPERATOR
+            + "medium"
+            + SEPERATOR
+            + "COMPM_"
+            + type(m).__name__
+            + ".json"
+        )
         with open(path, "w+") as f:
-            json.dump(COMPM,f)
+            json.dump(COMPM, f)
         log.info(f"Saving COMPMs: {path}")
         # Also save default medium
-        path = PATH + SEPERATOR + "medium" + SEPERATOR + "SNM3_" + type(m).__name__ + ".json"
+        path = (
+            PATH
+            + SEPERATOR
+            + "medium"
+            + SEPERATOR
+            + "SNM3_"
+            + type(m).__name__
+            + ".json"
+        )
         with open(path, "w+") as f:
-            json.dump(m.medium,f)
+            json.dump(m.medium, f)
         SNM3s.append(m.medium)
         log.info(f"Saving COMPMs: {path}")
 
-
-    #COOPM
+    # COOPM
     log.info(f"Compute community COOPMs")
-    COOPMS_enforced = dict(zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]]))
+    COOPMS_enforced = dict(
+        zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]])
+    )
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
-            m.medium = compm 
-            m.weights = w 
+            m.medium = compm
+            m.weights = w
             MBR = m.slim_optimize()
             coopm = m.computeCOOPM(MBR)
             COOPMS_enforced[tuple(w)].append(coopm)
-            path = PATH + SEPERATOR + "medium" + SEPERATOR + "COOPM_survival" + str([np.round(i,2) for i in w]) + type(m).__name__ + ".json"
+            path = (
+                PATH
+                + SEPERATOR
+                + "medium"
+                + SEPERATOR
+                + "COOPM_survival"
+                + str([np.round(i, 2) for i in w])
+                + type(m).__name__
+                + ".json"
+            )
             with open(path, "w+") as f:
-                json.dump(coopm,f)
+                json.dump(coopm, f)
 
-    COOPMS_not_enforced = dict(zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]]))
+    COOPMS_not_enforced = dict(
+        zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]])
+    )
 
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
-            m.medium = compm 
-            m.weights = w 
+            m.medium = compm
+            m.weights = w
             MBR = m.slim_optimize()
             coopm = m.computeCOOPM(MBR, enforce_survival=False)
             COOPMS_not_enforced[tuple(w)].append(coopm)
-            path = PATH + SEPERATOR + "medium" + SEPERATOR + "COOPM_" + str([np.round(i,2) for i in w]) + type(m).__name__ + ".json"
+            path = (
+                PATH
+                + SEPERATOR
+                + "medium"
+                + SEPERATOR
+                + "COOPM_"
+                + str([np.round(i, 2) for i in w])
+                + type(m).__name__
+                + ".json"
+            )
             with open(path, "w+") as f:
-                json.dump(coopm,f)
-
-            
-
-    
+                json.dump(coopm, f)
 
     log.info(f"Compute community growth summary on snm3")
-    for i,m in enumerate(community_models):
+    for i, m in enumerate(community_models):
         df = pd.DataFrame()
         # SNM3
         m.medium = SNM3s[i]
@@ -172,16 +228,19 @@ def run_community(cfg : DictConfig) -> None:
             df_coopm["Medium"] = "COOPM"
             df = df.append(df_coopm)
 
-        path = PATH + SEPERATOR + "experiments" + SEPERATOR + type(m).__name__ + "_growth_summary.csv"
+        path = (
+            PATH
+            + SEPERATOR
+            + "experiments"
+            + SEPERATOR
+            + type(m).__name__
+            + "_growth_summary.csv"
+        )
         df.to_csv(path)
-
-
-
 
     log.info("Compute pairwise growth relationships for different weights.")
     for m in community_models:
         print(compute_pairwise_growth_relation_per_weight(m, 0, 1))
-
 
 
 if __name__ == "__main__":
