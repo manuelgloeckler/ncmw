@@ -21,11 +21,7 @@ def get_default_medium(medium:str="snm3.json"):
 
 def get_biomass_reaction(model):
     """ Return the biomass reaction of a model """
-    with model:
-        for ex in model.exchanges:
-            ex.lower_bound=-10
-    
-        growth = model.slim_optimize()
-        for rec in model.reactions:
-            if rec.flux == growth:
-                return rec
+    objective_str = str(list(model.objective.variables)[0])
+    for rec in model.reactions:
+        if rec.id in objective_str:
+            return rec
