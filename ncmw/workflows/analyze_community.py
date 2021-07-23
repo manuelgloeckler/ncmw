@@ -112,6 +112,7 @@ def run_community(cfg: DictConfig) -> None:
                 ), "The custom weights must have dimension equal to the number of models in the community!"
                 ws.append(weight)
         weights.append(ws)
+    log.info(f"We consider following weights: {weights}")
 
     log.info(f"Compute community COMPM")
     COMPMS = []
@@ -152,16 +153,19 @@ def run_community(cfg: DictConfig) -> None:
 
     # COOPM
     log.info(f"Compute community COOPMs")
-    COOPMS_enforced = dict(
-        zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]])
-    )
+    COOPMS_enforced = dict()
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
             m.medium = compm
             m.weights = w
             MBR = m.slim_optimize()
+            if MBR is None:
+                MBR = 0
             coopm = m.computeCOOPM(MBR)
-            COOPMS_enforced[tuple(w)].append(coopm)
+            if tuple(w) in COOPMS_enforced:
+                COOPMS_enforced[tuple(w)].append(coopm)
+            else:
+                COOPMS_enforced[tuple(w)] = [coopm]
             path = (
                 PATH
                 + SEPERATOR
@@ -175,17 +179,20 @@ def run_community(cfg: DictConfig) -> None:
             with open(path, "w+") as f:
                 json.dump(coopm, f)
 
-    COOPMS_not_enforced = dict(
-        zip([tuple(w) for w in weights[0]], [[] for _ in weights[0]])
-    )
+    COOPMS_not_enforced = dict()
 
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
             m.medium = compm
             m.weights = w
             MBR = m.slim_optimize()
+            if MBR is None:
+                MBR = 0
             coopm = m.computeCOOPM(MBR, enforce_survival=False)
-            COOPMS_not_enforced[tuple(w)].append(coopm)
+            if tuple(w) in COOPMS_not_enforced:
+                COOPMS_not_enforced[tuple(w)].append(coopm)
+            else:
+                COOPMS_not_enforced[tuple(w)] = [coopm]
             path = (
                 PATH
                 + SEPERATOR

@@ -22,7 +22,7 @@ def jacard_index_similarity_heatmap(ji_met, ji_rec, ji_ro, figsize=(10, 5)):
         sns.heatmap(
             df, annot=True, cmap="RdBu", vmin=0.0, vmax=1.0, ax=axes[i], cbar_ax=cbar_ax
         )
-        axes[i].set_yticklabels(df.index, rotation=0)
-        axes[i].set_xticklabels(df.index, rotation=90)
+        axes[i].set_yticklabels([str(id).split("_")[0] for id in df.index], rotation=0)
+        axes[i].set_xticklabels([str(id).split("_")[0] for id in df.index], rotation=90)
     plt.tight_layout()
     return fig

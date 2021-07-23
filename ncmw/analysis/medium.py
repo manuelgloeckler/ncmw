@@ -4,6 +4,7 @@ from cobra.medium import minimal_medium
 from cobra.flux_analysis import flux_variability_analysis
 
 from typing import Iterable, Callable
+import numpy as np
 
 
 def compute_fvas(models: Iterable, fraction: float):
@@ -39,8 +40,8 @@ def compute_COMPM(models: list, fvas: list = None):
             max_growth = m.slim_optimize()
             m.medium = medium
             growth = m.slim_optimize()
-            assert (
-                max_growth == growth
+            assert np.isclose(
+                max_growth, growth
             ), "In the COMPM medium all community members must reach maximum growth rate, check the input!"
 
     return mediums

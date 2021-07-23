@@ -40,7 +40,7 @@ def gapfill_model(model: Model, eps=1e-6, fill_model_base="ecoli"):
     return model, solution
 
 
-def gapfill_medium(model: Model, eps=1e-6):
+def gapfill_medium(model: Model, eps=1e-1):
     """This will add the minimal set of exchange reactions such that the model
     has more than eps growth.
 

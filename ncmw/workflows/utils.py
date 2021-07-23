@@ -65,6 +65,6 @@ def get_models(folder: str, prefix=DATA_PATH):
         elif filename.endswith(".mat"):
             model = load_matlab_model(directory + SEPERATOR + filename)
         else:
-            pass
+            raise ValueError("Unknown format")
         models.append(model)
     return models

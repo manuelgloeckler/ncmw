@@ -40,7 +40,7 @@ def compute_fair_weights(community_model):
     N = len(community_model.models)
     weights = np.array([community_model.single_optimize(i) for i in range(N)])
 
-    return weights / weights.sum()
+    return 1 - weights / weights.sum()
 
 
 def compute_dominant_weights(community_model, high_val=0.9):

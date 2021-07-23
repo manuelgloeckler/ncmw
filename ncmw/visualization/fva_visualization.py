@@ -17,8 +17,8 @@ def plot_full_fva(fva: pd.DataFrame, save_path: str, label_only_at_flux: int = 5
         + fva.index[fva["flux"] < -label_only_at_flux].tolist()
     )
     _ = plt.xticks(high_vals, rotation=90)
-    plt.tight_layout()
     plt.ylabel("Flux")
+    plt.tight_layout()
     fig.savefig(save_path)
 
 

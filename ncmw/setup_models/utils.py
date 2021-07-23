@@ -11,7 +11,7 @@ DATA_PATH = PATH + "data" + SEPERATOR
 RESULT_PATH = PATH + "results" + SEPERATOR
 
 
-def get_default_configs(configs: str = "defaults.json"):
+def get_default_configs(configs: str = "default.json"):
     """Returns the config dictionary"""
     with open(DATA_PATH + "configs" + SEPERATOR + configs, "r") as f:
         configs_dict = json.load(f)

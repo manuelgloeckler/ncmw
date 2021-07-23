@@ -266,12 +266,12 @@ class ShuttleCommunityModel(CommunityModel):
 
     def _set_medium(self, medium):
         self._medium = medium
-        for key in self.shuttel_reactions:
+        for key in self.shuttle_reactions:
             if key in medium:
-                self.shuttel_reactions[key].lb = -medium[key]
+                self.shuttle_reactions[key].lb = -medium[key]
                 self.medium[key] = -medium[key]
             else:
-                self.shuttel_reactions[key].lb = 0.0
+                self.shuttle_reactions[key].lb = 0.0
                 self.medium[key] = 0.0
 
     def optimize(self):
@@ -301,10 +301,16 @@ class ShuttleCommunityModel(CommunityModel):
             ex_dict = {}
             for key, val in rec_id.items():
                 if "EX_" in key:
-                    ex_dict[key] = self.xs[j][val].x
+                    ex_dict[key] = np.round(self.xs[j][val].x, 3)
             exchanges.append(ex_dict)
 
         return exchanges
+
+    def _open_exchanges_for_shuttles(self, bound=-10):
+        for j, rec_id in enumerate(self.rec_id_dicts):
+            for key, val in rec_id.items():
+                if key in self.shared_exchanges:
+                    self.xs[j][val].lb = bound
 
     def summary(self):
         self.optimize()
@@ -338,11 +344,18 @@ class ShuttleCommunityModel(CommunityModel):
             x = model.var_by_name(key)
             self.shuttle_reactions[key] = x
         for j, x in enumerate(self.xs):
-            for i in range(len(self._bounds[i])):
+            for i in range(len(x)):
                 x_i = model.var_by_name(f"x{j}" + str(i))
-                x[i] += [x_i]
+                x[i] = x_i
 
         self.comm_model = model
+        self.objective = xsum(
+            [
+                self.weights[i] * self.xs[i][self.biomass_ids[i]]
+                for i in range(len(self.xs))
+            ]
+        )
+        self.comm_model.objective = maximize(self.objective)
 
     def build_mip_model(self):
         ids = [[] for _ in range(len(self.rec_id_dicts))]
@@ -404,7 +417,7 @@ class ShuttleCommunityModel(CommunityModel):
         # thetas
         thetas = []
         thetas_constraint = []
-        for key, x in self.shuttel_reactions.items():
+        for key, x in self.shuttle_reactions.items():
             # TODO SET THIS TO THE MEDIUM??? Thats actually wrong...
             V_min = -10
             if key == "EX_o2_e":
@@ -427,12 +440,15 @@ class ShuttleCommunityModel(CommunityModel):
 
         self.comm_model.objective = maximize(xsum(thetas))
         self.comm_model.optimize()
-
-        coopm = dict()
-        for key, x in self.shuttel_reactions.items():
-            if x.x < 0:
-                coopm[key] = abs(x.x)
-        self.reset_model()
+        try:
+            coopm = dict()
+            for key, x in self.shuttle_reactions.items():
+                if x.x < 0:
+                    coopm[key] = abs(x.x)
+            self._reset_model()
+        except:
+            coopm = dict()
+            self._reset_model()
         return coopm
 
     def compute_convex_combination(self, alphas, maxbiomass=0.1):
@@ -448,7 +464,7 @@ class ShuttleCommunityModel(CommunityModel):
             )
         growth = self.optimize()
         summary = self.summary()
-        self.reset_model()
+        self._reset_model()
         return growth, summary
 
     def compute_convex_COOPM(
@@ -459,7 +475,7 @@ class ShuttleCommunityModel(CommunityModel):
         minMBR = maxbiomass * fraction
         thetas = []
         thetas_constraint = []
-        for key, x in self.shuttel_reactions.items():
+        for key, x in self.shuttle_reactions.items():
             V_min = -10
             if key == "EX_o2_e":
                 V_min = -20
@@ -489,7 +505,7 @@ class ShuttleCommunityModel(CommunityModel):
         self.comm_model.optimize()
 
         coopm = dict()
-        for key, x in self.shuttel_reactions.items():
+        for key, x in self.shuttle_reactions.items():
             if x.x < 0:
                 coopm[key] = abs(x.x)
         self.reset_model()
