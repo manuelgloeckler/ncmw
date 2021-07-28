@@ -15,12 +15,13 @@ import json
 
 
 from utils import get_models, get_result_path, SEPERATOR, save_model, get_model_paths
-from analysis import compute_fvas, jaccard_similarity_matrices, compute_COMPM
+from analysis import compute_fvas, jaccard_similarity_matrices, compute_COMPM, table_ex_transport,sekretion_uptake_fva, sekretion_uptake_fba, compute_uptake_sekretion_table
 from visualization import (
     plot_full_fva,
     plot_medium_fva_range,
     jacard_index_similarity_heatmap,
     plot_scaled_medium_growth,
+    uptake_sekretion_venn_diagrams
 )
 
 import cobra
@@ -45,12 +46,18 @@ def run_analysis(cfg: DictConfig) -> None:
     log.info(f"Working directory: {PATH}")
 
     try:
-        os.mkdir(PATH)
-        os.mkdir(PATH)
-        os.mkdir(PATH + SEPERATOR + "medium")
-        os.mkdir(PATH + SEPERATOR + "growth")
-        os.mkdir(PATH + SEPERATOR + "flux_analysis")
-        os.mkdir(PATH + SEPERATOR + "similarity")
+        if not os.path.exists(PATH):
+            os.mkdir(PATH)
+        if not os.path.exists(PATH + SEPERATOR + "medium"):
+            os.mkdir(PATH + SEPERATOR + "medium")
+        if not os.path.exists(PATH + SEPERATOR + "growth"):
+            os.mkdir(PATH + SEPERATOR + "growth")
+        if not os.path.exists(PATH + SEPERATOR + "flux_analysis"):
+            os.mkdir(PATH + SEPERATOR + "flux_analysis")
+        if not os.path.exists(PATH + SEPERATOR + "similarity"):
+            os.mkdir(PATH + SEPERATOR + "similarity")
+        if not os.path.exists(PATH + SEPERATOR + "sekretion_uptake"):
+            os.mkdir(PATH + SEPERATOR + "sekretion_uptake")
     except:
         pass
 
@@ -101,6 +108,32 @@ def run_analysis(cfg: DictConfig) -> None:
             cfg.analysis.fva_fraction,
         )
 
+    log.info("Computing Uptake Sekretions + Transports")
+    uptakes = []
+    sekretions = []
+    for i,model in enumerate(models):
+        # Transport reactions
+        transport_check = table_ex_transport(model)
+        transport_check.to_csv(PATH + SEPERATOR + "sekretion_uptake" + SEPERATOR + model.id + "_transport_summary.csv")
+        
+        # Sekretion uptakes
+        PATH + SEPERATOR + "sekretion_uptake"
+        if cfg.analysis.sekretion_uptake == "fva":
+            uptake, sekretion = sekretion_uptake_fva(dfs[i])
+        else:
+            uptake, sekretion = sekretion_uptake_fba(model)
+        uptakes.append(uptake)
+        sekretions.append(sekretion)
+    
+    for i in range(len(models)):
+        for j in range(i+1, len(models)):
+            uptake_sekretion_table = compute_uptake_sekretion_table(models[i].id, models[j].id, uptakes[i], uptakes[j], sekretions[i], sekretions[j])
+            uptake_sekretion_table.to_csv(PATH + SEPERATOR + "sekretion_uptake" + SEPERATOR + f"{models[i].id}_{models[j].id}_uptake_sekretion_summary.csv")
+    
+    fig = uptake_sekretion_venn_diagrams(models, uptakes, sekretions)
+    fig.savefig(PATH + SEPERATOR + "sekretion_uptake" + SEPERATOR + "uptake_sekretion_overlap_plot.pdf")
+
+
     log.info("Computing Jacard Similarities")
     df_met, df_rec, df_ro = jaccard_similarity_matrices(models)
     df_met.to_csv(
@@ -135,8 +168,7 @@ def run_analysis(cfg: DictConfig) -> None:
     fig.savefig(
         PATH + SEPERATOR + "growth" + SEPERATOR + "scaled_medium_growth_plot.pdf"
     )
-
-    log.info("Computing Uptake Sekretions + Transports")
+    
 
 
 if __name__ == "__main__":

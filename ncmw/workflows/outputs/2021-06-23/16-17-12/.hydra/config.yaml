@@ -1,9 +1,0 @@
-setup:
-  fastcc: false
-  memote_evaluation: true
-  gapfill: model
-  configs: default.json
-  medium: snm3.json
-  models: models
-name: default_project_name
-seed: 1

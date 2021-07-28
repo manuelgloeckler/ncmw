@@ -129,4 +129,6 @@ dmypy.json
 .pyre/
 results 
 outputs
+/mnt/c/Users/manug/OneDrive/Uni/HIWI/ncmw/ncmw/workflows/outputs
+
 
