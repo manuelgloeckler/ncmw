@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
@@ -9,12 +11,16 @@ import time
 
 import random
 import numpy as np
-import os
 import pandas as pd
 import json
 
+import sys, os
 
-from utils import (
+file_dir = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(file_dir)
+
+
+from ncmw.utils.utils_io import (
     get_models,
     get_result_path,
     SEPERATOR,
@@ -22,7 +28,7 @@ from utils import (
     get_model_paths,
     get_mediums,
 )
-from community import (
+from ncmw.community import (
     BagOfReactionsModel,
     ShuttleCommunityModel,
     compute_pairwise_growth_relation_per_weight,
@@ -34,7 +40,7 @@ from community import (
 import cobra
 
 
-@hydra.main(config_path="../../data/hydra", config_name="config.yaml")
+@hydra.main(config_path="../data/hydra", config_name="config.yaml")
 def run_community(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
     log.info(OmegaConf.to_yaml(cfg))
@@ -152,7 +158,7 @@ def run_community(cfg: DictConfig) -> None:
         log.info(f"Saving COMPMs: {path}")
 
     # COOPM
-    log.info(f"Compute community COOPMs")
+    log.info(f"Compute community COOPMs enforced survival")
     COOPMS_enforced = dict()
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
@@ -181,6 +187,7 @@ def run_community(cfg: DictConfig) -> None:
 
     COOPMS_not_enforced = dict()
 
+    log.info(f"Compute community COOPMs enforced survival")
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
             m.medium = compm
@@ -221,15 +228,24 @@ def run_community(cfg: DictConfig) -> None:
         df_compm["Medium"] = "COMPM"
         df = df.append(df_compm)
 
+
         # COOPM enforced
         for weight in weights[i]:
-            coopm = COOPMS_enforced[tuple(weight)][i]
+            coopms = COOPMS_enforced[tuple(weight)]
+            if len(coopms) > 1:
+                coopm = coopms[i]
+            else:
+                coopm = coopms[0]
             m.medium = coopm
             df_coopm = compute_community_summary(m, [weight])
             df_coopm["Medium"] = "COOPM_enforced_survival"
             df = df.append(df_coopm)
 
-            coopm = COOPMS_not_enforced[tuple(weight)][i]
+            coopms = COOPMS_not_enforced[tuple(weight)]
+            if len(coopms) > 1:
+                coopm = coopms[i]
+            else:
+                coopm = coopms[0]
             m.medium = coopm
             df_coopm = compute_community_summary(m, [weight])
             df_coopm["Medium"] = "COOPM"

@@ -7,6 +7,7 @@ import mip
 
 from abc import ABC, abstractmethod, abstractproperty
 import typing
+from warnings import warn
 
 import sys, os
 import tempfile
@@ -136,7 +137,7 @@ class BagOfReactionsModel(CommunityModel):
         self.objective = sum(
             [
                 weights[i] * self.biomass_reactions[i].flux_expression
-                for i in range(len(self.weights))
+                for i in range(len(self._weights))
             ]
         )
         self.community_model.objective = self.objective
@@ -192,7 +193,7 @@ class BagOfReactionsModel(CommunityModel):
         # Constraints for growth rates, which must be at least 10% MBR
         if enforce_survival:
             constraint_growth = [
-                model.problem.Constraint(f, lb=self.weights[i] * minMBR, ub=1000)
+                model.problem.Constraint(f, lb=self._weights[i] * minMBR, ub=1000)
                 for i, f in enumerate(biomass)
             ]
         else:
@@ -254,25 +255,25 @@ class ShuttleCommunityModel(CommunityModel):
         self.comm_model = mip.Model("Community Model")
         self.build_mip_model()
 
+
     def _set_weights(self, weights):
         self._weights = weights
         self.objective = xsum(
             [
-                self.weights[i] * self.xs[i][self.biomass_ids[i]]
+                self._weights[i] * self.xs[i][self.biomass_ids[i]]
                 for i in range(len(self.xs))
             ]
         )
         self.comm_model.objective = maximize(self.objective)
 
     def _set_medium(self, medium):
-        self._medium = medium
         for key in self.shuttle_reactions:
             if key in medium:
                 self.shuttle_reactions[key].lb = -medium[key]
-                self.medium[key] = -medium[key]
             else:
                 self.shuttle_reactions[key].lb = 0.0
-                self.medium[key] = 0.0
+        self._medium = medium
+        
 
     def optimize(self):
         self.comm_model.optimize()
@@ -333,7 +334,7 @@ class ShuttleCommunityModel(CommunityModel):
                 self.models[i].id + " : ",
                 self.xs[i][self.biomass_ids[i]].x,
                 " with weights ",
-                self.weights[i],
+                self._weights[i],
             )
         return df
 
@@ -349,9 +350,11 @@ class ShuttleCommunityModel(CommunityModel):
                 x[i] = x_i
 
         self.comm_model = model
+        self._set_medium(self._medium)
+        self._set_weights(self._weights)
         self.objective = xsum(
             [
-                self.weights[i] * self.xs[i][self.biomass_ids[i]]
+                self._weights[i] * self.xs[i][self.biomass_ids[i]]
                 for i in range(len(self.xs))
             ]
         )
@@ -406,22 +409,22 @@ class ShuttleCommunityModel(CommunityModel):
         self.xs = xs
         self.objective = xsum(
             [
-                self.weights[i] * self.xs[i][self.biomass_ids[i]]
+                self._weights[i] * self.xs[i][self.biomass_ids[i]]
                 for i in range(len(self.xs))
             ]
         )
         self.comm_model.objective = maximize(self.objective)
 
-    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True):
+    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True, n_tries=3):
         minMBR = fraction * MBR
         # thetas
         thetas = []
         thetas_constraint = []
-        for key, x in self.shuttle_reactions.items():
-            # TODO SET THIS TO THE MEDIUM??? Thats actually wrong...
-            V_min = -10
+        for key in self.medium:
+            x = self.shuttle_reactions[key]
+            V_min = -10.
             if key == "EX_o2_e":
-                V_min = -20
+                V_min = -20.
             if "_fe" in key:
                 V_min = -0.1
             theta = self.comm_model.add_var(var_type=BINARY)
@@ -433,22 +436,30 @@ class ShuttleCommunityModel(CommunityModel):
         if enforce_survival:
             for i in range(len(self.models)):
                 self.comm_model.add_constr(
-                    self.xs[i][self.biomass_ids[i]] >= self.weights[i] * minMBR
+                    self.xs[i][self.biomass_ids[i]] >= self._weights[i] * minMBR
                 )
         else:
             self.comm_model.add_constr(self.objective >= minMBR)
 
         self.comm_model.objective = maximize(xsum(thetas))
-        self.comm_model.optimize()
+
+        for i in range(n_tries):
+            status = self.comm_model.optimize()
+            print("Optimization Status: ", status)
+            
+            if self.comm_model.objective.x is not None:
+                break
         try:
+            
             coopm = dict()
             for key, x in self.shuttle_reactions.items():
                 if x.x < 0:
                     coopm[key] = abs(x.x)
-            self._reset_model()
+            
         except:
             coopm = dict()
-            self._reset_model()
+            warn("The optimization failed, maybe some of the model is unable to achive fraction*MBR.")
+        self._reset_model()
         return coopm
 
     def compute_convex_combination(self, alphas, maxbiomass=0.1):
@@ -460,7 +471,7 @@ class ShuttleCommunityModel(CommunityModel):
         # Alpha objective...
         for i in range(len(alphas)):
             self.comm_model.add_constr(
-                self.weights[i] * self.x1[self.obj1] <= alphas[i] * maxbiomass
+                self._weights[i] * self.x1[self.obj1] <= alphas[i] * maxbiomass
             )
         growth = self.optimize()
         summary = self.summary()

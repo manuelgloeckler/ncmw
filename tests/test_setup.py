@@ -11,7 +11,7 @@ from ncmw.setup_models.setup import (
     gapfill_model,
     set_default_configs_and_snm3_medium,
 )
-from ncmw.workflows.utils import get_models
+from ncmw.utils import get_models
 
 MODELS = get_models("models")
 

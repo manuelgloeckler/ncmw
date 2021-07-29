@@ -10,8 +10,8 @@ Subpackages
    ncmw.analysis
    ncmw.community
    ncmw.setup_models
+   ncmw.utils
    ncmw.visualization
-   ncmw.workflows
 
 Module contents
 ---------------
