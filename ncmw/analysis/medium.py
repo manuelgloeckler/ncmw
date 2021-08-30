@@ -8,6 +8,7 @@ import numpy as np
 
 
 def compute_fvas(models: Iterable, fraction: float):
+    """ Compute the FVA result for all models """
     dfs = []
     for model in models:
         fva = flux_variability_analysis(model, fraction_of_optimum=fraction)

@@ -14,12 +14,19 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 
-import sys, os 
+import sys, os
+
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
 
 
-from ncmw.utils.utils_io import get_models, get_result_path, SEPERATOR, save_model, get_model_paths
+from ncmw.utils.utils_io import (
+    get_models,
+    get_result_path,
+    SEPERATOR,
+    save_model,
+    get_model_paths,
+)
 from ncmw.setup_models import *
 
 import cobra
@@ -43,12 +50,16 @@ def run_setup(cfg: DictConfig) -> None:
     PATH = PATH_res + SEPERATOR + "setup"
 
     try:
-        os.mkdir(PATH_res)
-        os.mkdir(PATH)
-        os.mkdir(PATH + SEPERATOR + "snm3_models")
-        os.mkdir(PATH + SEPERATOR + "quality_report")
+        if not os.path.exists(PATH):
+            os.mkdir(PATH)
+        if not os.path.exists(PATH_res):
+            os.mkdir(PATH_res)
+        if not os.path.exists(PATH + SEPERATOR + "snm3_models"):
+            os.mkdir(PATH + SEPERATOR + "snm3_models")
+        if not os.path.exists(PATH + SEPERATOR + "quality_report"):
+            os.mkdir(PATH + SEPERATOR + "quality_report")
     except:
-        pass
+        raise ValueError("Could not generate output directory")
     log.info(f"Generating result directory directory in {PATH}")
 
     models_folder = cfg.setup.models
@@ -83,7 +94,7 @@ def run_setup(cfg: DictConfig) -> None:
 
     log.info(f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium}")
     files = []
-    for model_i in models:
+    for i, model_i in enumerate(models):
         model = set_default_configs_and_snm3_medium(
             deepcopy(model_i), cfg.setup.configs, cfg.setup.medium
         )

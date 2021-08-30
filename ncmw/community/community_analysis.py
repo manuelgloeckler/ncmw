@@ -1,6 +1,68 @@
 import numpy as np
 import pandas as pd
 
+import networkx as nx
+
+import torch
+from sbi.inference import SNLE
+
+
+def compute_community_interaction_graph(model, df):
+    df_help = df[df.columns[:-1]]
+    medium_col = np.zeros(len(df_help))
+    for i, ex in enumerate(df_help.index):
+        if ex in model.medium:
+            medium_col[i] = model.medium[ex]
+        else:
+            medium_col[i] = 0.0
+    # Set output to zero
+    help_array = df_help.to_numpy()
+    help_array[help_array >= 0] = 0
+    # Non medium associated inputs -> interactions !
+    species_interaction = (help_array.sum(1) + medium_col) < -1e-6
+    species_interaction
+    df = df[species_interaction]
+    df = df.drop("Shuttle Reaction", 1)
+
+    # Build interaction graph
+    G = nx.DiGraph()
+    # Build nodes
+    for i, col in enumerate(df.columns):
+        names = [n[3:-2] + f"_{i}" for n in df[df[col] != 0].index]
+        G.add_nodes_from(names)
+
+    for n in G.nodes:
+        i = int(n[-1])
+        G.nodes[n]["class"] = model.models[i].id.split("_")[0]
+    return G, df
+
+
+def community_weight_posterior(model):
+    N = len(model.models)
+
+    def simulator(thetas):
+        xs = []
+        for weight in thetas:
+            model.weights = weight.numpy()
+            growths = torch.tensor(model.optimize()[-1])
+            xs.append(growths)
+        return torch.vstack(xs).float()
+
+    prior = torch.distributions.Dirichlet(torch.ones(N))
+    prior.set_default_validate_args(False)
+
+    thetas = prior.sample((N * 1000,))
+    xs = simulator(thetas)
+
+    inf = SNLE(prior)
+    density_estimator = inf.append_simulations(thetas, xs).train()
+    posterior = inf.build_posterior(
+        density_estimator,
+        sample_with="vi",
+        vi_parameters={"flow": "spline_autoregressive", "bound": 15, "num_bins": 15},
+    )
+    return posterior
+
 
 def compute_pairwise_growth_relation_per_weight(
     community_model, idx1, idx2, num_alphas=1000
@@ -11,8 +73,9 @@ def compute_pairwise_growth_relation_per_weight(
     weight_mask1[idx1] = 1.0
     weight_mask2 = np.zeros(N)
     weight_mask2[idx2] = 1.0
-    alpha = np.linspace(0, 1, num_alphas).reshape(-1, 1).repeat(N, 1)
-    alpha_weights = alpha * weight_mask1 + (1 - alpha) * weight_mask2
+    alpha = np.linspace(0, 1, num_alphas)
+    alphas = alpha.reshape(-1, 1).repeat(N, 1)
+    alpha_weights = alphas * weight_mask1 + (1 - alphas) * weight_mask2
 
     growth1 = np.zeros(num_alphas)
     growth2 = np.zeros(num_alphas)
@@ -21,7 +84,7 @@ def compute_pairwise_growth_relation_per_weight(
         _, single_growths = community_model.optimize()
         growth1[i] = single_growths[idx1]
         growth2[i] = single_growths[idx2]
-    return alpha.flatten(), growth1, growth2
+    return alpha, growth1, growth2
 
 
 def compute_fair_weights(community_model):

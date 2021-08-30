@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from ncmw.setup_models.utils import (
+from ncmw.utils import (
     get_default_medium,
     get_biomass_reaction,
     get_default_configs,

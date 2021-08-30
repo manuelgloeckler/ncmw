@@ -219,6 +219,28 @@ class BagOfReactionsModel(CommunityModel):
 
         return COOPM
 
+    def compute_convex_combination(self, alphas, maxbiomass=0.1):
+        assert sum(alphas) == 1, "The weights must sum to one!"
+        assert len(alphas) == len(self.models), "Scpecify a weight for each model..."
+        model = self.community_model.copy()
+        biomass = [
+            model.reactions.get_by_id(f.id).flux_expression
+            for f in self.biomass_reactions
+        ]
+        constraint_growth = [
+            model.problem.Constraint(
+                self.weights[i] * f,
+                lb=alphas[i] * maxbiomass,
+                ub=alphas[i] * maxbiomass,
+            )
+            for i, f in enumerate(biomass)
+        ]
+        model.add_cons_vars(constraint_growth)
+        model.solver.update()
+
+        sol = model.optimize()
+        return model.summary()
+
 
 class ShuttleCommunityModel(CommunityModel):
     def __init__(self, models, shared_exchanges=None):
@@ -255,7 +277,6 @@ class ShuttleCommunityModel(CommunityModel):
         self.comm_model = mip.Model("Community Model")
         self.build_mip_model()
 
-
     def _set_weights(self, weights):
         self._weights = weights
         self.objective = xsum(
@@ -273,7 +294,6 @@ class ShuttleCommunityModel(CommunityModel):
             else:
                 self.shuttle_reactions[key].lb = 0.0
         self._medium = medium
-        
 
     def optimize(self):
         self.comm_model.optimize()
@@ -302,7 +322,7 @@ class ShuttleCommunityModel(CommunityModel):
             ex_dict = {}
             for key, val in rec_id.items():
                 if "EX_" in key:
-                    ex_dict[key] = np.round(self.xs[j][val].x, 3)
+                    ex_dict[key] = np.round(self.xs[j][val].x, 5)
             exchanges.append(ex_dict)
 
         return exchanges
@@ -316,18 +336,26 @@ class ShuttleCommunityModel(CommunityModel):
     def summary(self):
         self.optimize()
         exchanges = self._get_exchange_flux()
-        shared_ex = set(exchanges[0].keys()).intersection(
-            *[set(ex.keys()) for ex in exchanges[1:]]
+        keys = []
+        for dic in exchanges:
+            keys.extend(list(dic.keys()))
+        keys = list(set(keys))
+
+        vals = np.zeros((len(keys), len(exchanges) + 1))
+        for i in range(len(keys)):
+            for j in range(len(exchanges) + 1):
+                if j < len(exchanges) and keys[i] in exchanges[j]:
+                    vals[i, j] = exchanges[j][keys[i]]
+                if j >= len(exchanges):
+                    if keys[i] in self.shuttle_reactions:
+                        vals[i, j] = np.round(self.shuttle_reactions[keys[i]].x, 5)
+
+        df = pd.DataFrame(
+            vals, index=keys, columns=[m.id for m in self.models] + ["Shuttle Reaction"]
         )
-        titles = [model.id + " flux" for model in self.models]
-        columns = [[] for _ in range(len(self.models))]
-        interchange = dict(zip(titles, columns))
-        index = shared_ex
-        for key in index:
-            for i in range(len(titles)):
-                interchange[titles[i]].append(exchanges[i][key])
-        df = pd.DataFrame(interchange)
-        df.index = index
+        # Only return nonzero
+        df = df[df.abs().sum(1) > 0]
+
         print("Objective: ", self.objective.x)
         for i in range(len(self.models)):
             print(
@@ -422,9 +450,9 @@ class ShuttleCommunityModel(CommunityModel):
         thetas_constraint = []
         for key in self.medium:
             x = self.shuttle_reactions[key]
-            V_min = -10.
+            V_min = -10.0
             if key == "EX_o2_e":
-                V_min = -20.
+                V_min = -20.0
             if "_fe" in key:
                 V_min = -0.1
             theta = self.comm_model.add_var(var_type=BINARY)
@@ -443,24 +471,34 @@ class ShuttleCommunityModel(CommunityModel):
 
         self.comm_model.objective = maximize(xsum(thetas))
 
-        for i in range(n_tries):
-            status = self.comm_model.optimize()
-            print("Optimization Status: ", status)
-            
-            if self.comm_model.objective.x is not None:
-                break
-        try:
-            
+        status = self.comm_model.optimize()
+        print("Optimization Status: ", status)
+
+        if self.comm_model.objective.x is not None:
             coopm = dict()
             for key, x in self.shuttle_reactions.items():
                 if x.x < 0:
                     coopm[key] = abs(x.x)
-            
-        except:
+            self._reset_model()
+            return coopm
+        elif n_tries >= 0:
+            new_fraction = 0.1 * fraction
+            warn(
+                f"The optimization failed, maybe some of the model is unable to achive fraction*MBR. We reduce the fraction to {new_fraction}"
+            )
+            self._reset_model()
+            return self.computeCOOPM(
+                MBR,
+                new_fraction,
+                enforce_survival=enforce_survival,
+                n_tries=n_tries - 1,
+            )
+        else:
             coopm = dict()
-            warn("The optimization failed, maybe some of the model is unable to achive fraction*MBR.")
-        self._reset_model()
-        return coopm
+            self._reset_model()
+            raise ValueError(
+                "The optimization failed, maybe some of the model is unable to achive fraction*MBR."
+            )
 
     def compute_convex_combination(self, alphas, maxbiomass=0.1):
         assert sum(alphas) == 1, "The weights must sum to one!"
@@ -471,12 +509,13 @@ class ShuttleCommunityModel(CommunityModel):
         # Alpha objective...
         for i in range(len(alphas)):
             self.comm_model.add_constr(
-                self._weights[i] * self.x1[self.obj1] <= alphas[i] * maxbiomass
+                self._weights[i] * self.xs[i][self.biomass_ids[i]]
+                <= alphas[i] * maxbiomass
             )
         growth = self.optimize()
         summary = self.summary()
         self._reset_model()
-        return growth, summary
+        return summary
 
     def compute_convex_COOPM(
         self, alphas, maxbiomass=0.1, fraction=0.1, enforce_survival=True
@@ -500,17 +539,18 @@ class ShuttleCommunityModel(CommunityModel):
         # Growth constraints
         for i in range(len(alphas)):
             self.comm_model.add_constr(
-                self.weights[i] * self.x1[self.obj1] <= alphas[i] * maxbiomass
+                self.weights[i] * self.xs[i][self.biomass_ids[i]]
+                == alphas[i] * maxbiomass
             )
-        # Both must grow
-        if enforce_survival:
-            for i in range(len(self.models)):
-                self.comm_model.add_constr(
-                    self.weights[i] * self.xs[i][self.biomass_ids[i]]
-                    >= alphas[i] * minMBR
-                )
-        else:
-            self.comm_model.add_constr(self.objective >= minMBR)
+        # # Both must grow
+        # if enforce_survival:
+        #     for i in range(len(self.models)):
+        #         self.comm_model.add_constr(
+        #             self.weights[i] * self.xs[i][self.biomass_ids[i]]
+        #             >= alphas[i] * minMBR
+        #         )
+        # else:
+        #     self.comm_model.add_constr(self.objective >= minMBR)
 
         self.comm_model.objective = maximize(xsum(thetas))
         self.comm_model.optimize()
@@ -519,7 +559,7 @@ class ShuttleCommunityModel(CommunityModel):
         for key, x in self.shuttle_reactions.items():
             if x.x < 0:
                 coopm[key] = abs(x.x)
-        self.reset_model()
+        self._reset_model()
         return coopm
 
     def _get_bounds(self):

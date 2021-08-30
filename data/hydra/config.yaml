@@ -1,6 +1,9 @@
 name: "default_project_name"
 seed: 1
 eps: 0.1  # Value at which a model is consider to have zero growth
+run_setup: True
+run_analysis: True
+run_community: True
 defaults:
   - setup: setup
   - analysis: analysis

@@ -25,6 +25,7 @@ def get_result_path(name: str):
 
 
 def get_model_paths(folder: str):
+    """ Gets all paths for the models."""
     directory = DATA_PATH + folder
     files = []
     for filename in os.listdir(directory):
@@ -39,16 +40,39 @@ def get_model_paths(folder: str):
 
 
 def save_model(model, path: str):
+    """ Saves a model in sbml format. """
     write_sbml_model(model, path)
 
 
 def get_mediums(folder, prefix=DATA_PATH):
+    """ Returns the default medium """
     directory = prefix + folder
     mediums = dict()
     for filename in os.listdir(directory):
         with open(directory + SEPERATOR + filename, "r") as f:
             mediums[filename] = json.load(f)
     return mediums
+
+def get_default_configs(configs: str = "default.json"):
+    """Returns the config dictionary"""
+    with open(DATA_PATH + "configs" + SEPERATOR + configs, "r") as f:
+        configs_dict = json.load(f)
+    return configs_dict
+
+
+def get_default_medium(medium: str = "snm3.json"):
+    """Returns the default medium"""
+    with open(DATA_PATH + "medium" + SEPERATOR + medium, "r") as f:
+        medium_dict = json.load(f)
+    return medium_dict
+
+
+def get_biomass_reaction(model):
+    """Return the biomass reaction of a model"""
+    objective_str = str(list(model.objective.variables)[0])
+    for rec in model.reactions:
+        if rec.id in objective_str:
+            return rec
 
 
 def get_models(folder: str, prefix=DATA_PATH):

@@ -3,4 +3,9 @@ scaled_medium_growth_plot:
   max_scale: 100
   evaluations: 1000
 
-name: "auto"
+cmap: "tab20"
+names: 
+  CarveMe_SNM_gapfilled_model_consistent_snm3: "Moraxella"
+  DP_83VPs_KB5_consistent_snm3: "D. pigrum"
+  iYS854_consistent_snm3: "S. aureus"
+  Staphylococcus_epidermidis_ATCC_12228_consistent_snm3: "S. epidermidis"

@@ -1,8 +1,8 @@
 fastcc: True
 memote_evaluation: True
-memote_solver_time_out: 1000
+memote_solver_time_out: 200
 
-gapfill: "medium" #TODO make this to medium !
+gapfill: "medium" 
 configs: "default.json"
 medium: "snm3.json"
 models: "models"

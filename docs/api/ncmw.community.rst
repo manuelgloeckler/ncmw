@@ -4,14 +4,6 @@ ncmw.community package
 Submodules
 ----------
 
-ncmw.community.REMOVE\_old\_community\_models module
-----------------------------------------------------
-
-.. automodule:: ncmw.community.REMOVE_old_community_models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ncmw.community.community\_analysis module
 -----------------------------------------
 

@@ -4,40 +4,94 @@ from cobra.core import Model
 import pandas as pd
 
 import subprocess
+from warnings import warn
 
-from .utils import get_default_configs, get_default_medium, get_biomass_reaction
+from ncmw.utils import (
+    get_default_configs,
+    get_default_medium,
+    get_biomass_reaction,
+    DATA_PATH,
+)
+from copy import deepcopy
 
 
-def gapfill_model(model: Model, eps=1e-6, fill_model_base="ecoli"):
+def gapfill_model(model: Model, eps=1e-6, fill_model_base="base", **kwargs):
     """Adds reactions to the model, such that it has growth in the given medium
 
     Args:
         model (Model): Cobra model
         eps ([type], optional): Minimum growth value. Defaults to 1e-6.
-        fill_model_base (str, optional): The base set of reactions to consider . Defaults to "ecoli".
+        fill_model_base (str, optional): The base set of reactions to consider .
+        Defaults to "ecoli".
+        kwargs (dict, optional): Additional kwargs for cobra gapfilling, seed pycobra
+        documentation https://cobrapy.readthedocs.io/en/latest/gapfilling.html
 
     Returns:
         (Model): Cobra model that has growth if algorithm succeeds
         (List): List of reactions that were added
     """
+    model = deepcopy(model)
     growth = model.slim_optimize()
     if growth > eps:
         # Already has growth gapfilling is unnecessary
-        return model
+        return model, []
     if isinstance(fill_model_base, Model):
         fill_model = fill_model_base
     elif fill_model_base == "ecoli" or fill_model_base == "salmonella":
         test_model = cobra.test.create_test_model(fill_model_base)
         fill_model = cobra.Model("universal_reactions")
         fill_model.add_reactions(test_model.reactions)
-    solution = cobra.flux_analysis.gapfill(
-        model, fill_model, demand_reactions=False, iterations=1
-    )[0]
-    model.add_reactions(solution)
+    elif fill_model_base == "base":
+        test_model = cobra.io.read_sbml_model(
+            DATA_PATH + "/gapfill_baseline/" + "model.xml"
+        )
+        fill_model = cobra.Model("universal_reactions")
+        fill_model.add_reactions(test_model.reactions)
 
-    assert model.slim_optimize() > eps, "The model still have no growth..."
+    if "demand_reactions" in kwargs:
+        demand_reactions = kwargs.pop("demand_reactions")
+    else:
+        demand_reactions = False
 
-    return model, solution
+    try:
+        solution = cobra.flux_analysis.gapfill(
+            model, fill_model, demand_reactions=demand_reactions, **kwargs
+        )[-1]
+        filled_model = deepcopy(model)
+        filled_model.add_reactions(solution)
+    except:
+        warn("The model still has no growth... . We try an alternative")
+        filled_model = deepcopy(model)
+        _, rec = gapfill_medium(model)
+
+        try:
+            solution = []
+            for r in rec:
+                objective = model.reactions.get_by_id(r).flux_expression
+                model.objective = objective
+                s = cobra.flux_analysis.gapfill(
+                    model, fill_model, demand_reactions=demand_reactions, **kwargs
+                )[-1]
+                solution.extend(s)
+            filled_model.add_reactions(solution)
+        except:
+            warn("The model still has no growth... . We greadily add sink reactions...")
+            solution = []
+            for r in rec:
+                from cobra import Reaction
+
+                reaction = Reaction("SK" + r[2:])
+                solution.append("SK" + r[2:])
+                reaction.lower_bound = -0.1
+                reaction.upper_bound = 1000
+                filled_model.add_reaction(reaction)
+                reaction.add_metabolites({r[3:]: -1.0})
+                if filled_model.slim_optimize() > eps:
+                    break
+
+    assert filled_model.slim_optimize() > eps, "Gapfilling failed..."
+
+    return filled_model, solution
 
 
 def gapfill_medium(model: Model, eps=1e-1):
@@ -52,7 +106,7 @@ def gapfill_medium(model: Model, eps=1e-1):
         (Model): Cobra model with extended medium
         (List): List of extended metabolites
     """
-    model_help = model.copy()
+    model_help = deepcopy(model)
     # if model_help.slim_optimize() > eps:
     #     # Already feasible model.
     #     return model, []
@@ -60,7 +114,7 @@ def gapfill_medium(model: Model, eps=1e-1):
     gapfillable = set([ex.id for ex in model_help.exchanges]).difference(
         set(model.medium.keys())
     )
-    print(f"There are {len(gapfillable)} many metabolites to fill the medium")
+    # print(f"There are {len(gapfillable)} many metabolites to fill the medium")
 
     biomass = get_biomass_reaction(model_help)
     # Binary variables: Theta_i

@@ -19,6 +19,11 @@ import sys, os
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
 
+from ncmw.visualization import (
+    plot_pairwise_growth_relation_per_weight,
+    plot_community_interaction,
+    plot_posterior_samples_for_observations,
+)
 
 from ncmw.utils.utils_io import (
     get_models,
@@ -31,7 +36,6 @@ from ncmw.utils.utils_io import (
 from ncmw.community import (
     BagOfReactionsModel,
     ShuttleCommunityModel,
-    compute_pairwise_growth_relation_per_weight,
     compute_fair_weights,
     compute_community_summary,
     compute_dominant_weights,
@@ -100,6 +104,17 @@ def run_community(cfg: DictConfig) -> None:
     # Medias
     medium_prefix = PATH_res + SEPERATOR + "analysis" + SEPERATOR
     mediums = get_mediums("medium", medium_prefix)
+
+    log.info("Compute pairwise growth relationships for different weights.")
+    for m in community_models:
+        fig = plot_pairwise_growth_relation_per_weight(m, cfg.visualization.names)
+        fig.savefig(
+            PATH
+            + SEPERATOR
+            + "experiments"
+            + SEPERATOR
+            + f"pairwise_growth_relationship_{type(m).__name__}.pdf"
+        )
 
     # Weights to consider
     weights = []
@@ -228,7 +243,6 @@ def run_community(cfg: DictConfig) -> None:
         df_compm["Medium"] = "COMPM"
         df = df.append(df_compm)
 
-
         # COOPM enforced
         for weight in weights[i]:
             coopms = COOPMS_enforced[tuple(weight)]
@@ -261,9 +275,81 @@ def run_community(cfg: DictConfig) -> None:
         )
         df.to_csv(path)
 
-    log.info("Compute pairwise growth relationships for different weights.")
     for m in community_models:
-        print(compute_pairwise_growth_relation_per_weight(m, 0, 1))
+        if isinstance(m, ShuttleCommunityModel):
+            m.weights = np.ones(len(m.weights))
+            medium_coopm = COOPMS_enforced[tuple(m.weights)]
+            m.medium = medium_coopm
+            df = m.summary()
+            fig1 = plot_community_interaction(m, df)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_community_interaction.pdf"
+            )
+            medium_compm = COMPMS[0]
+            m.medium = medium_compm
+            df = m.summary()
+            fig2 = plot_community_interaction(m, df)
+            fig2.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_compm_community_interaction.pdf"
+            )
+
+    log.info("Compute weight posteriors")
+    for m in community_models:
+        m.weights = np.ones(len(m.weights))
+        medium_coopm = COOPMS_enforced[tuple(m.weights)]
+        maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
+        balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
+        observations = [balanced_observation]
+        for i in range(len(m.models)):
+            dominant_observation = np.ones(len(m.models)) * min(
+                0.1, np.min(maximal_growths)
+            )
+            dominant_observation[i] = maximal_growths[i]
+            observations.append(dominant_observation)
+
+        figs = plot_posterior_samples_for_observations(m, observations)
+        for i in range(len(figs)):
+            figs[i].savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + f"_coopm_weight_posterior_{i}.pdf"
+            )
+
+        medium_compm = COMPMS[0]
+        m.medium = medium_compm
+        maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
+        balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
+        observations = [balanced_observation]
+        for i in range(len(m.models)):
+            dominant_observation = np.ones(len(m.models)) * min(
+                0.1, np.min(maximal_growths)
+            )
+            dominant_observation[i] = maximal_growths[i]
+            observations.append(dominant_observation)
+
+        figs = plot_posterior_samples_for_observations(m, observations)
+        for i in range(len(figs)):
+            figs[i].savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + f"_compm_weight_posterior_{i}.pdf"
+            )
 
 
 if __name__ == "__main__":

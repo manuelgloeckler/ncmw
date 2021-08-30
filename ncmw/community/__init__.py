@@ -5,4 +5,6 @@ from .community_analysis import (
     compute_fair_weights,
     compute_community_summary,
     compute_dominant_weights,
+    compute_community_interaction_graph,
+    community_weight_posterior,
 )

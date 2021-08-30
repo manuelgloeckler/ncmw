@@ -13,6 +13,7 @@ import inspect
 import shutil
 
 import sphinx_rtd_theme
+import nbsphinx
 
 # -- Path setup --------------------------------------------------------------
 
@@ -82,6 +83,12 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
+    "nbsphinx",
+]
+
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc=figure.dpi=96",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

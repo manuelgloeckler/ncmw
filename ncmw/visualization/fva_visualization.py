@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def plot_full_fva(fva: pd.DataFrame, save_path: str, label_only_at_flux: int = 5):
+def plot_full_fva(
+    fva: pd.DataFrame, save_path: str = None, label_only_at_flux: int = 5
+):
     """Plots all exchange fluxes, but only labels the one with large flux values.
 
     Args:
@@ -19,10 +21,13 @@ def plot_full_fva(fva: pd.DataFrame, save_path: str, label_only_at_flux: int = 5
     _ = plt.xticks(high_vals, rotation=90)
     plt.ylabel("Flux")
     plt.tight_layout()
-    fig.savefig(save_path)
+    if save_path is not None:
+        fig.savefig(save_path)
+    return fig
 
 
-def plot_medium_fva_range(model, save_path, growth_fraction=1.0):
+def plot_medium_fva_range(model, save_path=None, growth_fraction=1.0):
+    """Plots FVA flux ranges for all exchange reactions"""
     fva_ex = model.summary(fva=growth_fraction)
     fva_ex = fva_ex.to_frame()
     medium = model.medium
@@ -76,4 +81,6 @@ def plot_medium_fva_range(model, save_path, growth_fraction=1.0):
     plt.grid(linestyle="--", alpha=0.5)
     plt.ylabel("$Flux$")
     plt.tight_layout()
-    fig.savefig(save_path)
+    if save_path is not None:
+        fig.savefig(save_path)
+    return fig

@@ -12,14 +12,6 @@ ncmw.setup\_models.setup module
    :undoc-members:
    :show-inheritance:
 
-ncmw.setup\_models.utils module
--------------------------------
-
-.. automodule:: ncmw.setup_models.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
