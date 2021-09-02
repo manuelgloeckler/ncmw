@@ -7,7 +7,7 @@ from ncmw.community import (
     community_weight_posterior,
     compute_pairwise_growth_relation_per_weight,
 )
-from networkx.drawing.layout import circular_layout
+from networkx.drawing.layout import circular_layout, bipartite_layout
 import networkx as nx
 import torch
 from copy import deepcopy
@@ -45,6 +45,65 @@ def plot_posterior_samples_for_observations(model, observations):
     return figs
 
 
+def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis"):
+    models = model.models
+    model_name = []
+    for model in model.models:
+        if model.id in names:
+            model_name.append(names[model.id])
+        else:
+            model_name.append(model.id.split("_")[0])
+
+    names = np.array(model_name)
+    df_in = df["Shuttle Reaction"]
+    shared_output = dict()
+    for i, data in df.iterrows():
+        data = data[:-1]
+        x = data.to_numpy()
+        y = df_in[i]
+        if y < 0:
+            inputs = x < 0
+            input_names = names[inputs]
+            fluxes = x[inputs]
+            if inputs.sum() > 0:
+                shared_output[i] = (input_names, fluxes)
+
+    G = nx.DiGraph()
+    # Build nodes
+    cmap = matplotlib.cm.get_cmap(cmap)
+    G.add_nodes_from(names)
+    G.add_nodes_from(list(shared_output.keys()))
+    colors = [cmap(i / len(names)) for i in range(len(names))] + ["Grey"] * len(
+        shared_output
+    )
+    widths = []
+    edge_color = []
+    for ex, (name, f) in shared_output.items():
+        for i in range(len(name)):
+            n = name[i]
+            flux = f[i]
+            G.add_edge(ex, n, weight=flux)
+            widths.append(flux / 4)
+            edge_color.append(cmap(np.argmax(names == n) / len(names)))
+
+    pos = bipartite_layout(G, names)
+    fig = plt.figure(figsize=(10, 30))
+    plt.title("Shared Uptake", fontsize=30)
+    nx.draw(
+        G,
+        with_labels=True,
+        pos=pos,
+        node_size=1000,
+        font_size=8,
+        width=widths,
+        node_color=colors,
+        edge_color=edge_color,
+    )
+    fig.tight_layout()
+
+    return fig
+
+
 def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None):
     """This plots the community interaction as a graph with circular layout, similar to
     circos plots
@@ -59,6 +118,13 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
             figure: Plot
 
     """
+    model_name = []
+    for model in model.models:
+        if model.id in names:
+            model_name.append(names[model.id])
+        else:
+            model_name.append(model.id.split("_")[0])
+
     G, df = compute_community_interaction_graph(model, df)
     # Colors
     cmap = matplotlib.cm.get_cmap(cmap)
@@ -103,7 +169,7 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
         pathes.append(
             matplotlib.patches.Patch(
                 color=cmap(i / len(model.models)),
-                label=model.models[i].id.split("_")[0],
+                label=model_name[i],
             )
         )
     fig.suptitle("Community Interaction\n", fontsize=20)

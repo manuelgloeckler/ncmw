@@ -1,0 +1,500 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ncmw.setup_models.setup &mdash; ncmw  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> ncmw
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ncmw</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ncmw.setup_models.setup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ncmw.setup_models.setup</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">cobra</span>
+<span class="kn">import</span> <span class="nn">cobra.test</span>
+<span class="kn">from</span> <span class="nn">cobra.core</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">ncmw.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_default_configs</span><span class="p">,</span>
+    <span class="n">get_default_medium</span><span class="p">,</span>
+    <span class="n">get_biomass_reaction</span><span class="p">,</span>
+    <span class="n">DATA_PATH</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+
+<div class="viewcode-block" id="gapfill_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_model">[docs]</a><span class="k">def</span> <span class="nf">gapfill_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">fill_model_base</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adds reactions to the model, such that it has growth in the given medium</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (Model): Cobra model</span>
+<span class="sd">        eps ([type], optional): Minimum growth value. Defaults to 1e-6.</span>
+<span class="sd">        fill_model_base (str, optional): The base set of reactions to consider .</span>
+<span class="sd">        Defaults to &quot;ecoli&quot;.</span>
+<span class="sd">        kwargs (dict, optional): Additional kwargs for cobra gapfilling, seed pycobra</span>
+<span class="sd">        documentation https://cobrapy.readthedocs.io/en/latest/gapfilling.html</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (Model): Cobra model that has growth if algorithm succeeds</span>
+<span class="sd">        (List): List of reactions that were added</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">growth</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">growth</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
+        <span class="c1"># Already has growth gapfilling is unnecessary</span>
+        <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fill_model_base</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+        <span class="n">fill_model</span> <span class="o">=</span> <span class="n">fill_model_base</span>
+    <span class="k">elif</span> <span class="n">fill_model_base</span> <span class="o">==</span> <span class="s2">&quot;ecoli&quot;</span> <span class="ow">or</span> <span class="n">fill_model_base</span> <span class="o">==</span> <span class="s2">&quot;salmonella&quot;</span><span class="p">:</span>
+        <span class="n">test_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">create_test_model</span><span class="p">(</span><span class="n">fill_model_base</span><span class="p">)</span>
+        <span class="n">fill_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="s2">&quot;universal_reactions&quot;</span><span class="p">)</span>
+        <span class="n">fill_model</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">(</span><span class="n">test_model</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fill_model_base</span> <span class="o">==</span> <span class="s2">&quot;base&quot;</span><span class="p">:</span>
+        <span class="n">test_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_sbml_model</span><span class="p">(</span>
+            <span class="n">DATA_PATH</span> <span class="o">+</span> <span class="s2">&quot;/gapfill_baseline/&quot;</span> <span class="o">+</span> <span class="s2">&quot;model.xml&quot;</span>
+        <span class="p">)</span>
+        <span class="n">fill_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="s2">&quot;universal_reactions&quot;</span><span class="p">)</span>
+        <span class="n">fill_model</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">(</span><span class="n">test_model</span><span class="o">.</span><span class="n">reactions</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;demand_reactions&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">demand_reactions</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;demand_reactions&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">demand_reactions</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">solution</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">gapfill</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">fill_model</span><span class="p">,</span> <span class="n">demand_reactions</span><span class="o">=</span><span class="n">demand_reactions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">filled_model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">filled_model</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The model still has no growth... . We try an alternative&quot;</span><span class="p">)</span>
+        <span class="n">filled_model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">rec</span> <span class="o">=</span> <span class="n">gapfill_medium</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">solution</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rec</span><span class="p">:</span>
+                <span class="n">objective</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">flux_expression</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">gapfill</span><span class="p">(</span>
+                    <span class="n">model</span><span class="p">,</span> <span class="n">fill_model</span><span class="p">,</span> <span class="n">demand_reactions</span><span class="o">=</span><span class="n">demand_reactions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">solution</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">filled_model</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The model still has no growth... . We greadily add sink reactions...&quot;</span><span class="p">)</span>
+            <span class="n">solution</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rec</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">cobra</span> <span class="kn">import</span> <span class="n">Reaction</span>
+
+                <span class="n">reaction</span> <span class="o">=</span> <span class="n">Reaction</span><span class="p">(</span><span class="s2">&quot;SK&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+                <span class="n">solution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;SK&quot;</span> <span class="o">+</span> <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+                <span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+                <span class="n">reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
+                <span class="n">filled_model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                <span class="n">reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">({</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">:]:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">})</span>
+                <span class="k">if</span> <span class="n">filled_model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+    <span class="k">assert</span> <span class="n">filled_model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">,</span> <span class="s2">&quot;Gapfilling failed...&quot;</span>
+
+    <span class="k">return</span> <span class="n">filled_model</span><span class="p">,</span> <span class="n">solution</span></div>
+
+
+<div class="viewcode-block" id="gapfill_medium"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_medium">[docs]</a><span class="k">def</span> <span class="nf">gapfill_medium</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This will add the minimal set of exchange reactions such that the model</span>
+<span class="sd">    has more than eps growth.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (Model): Cobra model which has less than eps growth</span>
+<span class="sd">        eps ([type], optional): Value for which we consider the model to have zero growth . Defaults to 1e-6.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (Model): Cobra model with extended medium</span>
+<span class="sd">        (List): List of extended metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model_help</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="c1"># if model_help.slim_optimize() &gt; eps:</span>
+    <span class="c1">#     # Already feasible model.</span>
+    <span class="c1">#     return model, []</span>
+    <span class="c1"># We can gapfill any exchange reaction that currently is not in the medium</span>
+    <span class="n">gapfillable</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model_help</span><span class="o">.</span><span class="n">exchanges</span><span class="p">])</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+        <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="c1"># print(f&quot;There are {len(gapfillable)} many metabolites to fill the medium&quot;)</span>
+
+    <span class="n">biomass</span> <span class="o">=</span> <span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">model_help</span><span class="p">)</span>
+    <span class="c1"># Binary variables: Theta_i</span>
+    <span class="c1"># This is an indicator which is zero if the metabolite should be added to the medium</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gapfillable</span><span class="p">)):</span>
+        <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_help</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;theta_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Constraints for exchanges, which are turned of for theta_i = 1</span>
+    <span class="n">theta_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gapfillable</span><span class="p">):</span>
+        <span class="n">reaction</span> <span class="o">=</span> <span class="n">model_help</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">min_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+        <span class="n">reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">min_bound</span>
+        <span class="n">cons</span> <span class="o">=</span> <span class="n">model_help</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">flux_expression</span> <span class="o">+</span> <span class="n">min_bound</span> <span class="o">*</span> <span class="n">thetas</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">lb</span><span class="o">=</span><span class="n">min_bound</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span>
+        <span class="p">)</span>
+        <span class="n">theta_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cons</span><span class="p">)</span>
+
+    <span class="c1"># Constraints for growth rates, which must be at least 10% MBR</span>
+    <span class="n">constraint_growth</span> <span class="o">=</span> <span class="n">model_help</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+        <span class="n">biomass</span><span class="o">.</span><span class="n">flux_expression</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Adding new variables and constraints.</span>
+    <span class="n">model_help</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+    <span class="n">model_help</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">theta_constraints</span><span class="p">)</span>
+    <span class="n">model_help</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
+
+    <span class="c1"># Objevtive is maximising turned of exchanges, that is sum of theta_is</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">model_help</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Objective</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">thetas</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">)</span>
+    <span class="n">model_help</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+    <span class="n">model_help</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+    <span class="c1"># Model optimization</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">model_help</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+    <span class="c1"># Change medium and check if it worked</span>
+    <span class="n">new_exchanges</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">ex</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model_help</span><span class="o">.</span><span class="n">exchanges</span>
+        <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">flux</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">medium</span>
+    <span class="p">]</span>
+    <span class="n">extended_medium</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">medium</span>
+    <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">new_exchanges</span><span class="p">:</span>
+        <span class="n">extended_medium</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">extended_medium</span>
+    <span class="c1"># assert model.slim_optimize() &gt; eps, &quot;The medium extension failed for some reason...&quot;</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">new_exchanges</span></div>
+
+
+<div class="viewcode-block" id="set_default_configs_and_snm3_medium"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.set_default_configs_and_snm3_medium">[docs]</a><span class="k">def</span> <span class="nf">set_default_configs_and_snm3_medium</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">configs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default.json&quot;</span><span class="p">,</span> <span class="n">medium</span><span class="o">=</span><span class="s2">&quot;snm3.json&quot;</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (Model): A cobra model</span>
+<span class="sd">        configs (str): File name of a config file in json format</span>
+<span class="sd">        medium (str): File name of a medium file in json format</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (Model): Cobra model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set bounds</span>
+    <span class="n">configs_dict</span> <span class="o">=</span> <span class="n">get_default_configs</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+    <span class="n">medium_dict</span> <span class="o">=</span> <span class="n">get_default_medium</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">configs_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;reactions&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="p">:</span>
+                <span class="n">reaction_dic</span> <span class="o">=</span> <span class="n">reaction</span><span class="o">.</span><span class="vm">__dict__</span>
+                <span class="k">if</span> <span class="n">reaction_dic</span><span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">reaction_dic</span><span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reaction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">reaction_dic</span> <span class="o">=</span> <span class="n">reaction</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="k">if</span> <span class="n">reaction_dic</span><span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">reaction_dic</span><span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">val</span>
+
+    <span class="c1"># Set medium</span>
+    <span class="n">exchanges</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">exchanges</span><span class="p">]</span>
+    <span class="n">model_medium</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">medium_dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">exchanges</span><span class="p">:</span>
+            <span class="n">model_medium</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">medium_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">model_medium</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="score_memote"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.score_memote">[docs]</a><span class="k">def</span> <span class="nf">score_memote</span><span class="p">(</span><span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">report_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">solver_timout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates a memote evaluation report for the model quality.</span>
+
+<span class="sd">    NOTE: This typically requires a rather consistent model, otherwise it breaks</span>
+<span class="sd">    NOTE: This can take a while on a local computer, especially if the solver_timeout is high</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_path (str): Path to the model file: Typically SBML format</span>
+<span class="sd">        report_path (str): Path to the model file: Typically SBML format</span>
+<span class="sd">        solver_timout (int): Time in seconds until the solver timeouts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;memote&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;report&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;snapshot&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;--filename&quot;</span><span class="p">,</span>
+                <span class="n">report_path</span><span class="p">,</span>
+                <span class="s2">&quot;--solver-timeout&quot;</span><span class="p">,</span>
+                <span class="n">solver_timout</span><span class="p">,</span>
+                <span class="n">model_path</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;It seems that the model cannot be evaluated or the installation of memote is broken...&quot;</span>
+    <span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You may consider to score the model online: https://memote.io/&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_consistent_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.create_consistent_model">[docs]</a><span class="k">def</span> <span class="nf">create_consistent_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This will create a more consistent model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (cobra.core.Model): Cobra metabolic model class</span>
+<span class="sd">        verbose (bool, optional): Print out results in console . Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cobra.core.Model: Returns a more consistent cobra model.</span>
+<span class="sd">        pd.DataFrame: Returns some statistics that may be imprved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blocked_reactions</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">find_blocked_reactions</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">met_formulas</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_metabolite_compartment_formula</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">mass_charge_balance</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_mass_balance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="n">consistent_model</span> <span class="o">=</span> <span class="n">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">consistent_model</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_consistent&quot;</span>
+    <span class="n">blocked_reactions_consistent</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">find_blocked_reactions</span><span class="p">(</span>
+        <span class="n">consistent_model</span>
+    <span class="p">)</span>
+    <span class="n">met_formulas_consistent</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_metabolite_compartment_formula</span><span class="p">(</span>
+        <span class="n">consistent_model</span>
+    <span class="p">)</span>
+    <span class="n">mass_charge_balance_consistent</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_mass_balance</span><span class="p">(</span>
+        <span class="n">consistent_model</span>
+    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Blocked reactions&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">blocked_reactions</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">blocked_reactions_consistent</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;Metabolite formula problems&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">met_formulas</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">met_formulas_consistent</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;Mass charge balance violations&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">mass_charge_balance</span><span class="p">),</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">mass_charge_balance_consistent</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">}</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Original Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Consistent model&quot;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">consistent_model</span><span class="p">,</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="fastcc"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.fastcc">[docs]</a><span class="k">def</span> <span class="nf">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FastCC algorithm to increase model quality by resolving conflicts and removing</span>
+<span class="sd">    unnecessary e.g. blocked pathways</span>
+<span class="sd">    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        cobra.core.Model: Returns a more consistent cobra model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">consistent_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">consistent_model</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, manumanu12345.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

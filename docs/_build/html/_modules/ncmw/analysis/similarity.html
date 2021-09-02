@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ncmw.analysis.similarity &#8212; ncmw  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for ncmw.analysis.similarity</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">cobra.core</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="get_shared_metabolites_counts"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.get_shared_metabolites_counts">[docs]</a><span class="k">def</span> <span class="nf">get_shared_metabolites_counts</span><span class="p">(</span><span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This method return the number of unique metabolites in both models .</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model1 (Model): First cobra model</span>
+<span class="sd">        model2 (Model): Second cobra model</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (int): Total number of metabolites in both models</span>
+<span class="sd">        (int): Total number of shared metabolites</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">met1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">model1</span><span class="o">.</span><span class="n">metabolites</span><span class="p">))</span>
+    <span class="n">met2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">model2</span><span class="o">.</span><span class="n">metabolites</span><span class="p">))</span>
+    <span class="n">met_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">met1</span><span class="p">)</span>
+    <span class="n">met_ids</span> <span class="o">=</span> <span class="n">met_ids</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">met2</span><span class="p">))</span>
+    <span class="n">common_met_ids</span> <span class="o">=</span> <span class="n">met1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">met2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">met_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_met_ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_shared_reactions_counts"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.get_shared_reactions_counts">[docs]</a><span class="k">def</span> <span class="nf">get_shared_reactions_counts</span><span class="p">(</span><span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This computes the number of shared reactions</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model1 (Model): First cobra model</span>
+<span class="sd">        model2 (Model): Second cobra model</span>
+<span class="sd">        prefix (str): Location to write file. Default is &quot;&quot;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (int): Total number of reactions in both models</span>
+<span class="sd">        (int): Total number of shared reactions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">rec1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">model1</span><span class="o">.</span><span class="n">reactions</span><span class="p">))</span>
+    <span class="n">rec2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">model2</span><span class="o">.</span><span class="n">reactions</span><span class="p">))</span>
+    <span class="n">rec_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rec1</span><span class="p">)</span>
+    <span class="n">rec_ids</span> <span class="o">=</span> <span class="n">rec_ids</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">rec2</span><span class="p">))</span>
+    <span class="n">common_rec_ids</span> <span class="o">=</span> <span class="n">rec1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rec2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">rec_ids</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">common_rec_ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="jaccard_similarity"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.jaccard_similarity">[docs]</a><span class="k">def</span> <span class="nf">jaccard_similarity</span><span class="p">(</span><span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This returns the Jacard Similarity of both models with respect to the set</span>
+<span class="sd">    of metabolites and reactions</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model1 (Model): First cobra model</span>
+<span class="sd">        model2 (Model): Second cobra model</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (float): Jacard similarity of metabolite sets</span>
+<span class="sd">        (float): Jacard similarity of reaction sets</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">total_mets</span><span class="p">,</span> <span class="n">common_mets</span> <span class="o">=</span> <span class="n">get_shared_metabolites_counts</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">)</span>
+    <span class="n">total_recs</span><span class="p">,</span> <span class="n">common_recs</span> <span class="o">=</span> <span class="n">get_shared_reactions_counts</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">)</span>
+    <span class="n">j_met</span> <span class="o">=</span> <span class="n">common_mets</span> <span class="o">/</span> <span class="n">total_mets</span>
+    <span class="n">j_rec</span> <span class="o">=</span> <span class="n">common_recs</span> <span class="o">/</span> <span class="n">total_recs</span>
+    <span class="k">return</span> <span class="n">j_met</span><span class="p">,</span> <span class="n">j_rec</span></div>
+
+
+<div class="viewcode-block" id="jaccard_similarity_matrices"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.jaccard_similarity_matrices">[docs]</a><span class="k">def</span> <span class="nf">jaccard_similarity_matrices</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The methods takes an Iterable of cobra models and returns a dictionary</span>
+<span class="sd">    containing all pairwise jaccard similarities.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        models (Iterable): List of cobra models</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (df): DataFrame of all jaccard similarities for metabolites indexed by the model ids.</span>
+<span class="sd">        (df): DataFrame of all jaccard similarities for reaction indexed by the model ids.</span>
+<span class="sd">        (df): DataFrame for resourece overlap indexed by the model ids.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+    <span class="n">matrix_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">matrix_rec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">matrix_ro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">model2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">models</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]):</span>
+            <span class="n">ji_met</span><span class="p">,</span> <span class="n">ji_rec</span> <span class="o">=</span> <span class="n">jaccard_similarity</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">)</span>
+            <span class="n">ji_ro</span> <span class="o">=</span> <span class="n">resource_overlap</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">)</span>
+            <span class="n">matrix_met</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_met</span>
+            <span class="n">matrix_met</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_met</span>
+            <span class="n">matrix_rec</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_rec</span>
+            <span class="n">matrix_rec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_rec</span>
+            <span class="n">matrix_ro</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_ro</span>
+            <span class="n">matrix_ro</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ji_ro</span>
+
+    <span class="n">df1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix_met</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix_rec</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">df3</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix_ro</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df1</span><span class="p">,</span> <span class="n">df2</span><span class="p">,</span> <span class="n">df3</span></div>
+
+
+<div class="viewcode-block" id="resource_overlap"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.resource_overlap">[docs]</a><span class="k">def</span> <span class="nf">resource_overlap</span><span class="p">(</span><span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Coputes the resource overlap between two models</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model1 (Model): Cobra model</span>
+<span class="sd">        model2 (Model): Cobra model</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (float): Jacard index of resource overlap</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">in_ex1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model1</span><span class="o">.</span><span class="n">exchanges</span> <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">in_ex2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model2</span><span class="o">.</span><span class="n">exchanges</span> <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">common</span> <span class="o">=</span> <span class="n">in_ex1</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">in_ex2</span><span class="p">)</span>
+    <span class="n">union</span> <span class="o">=</span> <span class="n">in_ex1</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">in_ex2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">common</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">union</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="write_out_common_metabolites"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.write_out_common_metabolites">[docs]</a><span class="k">def</span> <span class="nf">write_out_common_metabolites</span><span class="p">(</span>
+    <span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;common_reactions.csv&quot;</span>
+<span class="p">):</span>
+    <span class="c1"># Check for correctness</span>
+    <span class="n">common_metabolits</span> <span class="o">=</span> <span class="p">[</span><span class="n">met</span> <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">model1</span><span class="o">.</span><span class="n">metabolites</span> <span class="k">if</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">model2</span><span class="o">.</span><span class="n">metabolites</span><span class="p">]</span>
+    <span class="c1"># Write csv</span>
+    <span class="n">df_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;FORMULA&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;COMPARTMENT&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">common_metabolits</span><span class="p">:</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;FORMULA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;COMPARTMENT&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">compartment</span><span class="p">)</span>
+    <span class="n">df_common_met</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df_dict</span><span class="p">)</span>
+    <span class="n">df_common_met</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="n">df_common_met</span><span class="o">.</span><span class="n">head</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="write_out_common_reactions"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.similarity.write_out_common_reactions">[docs]</a><span class="k">def</span> <span class="nf">write_out_common_reactions</span><span class="p">(</span>
+    <span class="n">model1</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">model2</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;common_metabolites.csv&quot;</span>
+<span class="p">):</span>
+    <span class="n">common_reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">rec</span> <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">model1</span><span class="o">.</span><span class="n">reactions</span> <span class="k">if</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">model2</span><span class="o">.</span><span class="n">reactions</span><span class="p">]</span>
+    <span class="c1"># Write csv</span>
+    <span class="n">df_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;REACTION&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;LOWER_BOUND&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;UPPER_BOUND&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">common_reactions</span><span class="p">:</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;NAME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;REACTION&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">reaction</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;LOWER_BOUND&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">)</span>
+        <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;UPPER_BOUND&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">highlight_col</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="c1"># copy df to new - original data are not changed</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># mark exchange reactions by yellow color</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;EX_&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="s2">&quot;background-color: yellow&quot;</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="s2">&quot;background-color: white&quot;</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelWriter</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="n">df_common_rec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df_dict</span><span class="p">)</span>
+    <span class="n">df_common_rec</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">highlight_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">writer</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ncmw</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, manumanu12345.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

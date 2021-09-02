@@ -7,6 +7,37 @@ import torch
 from sbi.inference import SNLE
 
 
+
+
+def compute_community_interaction_graph(model, df):
+    df_help = df[df.columns[:-1]]
+    medium_col = np.zeros(len(df_help))
+    for i, ex in enumerate(df_help.index):
+        if ex in model.medium:
+            medium_col[i] = model.medium[ex]
+        else:
+            medium_col[i] = 0.0
+    # Set output to zero
+    help_array = df_help.to_numpy()
+    help_array[help_array >= 0] = 0
+    # Non medium associated inputs -> interactions !
+    species_interaction = (help_array.sum(1) + medium_col) < -1e-6
+    species_interaction
+    df = df[species_interaction]
+    df = df.drop("Shuttle Reaction", 1)
+
+    # Build interaction graph
+    G = nx.DiGraph()
+    # Build nodes
+    for i, col in enumerate(df.columns):
+        names = [n[3:-2] + f"_{i}" for n in df[df[col] != 0].index]
+        G.add_nodes_from(names)
+
+    for n in G.nodes:
+        i = int(n[-1])
+        G.nodes[n]["class"] = model.models[i].id.split("_")[0]
+    return G, df
+
 def compute_community_interaction_graph(model, df):
     df_help = df[df.columns[:-1]]
     medium_col = np.zeros(len(df_help))
