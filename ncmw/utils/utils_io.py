@@ -2,6 +2,9 @@ import os
 import sys
 import json
 
+import pandas as pd
+import numpy as np
+
 from cobra.io import (
     read_sbml_model,
     load_json_model,
@@ -24,8 +27,35 @@ def get_result_path(name: str):
     return RESULT_PATH + name
 
 
+def get_reference_network_weights():
+    df = pd.read_csv(DATA_PATH + "configs/network_map.csv", sep=";")
+
+    organisms = list(set(df["SOURCE"].tolist()))
+    N = len(organisms)
+
+    positive = np.zeros((N, N))
+    negative = np.zeros((N, N))
+    for i in range(N):
+        for j in range(N):
+            org1 = organisms[i]
+            org2 = organisms[j]
+            df_org = df[df["SOURCE"] == org1]
+            org1_to_org2 = df_org["TARGET"] == org2
+            directed = df_org[org1_to_org2]["DIRECTED"] == "TRUE"
+            undirected = df_org[org1_to_org2]["DIRECTED"] == "FALSE"
+            p = df_org[org1_to_org2]["INTERACTION"] == "p"
+            n = df_org[org1_to_org2]["INTERACTION"] == "n"
+            positive[i, j] += p.sum()
+            positive[j, i] += p[undirected].sum()
+            negative[i, j] += n.sum()
+            negative[j, i] += n[undirected].sum()
+
+    weights = positive - negative
+    return organisms, weights
+
+
 def get_model_paths(folder: str):
-    """ Gets all paths for the models."""
+    """Gets all paths for the models."""
     directory = DATA_PATH + folder
     files = []
     for filename in os.listdir(directory):
@@ -40,18 +70,19 @@ def get_model_paths(folder: str):
 
 
 def save_model(model, path: str):
-    """ Saves a model in sbml format. """
+    """Saves a model in sbml format."""
     write_sbml_model(model, path)
 
 
 def get_mediums(folder, prefix=DATA_PATH):
-    """ Returns the default medium """
+    """Returns the default medium"""
     directory = prefix + folder
     mediums = dict()
     for filename in os.listdir(directory):
         with open(directory + SEPERATOR + filename, "r") as f:
             mediums[filename] = json.load(f)
     return mediums
+
 
 def get_default_configs(configs: str = "default.json"):
     """Returns the config dictionary"""

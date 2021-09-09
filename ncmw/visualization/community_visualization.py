@@ -6,11 +6,99 @@ from ncmw.community import (
     compute_community_interaction_graph,
     community_weight_posterior,
     compute_pairwise_growth_relation_per_weight,
+    compute_species_interaction_weights,
 )
+from utils import get_reference_network_weights
 from networkx.drawing.layout import circular_layout, bipartite_layout
 import networkx as nx
 import torch
 from copy import deepcopy
+
+
+def plot_reference_interaction(interaction_cutoff=0, cmap="viridis"):
+    nodes, weights = get_reference_network_weights()
+    N = len(weights)
+    G = nx.DiGraph()
+    G.add_nodes_from(nodes)
+    cmap = matplotlib.cm.get_cmap(cmap)
+    cmap2 = matplotlib.cm.get_cmap("jet_r")
+    edge_color = []
+    colors = [cmap(i / len(nodes)) for i in range(len(nodes))]
+    for i in range(N):
+        for j in range(N):
+            if i != j and np.abs(weights[i, j]) > interaction_cutoff:
+                n1 = nodes[i]
+                n2 = nodes[j]
+                G.add_edge(n1, n2, weight=weights[i, j])
+                edge_color.append(cmap2((weights[i, j])))
+
+    fig = plt.figure(figsize=(N, N - 2))
+    pos = circular_layout(G)
+    nx.draw(
+        G,
+        with_labels=True,
+        pos=pos,
+        node_size=1000,
+        font_size=8,
+        node_color=colors,
+        edge_color=edge_color,
+        width=3,
+        connectionstyle="arc3, rad = 0.1",
+    )
+    cbar = fig.colorbar(
+        matplotlib.cm.ScalarMappable(matplotlib.colors.Normalize(-1, 1), cmap=cmap2)
+    )
+    cbar.set_label("Interaction (Red=harmful, Blue=Benefitial)", rotation=270)
+    cbar.set_ticks([-1, 0, 1])
+
+    return fig
+
+
+def plot_species_interaction(
+    model, df, names: dict = dict(), cmap="viridis", interaction_cutoff=0.0
+):
+    G = nx.DiGraph()
+    weights = compute_species_interaction_weights(model, df)
+    names = []
+    for m in model.models:
+        if m.id in names:
+            names.append(names[m.id])
+        else:
+            names.append(m.id.split("_")[0])
+    cmap = matplotlib.cm.get_cmap(cmap)
+    cmap2 = matplotlib.cm.get_cmap("jet_r")
+    G.add_nodes_from(names)
+
+    edge_color = []
+    colors = [cmap(i / len(names)) for i in range(len(names))]
+    for i in range(len(model.models)):
+        for j in range(len(model.models)):
+            if i != j and np.abs(weights[i, j]) > interaction_cutoff:
+                n1 = names[i]
+                n2 = names[j]
+                G.add_edge(n1, n2, weight=weights[i, j])
+                edge_color.append(cmap2((weights[i, j] + 1) / 2))
+
+    fig = plt.figure(figsize=(len(model.models) * 2, 2 * len(model.models) - 2))
+    pos = circular_layout(G)
+    nx.draw(
+        G,
+        with_labels=True,
+        pos=pos,
+        node_size=1000,
+        font_size=8,
+        node_color=colors,
+        edge_color=edge_color,
+        width=3,
+        connectionstyle="arc3, rad = 0.1",
+    )
+    cbar = fig.colorbar(
+        matplotlib.cm.ScalarMappable(matplotlib.colors.Normalize(-1, 1), cmap=cmap2)
+    )
+    cbar.set_label("Interaction (Red=harmful, Blue=Benefitial)", rotation=270)
+    cbar.set_ticks([-1, 0, 1])
+
+    return fig
 
 
 def plot_posterior_samples_for_observations(model, observations):
@@ -48,11 +136,11 @@ def plot_posterior_samples_for_observations(model, observations):
 def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis"):
     models = model.models
     model_name = []
-    for model in model.models:
-        if model.id in names:
-            model_name.append(names[model.id])
+    for m in model.models:
+        if m.id in names:
+            model_name.append(names[m.id])
         else:
-            model_name.append(model.id.split("_")[0])
+            model_name.append(m.id.split("_")[0])
 
     names = np.array(model_name)
     df_in = df["Shuttle Reaction"]
@@ -119,11 +207,11 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
 
     """
     model_name = []
-    for model in model.models:
-        if model.id in names:
-            model_name.append(names[model.id])
+    for m in model.models:
+        if m.id in names:
+            model_name.append(names[m.id])
         else:
-            model_name.append(model.id.split("_")[0])
+            model_name.append(m.id.split("_")[0])
 
     G, df = compute_community_interaction_graph(model, df)
     # Colors

@@ -7,4 +7,5 @@ from .community_analysis import (
     compute_dominant_weights,
     compute_community_interaction_graph,
     community_weight_posterior,
+    compute_species_interaction_weights,
 )
