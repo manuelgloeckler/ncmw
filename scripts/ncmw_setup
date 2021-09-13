@@ -50,10 +50,10 @@ def run_setup(cfg: DictConfig) -> None:
     PATH = PATH_res + SEPERATOR + "setup"
 
     try:
-        if not os.path.exists(PATH):
-            os.mkdir(PATH)
         if not os.path.exists(PATH_res):
             os.mkdir(PATH_res)
+        if not os.path.exists(PATH):
+            os.mkdir(PATH)
         if not os.path.exists(PATH + SEPERATOR + "snm3_models"):
             os.mkdir(PATH + SEPERATOR + "snm3_models")
         if not os.path.exists(PATH + SEPERATOR + "quality_report"):

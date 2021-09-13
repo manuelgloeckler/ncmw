@@ -65,6 +65,8 @@ def run_analysis(cfg: DictConfig) -> None:
     log.info(f"Working directory: {PATH}")
 
     try:
+        if not os.path.exists(PATH_res):
+            os.mkdir(PATH_res)
         if not os.path.exists(PATH):
             os.mkdir(PATH)
         if not os.path.exists(PATH + SEPERATOR + "medium"):
