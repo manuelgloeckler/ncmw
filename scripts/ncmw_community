@@ -23,6 +23,8 @@ from ncmw.visualization import (
     plot_pairwise_growth_relation_per_weight,
     plot_community_interaction,
     plot_posterior_samples_for_observations,
+    plot_community_uptake_graph,
+    plot_species_interaction,
 )
 
 from ncmw.utils.utils_io import (
@@ -174,6 +176,74 @@ def run_community(cfg: DictConfig) -> None:
         SNM3s.append(m.medium)
         log.info(f"Saving COMPMs: {path}")
 
+    log.info(f"Compute community visualization")
+    for m in community_models:
+        if isinstance(m, ShuttleCommunityModel):
+            m.weights = np.ones(len(m.weights))
+            medium_coopm = m.computeCOOPM(m.slim_optimize())
+            m.medium = medium_coopm
+            df = m.summary()
+            fig1 = plot_community_interaction(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_community_interaction.pdf"
+            )
+            fig1 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_uptake_flux.pdf"
+            )
+
+            fig1 = plot_species_interaction(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_species_interaction.pdf"
+            )
+
+            medium_compm = COMPMS[0]
+            m.medium = medium_compm
+            df = m.summary()
+            fig2 = plot_community_interaction(m, df, names=cfg.visualization.names)
+            fig2.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_compm_community_interaction.pdf"
+            )
+            fig2 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
+            fig2.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_compm_uptake_flux.pdf"
+            )
+
+            fig2 = plot_species_interaction(m, df, names=cfg.visualization.names)
+            fig2.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_compm_species_interaction.pdf"
+            )
+
     # COOPM
     log.info(f"Compute community COOPMs enforced survival")
     COOPMS_enforced = dict()
@@ -184,7 +254,10 @@ def run_community(cfg: DictConfig) -> None:
             MBR = m.slim_optimize()
             if MBR is None:
                 MBR = 0
-            coopm = m.computeCOOPM(MBR)
+            try:
+                coopm = m.computeCOOPM(MBR)
+            except:
+                coopm = dict()
             if tuple(w) in COOPMS_enforced:
                 COOPMS_enforced[tuple(w)].append(coopm)
             else:
@@ -212,7 +285,10 @@ def run_community(cfg: DictConfig) -> None:
             MBR = m.slim_optimize()
             if MBR is None:
                 MBR = 0
-            coopm = m.computeCOOPM(MBR, enforce_survival=False)
+            try:
+                coopm = m.computeCOOPM(MBR, enforce_survival=False)
+            except:
+                coopm = dict()
             if tuple(w) in COOPMS_not_enforced:
                 COOPMS_not_enforced[tuple(w)].append(coopm)
             else:
@@ -276,34 +352,6 @@ def run_community(cfg: DictConfig) -> None:
             + "_growth_summary.csv"
         )
         df.to_csv(path)
-
-    for m in community_models:
-        if isinstance(m, ShuttleCommunityModel):
-            m.weights = np.ones(len(m.weights))
-            medium_coopm = COOPMS_enforced[tuple(m.weights)]
-            m.medium = medium_coopm
-            df = m.summary()
-            fig1 = plot_community_interaction(m, df)
-            fig1.savefig(
-                PATH
-                + SEPERATOR
-                + "experiments"
-                + SEPERATOR
-                + type(m).__name__
-                + "_coopm_community_interaction.pdf"
-            )
-            medium_compm = COMPMS[0]
-            m.medium = medium_compm
-            df = m.summary()
-            fig2 = plot_community_interaction(m, df)
-            fig2.savefig(
-                PATH
-                + SEPERATOR
-                + "experiments"
-                + SEPERATOR
-                + type(m).__name__
-                + "_compm_community_interaction.pdf"
-            )
 
     log.info("Compute weight posteriors")
     for m in community_models:

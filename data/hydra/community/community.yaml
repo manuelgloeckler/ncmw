@@ -6,3 +6,4 @@ weights:
   fair: True
   dominant_weights: True
   custom: []
+compute_summary: False

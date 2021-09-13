@@ -443,7 +443,7 @@ class ShuttleCommunityModel(CommunityModel):
         )
         self.comm_model.objective = maximize(self.objective)
 
-    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True, n_tries=3):
+    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True, n_tries=2):
         minMBR = fraction * MBR
         # thetas
         thetas = []

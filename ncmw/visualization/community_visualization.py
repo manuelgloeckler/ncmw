@@ -121,7 +121,7 @@ def plot_posterior_samples_for_observations(model, observations):
     for x_o in observations:
         x_o = torch.tensor(x_o).float()
         posterior.set_default_x(x_o)
-        posterior.train(loss="forward_kl", warm_up_rounds=100)
+        posterior.train(loss="elbo", warm_up_rounds=100)
         samples = posterior.sample((10000,))
         fig, axes = sbi.analysis.pairplot(
             samples, labels=["Weights: " + m.id.split("_")[0] for m in model.models]
