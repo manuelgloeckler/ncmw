@@ -282,11 +282,50 @@ def run_community(cfg: DictConfig) -> None:
     log.info("Generating community models")
     community_models = []
     if cfg.community.bag_of_reactions_model:
-        log.info("Building BagOfReactions Community model")
-        community_models += [BagOfReactionsModel(models)]
+
+        path = (
+            PATH
+            + SEPERATOR
+            + "community_models"
+            + SEPERATOR
+            + "BagOfReactionsModel.pkl"
+        )
+        if os.path.exists(path):
+            log.info("Loading BagOfReactions Community model")
+            m = BagOfReactionsModel.load(path)
+            ids = [mod.id for mod in m.models]
+            correct = True
+            for model in models:
+                correct = correct and (model.id in ids)
+            if correct:
+                community_models += [m]
+            else:
+                community_models += [BagOfReactionsModel(models)]
+        else:
+            log.info("Building BagOfReactions Community model")
+            community_models += [BagOfReactionsModel(models)]
     if cfg.community.shuttle_reactions_model:
-        log.info("Building shuttle reactions model")
-        community_models += [ShuttleCommunityModel(models)]
+        path = (
+            PATH
+            + SEPERATOR
+            + "community_models"
+            + SEPERATOR
+            + "ShuttleCommunityModel.pkl"
+        )
+        if os.path.exists(path):
+            log.info("Loading shuttle reactions model")
+            m = ShuttleCommunityModel.load(path)
+            ids = [mod.id for mod in m.models]
+            correct = True
+            for model in models:
+                correct = correct and (model.id in ids)
+            if correct:
+                community_models += [m]
+            else:
+                community_models += [ShuttleCommunityModel(models)]
+        else:
+            log.info("Building shuttle reactions model")
+            community_models += [ShuttleCommunityModel(models)]
 
     log.info(f"Saving models: {cfg.community.save_models}")
     if cfg.community.save_models:
@@ -299,16 +338,17 @@ def run_community(cfg: DictConfig) -> None:
     medium_prefix = PATH_res + SEPERATOR + "analysis" + SEPERATOR
     mediums = get_mediums("medium", medium_prefix)
 
-    log.info("Compute pairwise growth relationships for different weights.")
-    for m in community_models:
-        fig = plot_pairwise_growth_relation_per_weight(m, cfg.visualization.names)
-        fig.savefig(
-            PATH
-            + SEPERATOR
-            + "experiments"
-            + SEPERATOR
-            + f"pairwise_growth_relationship_{type(m).__name__}.pdf"
-        )
+    if cfg.community.pairwise_growth:
+        log.info("Compute pairwise growth relationships for different weights.")
+        for m in community_models:
+            fig = plot_pairwise_growth_relation_per_weight(m, cfg.visualization.names)
+            fig.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + f"pairwise_growth_relationship_{type(m).__name__}.pdf"
+            )
 
     # Weights to consider
     weights = []

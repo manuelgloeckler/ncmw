@@ -106,7 +106,7 @@ class CommunityModel(ABC):
 
     @staticmethod
     def load(path):
-        with open(path + ".pkl", "wb") as f:
+        with open(path, "rb") as f:
             return pickle.load(f)
 
 
@@ -574,8 +574,20 @@ class ShuttleCommunityModel(CommunityModel):
 
     def save(self, path):
         """This saves the model using pickle. For other format overwrite this function"""
-        self.comm_model.write(path + ".lp")
+        self.comm_model.write(path + "_help.lp")
+        self.path = path + "_help.lp"
+        self.comm_model = None
+        for key in self.shuttle_reactions:
+            self.shuttle_reactions[key] = None
+        for i in range(len(self.xs)):
+            for j in range(len(self.xs[i])):
+                self.xs[i][j] = None
+        self.objective = None
+        super().save(path)
 
-    def load(self, path):
-        self.path = path + ".lp"
-        self._reset_model()
+    @staticmethod
+    def load(path):
+        with open(path, "rb") as f:
+            model = pickle.load(f)
+            model._reset_model()
+            return model

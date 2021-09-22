@@ -7,3 +7,4 @@ weights:
   dominant_weights: True
   custom: []
 compute_summary: False
+pairwise_growth: True
