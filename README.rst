@@ -8,7 +8,7 @@ Installation
 ============
 
 Please clone the repository using ``git clone URL`` . The package and all the dependencies can be installed via pip. Just enter:
-    ``pip install ncmw``
+    ``pip install -e ncmw``
 
 when you are in the same directory as the pacakage. This will install the python package  ``ncmw`` but also console scripts ``ncmw_setup`` , ``ncmw_analysis``, ``ncmw_community`` and ``ncmw``, which calls the latter three scripts in sequential order.
 
