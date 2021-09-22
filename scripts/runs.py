@@ -21,6 +21,7 @@ sys.path.append(file_dir)
 
 
 from ncmw.utils.utils_io import (
+    DATA_PATH,
     get_models,
     get_result_path,
     SEPERATOR,
@@ -83,6 +84,7 @@ import cobra
 
 def run_setup(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
 
@@ -130,8 +132,8 @@ def run_setup(cfg: DictConfig) -> None:
             log.info(f"Alread done {m.id}")
             models.remove(m)
 
-    log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
     if cfg.setup.fastcc:
+        log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
         consistent_models = []
         reports = []
         for model in models:
@@ -152,19 +154,22 @@ def run_setup(cfg: DictConfig) -> None:
 
         models = consistent_models
 
-    log.info(f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium}")
     files = []
     gapfill_dict = {"Id": [], "Additions": [], "Growth": []}
     for i, model_i in enumerate(models):
         if cfg.setup.set_bounds_and_medium:
+            log.info(
+                f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium} for {model_i.id}"
+            )
             model = set_default_configs_and_snm3_medium(
                 deepcopy(model_i), cfg.setup.configs, cfg.setup.medium
             )
         else:
+            log.info(f"Keep model {model_i.id} as they are")
             model = model_i
 
         growth = model.slim_optimize()
-        log.info(f"Growth on SNM3: {growth}")
+        log.info(f"Growth on medium: {growth}")
         if growth < cfg.eps:
             log.warning(
                 f"The model {model.id} has no growth on selected Medium, we will try a automated gapfilling strategy"
@@ -207,7 +212,7 @@ def run_setup(cfg: DictConfig) -> None:
 
     if cfg.setup.memote_evaluation:
         # Start two memote jobs in parallel
-        log.info("Computing memote reports")
+        log.info("Computing memote reports, this can take several minutes...")
         i = 0
         for file, model in zip(files, models):
             out_file = (
@@ -233,6 +238,7 @@ def run_setup(cfg: DictConfig) -> None:
 
 def run_community(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
 
@@ -585,9 +591,14 @@ def run_community(cfg: DictConfig) -> None:
                 + f"_compm_weight_posterior_{i}.pdf"
             )
 
+    end_time = time.time()
+    runtime = end_time - start_time
+    log.info(f"Finished Workflow in {runtime} seconds")
+
 
 def run_analysis(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
 
@@ -621,27 +632,60 @@ def run_analysis(cfg: DictConfig) -> None:
     except:
         pass
 
-    assert os.path.exists(
-        PATH_res + SEPERATOR + "setup" + SEPERATOR + "snm3_models"
-    ), "We require the setup to run first."
+    if cfg.analysis.require_setup:
+        model_PATH = PATH_res + SEPERATOR + "setup" + SEPERATOR + "snm3_models"
+        assert os.path.exists(model_PATH), "We require the setup to run first."
+        log.info("Loading models")
+        models = get_models(
+            "snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR
+        )
+    else:
+        log.info("Loading original models, WITHOUT setup")
+        models = get_models(cfg.setup.models)
 
-    log.info("Loading models")
-    models = get_models(
-        "snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR
-    )
+    # Check which results are already there
+    models = np.array(models)
+    models_mask = np.zeros(len(models), dtype=np.int32)
+    for filepath in glob.iglob(PATH + SEPERATOR + "flux_analysis" + SEPERATOR + "*"):
+        models_already_done = []
+        for i in range(len(models)):
+            if models[i].id in filepath:
+                models_already_done.append(i)
+        for m in list(set(models_already_done)):
+            models_mask[m] = 1
 
     log.info("Generating fva results")
-    dfs = compute_fvas(models, cfg.analysis.fva_fraction)
-    for model, df in zip(models, dfs):
-        sol = model.optimize()
-        df["flux"] = sol.fluxes
-        df.to_csv(
-            PATH + SEPERATOR + "flux_analysis" + SEPERATOR + "fva_" + model.id + ".csv"
-        )
-        log.info(df)
+    dfs = compute_fvas(models[models_mask], cfg.analysis.fva_fraction)
+    for i, (model, df) in enumerate(zip(models, dfs)):
+        if models_mask[i] == 0:
+            sol = model.optimize()
+            df["flux"] = sol.fluxes
+            df.to_csv(
+                PATH
+                + SEPERATOR
+                + "flux_analysis"
+                + SEPERATOR
+                + "fva_"
+                + model.id
+                + ".csv"
+            )
+            log.info(df)
+        elif models_mask[i] == 1:
+            df = pd.read_csv(
+                PATH
+                + SEPERATOR
+                + "flux_analysis"
+                + SEPERATOR
+                + "fva_"
+                + model.id
+                + ".csv",
+                index_col=0,
+            )
+            dfs.insert(i, df)
 
+    dfs = np.array(dfs)
     log.info("Computing COMPM media for modles")
-    mediums = compute_COMPM(models, dfs)
+    mediums = compute_COMPM(models[models_mask], dfs[models_mask])
     for model, medium in zip(models, mediums):
         with open(
             PATH + SEPERATOR + "medium" + SEPERATOR + "COMPM_" + model.id + ".json", "w"
@@ -677,34 +721,38 @@ def run_analysis(cfg: DictConfig) -> None:
     sekretions = []
     for i, model in enumerate(models):
         # Transport reactions
-        transport_check = table_ex_transport(model)
-        transport_check.to_csv(
-            PATH
-            + SEPERATOR
-            + "sekretion_uptake"
-            + SEPERATOR
-            + model.id
-            + "_transport_summary.csv"
-        )
+        if cfg.analysis.check_transport:
+            transport_check = table_ex_transport(model)
+            transport_check.to_csv(
+                PATH
+                + SEPERATOR
+                + "sekretion_uptake"
+                + SEPERATOR
+                + model.id
+                + "_transport_summary.csv"
+            )
 
         # Sekretion uptakes
-        PATH + SEPERATOR + "sekretion_uptake"
         if cfg.analysis.sekretion_uptake == "fva":
             uptake, sekretion = sekretion_uptake_fva(dfs[i])
         else:
             uptake, sekretion = sekretion_uptake_fba(model)
+        log.info(
+            f"Model: {model.id} has {len(uptake)} uptakes and {len(sekretions)} sekretions."
+        )
         uptakes.append(uptake)
         sekretions.append(sekretion)
 
     for i in range(len(models)):
         for j in range(i + 1, len(models)):
+            log.info(f"Comparing flux interchange between {models[i]} and {models[j]}")
             uptake_sekretion_table = compute_uptake_sekretion_table(
                 models[i].id,
                 models[j].id,
-                uptakes[i],
-                uptakes[j],
-                sekretions[i],
-                sekretions[j],
+                deepcopy(uptakes[i]),
+                deepcopy(uptakes[j]),
+                deepcopy(sekretions[i]),
+                deepcopy(sekretions[j]),
             )
             uptake_sekretion_table.to_csv(
                 PATH
@@ -714,62 +762,69 @@ def run_analysis(cfg: DictConfig) -> None:
                 + f"{models[i].id}_{models[j].id}_uptake_sekretion_summary.csv"
             )
 
-    fig = uptake_sekretion_venn_diagrams(
-        models,
-        uptakes,
-        sekretions,
-        names=cfg.visualization.names,
-        cmap=cfg.visualization.cmap,
-    )
-    fig.savefig(
-        PATH
-        + SEPERATOR
-        + "sekretion_uptake"
-        + SEPERATOR
-        + "uptake_sekretion_overlap_plot.pdf"
-    )
+    if models_mask.sum() < len(models):
+        log.info(f"Plotting venn diagrams for uptake sekretion overlaps")
 
-    log.info("Computing Jacard Similarities")
-    df_met, df_rec, df_ro = jaccard_similarity_matrices(models)
-    df_met.to_csv(
-        PATH
-        + SEPERATOR
-        + "similarity"
-        + SEPERATOR
-        + "jacard_similarities_metabolies.csv"
-    )
-    df_rec.to_csv(
-        PATH
-        + SEPERATOR
-        + "similarity"
-        + SEPERATOR
-        + "jacard_similarities_reactions.csv"
-    )
-    df_ro.to_csv(
-        PATH
-        + SEPERATOR
-        + "similarity"
-        + SEPERATOR
-        + "jacard_similarities_exchanges.csv"
-    )
-    fig = jacard_index_similarity_heatmap(
-        df_met, df_rec, df_ro, names=cfg.visualization.names
-    )
-    fig.savefig(PATH + SEPERATOR + "similarity" + SEPERATOR + "similarity_summary.pdf")
+        fig = uptake_sekretion_venn_diagrams(
+            models,
+            uptakes,
+            sekretions,
+            names=cfg.visualization.names,
+            cmap=cfg.visualization.cmap,
+        )
+        fig.savefig(
+            PATH
+            + SEPERATOR
+            + "sekretion_uptake"
+            + SEPERATOR
+            + "uptake_sekretion_overlap_plot.pdf"
+        )
 
-    log.info("Computing scaled medium growth plot")
-    kwargs = cfg.visualization.scaled_medium_growth_plot
-    fig = plot_scaled_medium_growth(
-        models,
-        kwargs.min_scale,
-        kwargs.max_scale,
-        kwargs.evaluations,
-        names=cfg.visualization.names,
-        cmap=cfg.visualization.cmap,
-    )
-    fig.savefig(
-        PATH + SEPERATOR + "growth" + SEPERATOR + "scaled_medium_growth_plot.pdf"
-    )
+    if models_mask.sum() < len(models):
+        log.info("Computing Jacard Similarities")
+        df_met, df_rec, df_ro = jaccard_similarity_matrices(models)
+        df_met.to_csv(
+            PATH
+            + SEPERATOR
+            + "similarity"
+            + SEPERATOR
+            + "jacard_similarities_metabolies.csv"
+        )
+        df_rec.to_csv(
+            PATH
+            + SEPERATOR
+            + "similarity"
+            + SEPERATOR
+            + "jacard_similarities_reactions.csv"
+        )
+        df_ro.to_csv(
+            PATH
+            + SEPERATOR
+            + "similarity"
+            + SEPERATOR
+            + "jacard_similarities_exchanges.csv"
+        )
+        fig = jacard_index_similarity_heatmap(
+            df_met, df_rec, df_ro, names=cfg.visualization.names
+        )
+        fig.savefig(
+            PATH + SEPERATOR + "similarity" + SEPERATOR + "similarity_summary.pdf"
+        )
+
+    if models_mask.sum() < len(models):
+        log.info("Computing scaled medium growth plot")
+        kwargs = cfg.visualization.scaled_medium_growth_plot
+        fig = plot_scaled_medium_growth(
+            models,
+            kwargs.min_scale,
+            kwargs.max_scale,
+            kwargs.evaluations,
+            names=cfg.visualization.names,
+            cmap=cfg.visualization.cmap,
+        )
+        fig.savefig(
+            PATH + SEPERATOR + "growth" + SEPERATOR + "scaled_medium_growth_plot.pdf"
+        )
 
     end_time = time.time()
     log.info(f"Job finished in {end_time-start_time} seconds")

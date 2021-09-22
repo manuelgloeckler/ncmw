@@ -1,2 +1,5 @@
 fva_fraction: 1.0
 sekretion_uptake: "fva"
+require_setup: True
+check_transport: True
+check_uptake_sekretion: True

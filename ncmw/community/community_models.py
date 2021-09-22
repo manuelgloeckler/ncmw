@@ -104,9 +104,10 @@ class CommunityModel(ABC):
         with open(path + ".pkl", "wb+") as f:
             pickle.dump(self, f)
 
-    def load(self, path):
+    @staticmethod
+    def load(path):
         with open(path + ".pkl", "wb") as f:
-            self = pickle.load(f)
+            return pickle.load(f)
 
 
 class BagOfReactionsModel(CommunityModel):

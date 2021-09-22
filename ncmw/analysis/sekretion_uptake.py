@@ -123,9 +123,9 @@ def compute_uptake_sekretion_table(
     model_name1, model_name2, uptake1, uptake2, sekretion1, sekretion2
 ):
     """Compute the uptake sekretion overlap
-    
-    
-    
+
+
+
     Args:
         model_name1: Name of the model 1
         model_name2: Name of the model 2
@@ -133,10 +133,10 @@ def compute_uptake_sekretion_table(
         uptake2: Uptake reactions of model 2
         sekretion1: Sekretion reactions of model 1
         sekretion2: Sekretion reactions of model 2
-    
+
     Returns:
         DataFrame: Tabel of uptake/sekretions as well as Sekretion -> Uptake relationships.
-    
+
     """
     # Common up/sekretion from SA to DP
     sek2_up1 = []
@@ -164,16 +164,16 @@ def compute_uptake_sekretion_table(
 
 def compute_all_uptake_sekretion_tables(models: list, fvas=None):
     """Computes all uptake sekretion tables for all models.
-    
-    
-    
+
+
+
     Args:
         models: Cobra models
         fvas: FVA results
-    
+
     Returns:
         list : List of tables.
-    
+
     """
     N = len(models)
     if fvas is not None:
