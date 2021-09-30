@@ -242,6 +242,20 @@ class BagOfReactionsModel(CommunityModel):
         sol = model.optimize()
         return model.summary()
 
+    def save(self, path):
+        """This saves the model using pickle. For other format overwrite this
+        function"""
+        self.biomass_reactions = None
+        self.objective = None
+
+        with open(path + ".pkl", "wb+") as f:
+            pickle.dump(self, f)
+
+    @staticmethod
+    def load(path):
+        with open(path, "rb") as f:
+            return pickle.load(f)
+
 
 class ShuttleCommunityModel(CommunityModel):
     def __init__(self, models, shared_exchanges=None):
