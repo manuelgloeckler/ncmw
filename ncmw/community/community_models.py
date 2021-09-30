@@ -607,6 +607,7 @@ class ShuttleCommunityModel(CommunityModel):
                 self.xs[i][j] = None
         self.objective = None
         super().save(path)
+        self._reset_model()
 
     @staticmethod
     def load(path):
