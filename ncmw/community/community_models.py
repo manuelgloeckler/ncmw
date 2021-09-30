@@ -251,6 +251,11 @@ class BagOfReactionsModel(CommunityModel):
         with open(path + ".pkl", "wb+") as f:
             pickle.dump(self, f)
 
+        self.biomass_reactions = [get_biomass_reaction(model) for model in self.models]
+        self.objective = sum([f.flux_expression for f in self.biomass_reactions])
+        self.community_model.objective = self.objective
+
+
     @staticmethod
     def load(path):
         with open(path, "rb") as f:
