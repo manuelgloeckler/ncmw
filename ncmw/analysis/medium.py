@@ -8,7 +8,7 @@ import numpy as np
 
 
 def compute_fvas(models: Iterable, fraction: float):
-    """ Compute the FVA result for all models """
+    """Compute the FVA result for all models"""
     dfs = []
     for model in models:
         fva = flux_variability_analysis(model, fraction_of_optimum=fraction)
@@ -25,7 +25,8 @@ def compute_COMPM(models: list, fvas: list = None):
     """
     if fvas is None:
         fvas = compute_fvas(models, 1.0)
-    df = pd.concat(fvas)
+    print(fvas)
+    df = pd.concat(list(fvas))
     df = df.groupby(df.index).min()
     mediums = []
     for model in models:

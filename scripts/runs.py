@@ -429,7 +429,8 @@ def run_community(cfg: DictConfig) -> None:
                 + "experiments"
                 + SEPERATOR
                 + type(m).__name__
-                + "_coopm_uptake_flux.pdf"
+                + "_coopm_uptake_flux.png",
+                dpi=1000,
             )
 
             fig1 = plot_species_interaction(m, df, names=cfg.visualization.names)
@@ -685,47 +686,46 @@ def run_analysis(cfg: DictConfig) -> None:
 
     # Check which results are already there
     models = np.array(models)
-    models_mask = np.zeros(len(models), dtype=np.int32)
-    for filepath in glob.iglob(PATH + SEPERATOR + "flux_analysis" + SEPERATOR + "*"):
-        models_already_done = []
-        for i in range(len(models)):
-            if models[i].id in filepath:
-                models_already_done.append(i)
-        for m in list(set(models_already_done)):
-            models_mask[m] = 1
+    # models_mask = np.zeros(len(models), dtype=np.int32)
+    # for filepath in glob.iglob(PATH + SEPERATOR + "flux_analysis" + SEPERATOR + "*"):
+    #     models_already_done = []
+    #     for i in range(len(models)):
+    #         if models[i].id in filepath:
+    #             models_already_done.append(i)
+    #     for m in list(set(models_already_done)):
+    #         models_mask[m] = 1
 
     log.info("Generating fva results")
-    dfs = compute_fvas(models[models_mask], cfg.analysis.fva_fraction)
+    # dfs = compute_fvas(models[models_mask], cfg.analysis.fva_fraction)
+    dfs = compute_fvas(models, cfg.analysis.fva_fraction)
     for i, (model, df) in enumerate(zip(models, dfs)):
-        if models_mask[i] == 0:
-            sol = model.optimize()
-            df["flux"] = sol.fluxes
-            df.to_csv(
-                PATH
-                + SEPERATOR
-                + "flux_analysis"
-                + SEPERATOR
-                + "fva_"
-                + model.id
-                + ".csv"
-            )
-            log.info(df)
-        elif models_mask[i] == 1:
-            df = pd.read_csv(
-                PATH
-                + SEPERATOR
-                + "flux_analysis"
-                + SEPERATOR
-                + "fva_"
-                + model.id
-                + ".csv",
-                index_col=0,
-            )
-            dfs.insert(i, df)
+        # if models_mask[i] == 0:
+        sol = model.optimize()
+        df["flux"] = sol.fluxes
+        df.to_csv(
+            PATH + SEPERATOR + "flux_analysis" + SEPERATOR + "fva_" + model.id + ".csv"
+        )
+        log.info(df)
+    #     elif models_mask[i] == 1:
+    #         df = pd.read_csv(
+    #             PATH
+    #             + SEPERATOR
+    #             + "flux_analysis"
+    #             + SEPERATOR
+    #             + "fva_"
+    #             + model.id
+    #             + ".csv",
+    #             index_col=0,
+    #         )
+    #         log.info(df)
+    #         dfs.insert(i, df)
 
-    dfs = np.array(dfs)
     log.info("Computing COMPM media for modles")
-    mediums = compute_COMPM(models[models_mask], dfs[models_mask])
+    # mediums = compute_COMPM(
+    #     [models[i] for i in range(len(models)) if models_mask[i] == 1],
+    #     [dfs[i] for i in range(len(dfs)) if models_mask[i] == 1],
+    # )
+    mediums = compute_COMPM(models, dfs)
     for model, medium in zip(models, mediums):
         with open(
             PATH + SEPERATOR + "medium" + SEPERATOR + "COMPM_" + model.id + ".json", "w"
@@ -802,7 +802,8 @@ def run_analysis(cfg: DictConfig) -> None:
                 + f"{models[i].id}_{models[j].id}_uptake_sekretion_summary.csv"
             )
 
-    if models_mask.sum() < len(models):
+    # if models_mask.sum() < len(models):
+    if True:
         log.info(f"Plotting venn diagrams for uptake sekretion overlaps")
 
         fig = uptake_sekretion_venn_diagrams(
@@ -820,7 +821,8 @@ def run_analysis(cfg: DictConfig) -> None:
             + "uptake_sekretion_overlap_plot.pdf"
         )
 
-    if models_mask.sum() < len(models):
+    # if models_mask.sum() < len(models):
+    if True:
         log.info("Computing Jacard Similarities")
         df_met, df_rec, df_ro = jaccard_similarity_matrices(models)
         df_met.to_csv(
@@ -851,7 +853,8 @@ def run_analysis(cfg: DictConfig) -> None:
             PATH + SEPERATOR + "similarity" + SEPERATOR + "similarity_summary.pdf"
         )
 
-    if models_mask.sum() < len(models):
+    # if models_mask.sum() < len(models):
+    if True:
         log.info("Computing scaled medium growth plot")
         kwargs = cfg.visualization.scaled_medium_growth_plot
         fig = plot_scaled_medium_growth(

@@ -13,6 +13,7 @@ from networkx.drawing.layout import circular_layout, bipartite_layout
 import networkx as nx
 import torch
 from copy import deepcopy
+from sbi.analysis import pairplot
 
 
 def plot_reference_interaction(interaction_cutoff=0, cmap="viridis"):
@@ -122,8 +123,8 @@ def plot_posterior_samples_for_observations(model, observations):
         x_o = torch.tensor(x_o).float()
         posterior.set_default_x(x_o)
         posterior.train(loss="elbo", warm_up_rounds=100)
-        samples = posterior.sample((10000,))
-        fig, axes = sbi.analysis.pairplot(
+        samples = posterior.sample((20000,))
+        fig, axes = pairplot(
             samples, labels=["Weights: " + m.id.split("_")[0] for m in model.models]
         )
         fig.suptitle(
@@ -174,8 +175,10 @@ def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis")
             widths.append(flux / 4)
             edge_color.append(cmap(np.argmax(names == n) / len(names)))
 
+    M = len(shared_output.keys())
+    N = len(names)
     pos = bipartite_layout(G, names)
-    fig = plt.figure(figsize=(10, 30))
+    fig = plt.figure(figsize=(N + 5, M))
     plt.title("Shared Uptake", fontsize=30)
     nx.draw(
         G,
@@ -185,7 +188,7 @@ def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis")
         font_size=8,
         width=widths,
         node_color=colors,
-        edge_color=edge_color,
+        edge_color=edge_color,  # Cannot be save by savefig???
     )
     fig.tight_layout()
 
@@ -251,6 +254,7 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
         font_size=8,
         node_color=colors,
         width=widths * 20,
+        connectionstyle="arc3, rad = 0.1",
     )
     pathes = []
     for i in range(len(model.models)):
@@ -260,7 +264,7 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
                 label=model_name[i],
             )
         )
-    fig.suptitle("Community Interaction\n", fontsize=20)
+    fig.suptitle("Community Interaction\n", fontsize=20, y=1.05)
     plt.legend(handles=pathes)
     return fig
 
@@ -296,7 +300,9 @@ def plot_pairwise_growth_relation_per_weight(model, names: dict = dict()):
         else:
             model_name.append(model.id.split("_")[0])
 
-    fig, axes = plt.subplots(N - 1, N - 1, figsize=(15, 15), sharey=True)
+    fig, axes = plt.subplots(N - 1, N - 1, figsize=(5 + N, 5 + N), sharey=True)
+    if N - 1 == 1:
+        axes = np.array([[axes]])
     for i in range(len(axes)):
         axes[i, i].set_xlabel(r"$\alpha$ weight")
         axes[i, i].yaxis.set_tick_params(labelleft=True)

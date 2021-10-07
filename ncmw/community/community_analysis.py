@@ -9,21 +9,21 @@ from sbi.inference import SNLE
 
 def compute_species_interaction_weights(model, df, alpha=1):
     """Compute interaction between two species.
-    
-    
-    
+
+
+
     Args:
         model: Communiy model
         df: Summary table
         alpha: Parameter for postive interaction, larger implies that postive
         interaction is wheighted more.
-    
+
     Returns:
         [type]: [description]
-    
+
     """
     N = len(model.models)
-    weights = np.zeros((N,N))
+    weights = np.zeros((N, N))
     for i in range(N):
         for j in range(N):
             w_i = model.weights[i]
@@ -38,32 +38,34 @@ def compute_species_interaction_weights(model, df, alpha=1):
                 summary_m = df[df.columns[m]]
                 produced_m = summary_m > 0
                 consumed_m = summary_m < 0
-                positive_normalizer += model.weights[m]*produced_m[consumed_j].sum()
-                negative_normalizer += model.weights[m]*consumed_m[consumed_j].sum()
+                positive_normalizer += model.weights[m] * produced_m[consumed_j].sum()
+                negative_normalizer += model.weights[m] * consumed_m[consumed_j].sum()
             if positive_normalizer != 0:
-                weights[i,j] = w_i*produced_i[consumed_j].sum()/positive_normalizer 
+                weights[i, j] = w_i * produced_i[consumed_j].sum() / positive_normalizer
             else:
-                weights[i,j] = 0
-            weights[i,j] *= alpha
+                weights[i, j] = 0
+            weights[i, j] *= alpha
             if negative_normalizer != 0:
-                weights[i,j] -= w_i*consumed_i[consumed_j].sum()/negative_normalizer
+                weights[i, j] -= (
+                    w_i * consumed_i[consumed_j].sum() / negative_normalizer
+                )
             else:
-                weights[i,j]
+                weights[i, j]
     return weights
 
-    
+
 def compute_community_interaction_graph(model, df):
     """Compute a graph that displays the community interaction
-    
-    
-    
+
+
+
     Args:
         model: Cobra model
         df: A summary file i.e. that returned by model.summary()
     Returns:
         Graph: Interaction graph
         df: Relevant summary
-    
+
     """
     df_help = df[df.columns[:-1]]
     medium_col = np.zeros(len(df_help))
@@ -114,7 +116,6 @@ def community_weight_posterior(model):
     inf = SNLE(prior)
     density_estimator = inf.append_simulations(thetas, xs).train()
     posterior = inf.build_posterior(
-        density_estimator,
         sample_with="vi",
         vi_parameters={"flow": "spline_autoregressive", "bound": 15, "num_bins": 15},
     )
