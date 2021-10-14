@@ -3,12 +3,21 @@ import pandas as pd
 from cobra.medium import minimal_medium
 from cobra.flux_analysis import flux_variability_analysis
 
-from typing import Iterable, Callable
+from typing import Iterable, Callable, List
 import numpy as np
 
 
-def compute_fvas(models: Iterable, fraction: float):
-    """Compute the FVA result for all models"""
+def compute_fvas(models: Iterable, fraction: float) -> List:
+    """Compute the FVA result for all models
+
+    Args:
+        models: List of models
+        fraction: Fraction of maximal biomass rate that must be achived
+
+    Returns:
+        list: List of DataFrames containing minimum and maximum fluxes
+
+    """
     dfs = []
     for model in models:
         fva = flux_variability_analysis(model, fraction_of_optimum=fraction)
@@ -17,7 +26,16 @@ def compute_fvas(models: Iterable, fraction: float):
 
 
 def compute_COMPM(models: list, fvas: list = None):
-    """Computes the COMPM medium, given all the fva results
+    r"""Computes the COMPM medium, given all the fva results. The COMPM is defined as the
+       medium, in which all models can achive their maximum biomass rate (MBR) if they
+       are alone.
+
+       Mathematically it requires the FVA results for each reaction contained in the
+       medium! This contains the minimum flux required by the models to obtain
+       MBR. We denote it by $FVA_{min; r}^{m}$ for any reaction $r$ of model $m$.
+
+       For any reaction $r \in M$ within the medium $M$ we then define the COMPM as
+       $$ COMPM = \{ \min_{m \in Models} FVA_{min;r}^{m} \}_{r \in M}$$
 
     Args:
         fvas (list): [description]

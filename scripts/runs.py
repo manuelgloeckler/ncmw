@@ -462,7 +462,7 @@ def run_community(cfg: DictConfig) -> None:
                 + "experiments"
                 + SEPERATOR
                 + type(m).__name__
-                + "_compm_uptake_flux.pdf"
+                + "_compm_uptake_flux.png"
             )
 
             fig2 = plot_species_interaction(m, df, names=cfg.visualization.names)

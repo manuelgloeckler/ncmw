@@ -79,7 +79,8 @@ class CommunityModel(ABC):
 
     @abstractmethod
     def single_optimize(self, idx):
-        """This method returns the current objective value"""
+        """This method returns the current objective value, if the objective only
+        accounts a single model"""
         pass
 
     @abstractmethod
@@ -255,12 +256,13 @@ class BagOfReactionsModel(CommunityModel):
         self.objective = sum([f.flux_expression for f in self.biomass_reactions])
         self.community_model.objective = self.objective
 
-
     @staticmethod
     def load(path):
         with open(path, "rb") as f:
             model = pickle.load(f)
-        model.biomass_reactions = [get_biomass_reaction(model) for model in model.models]
+        model.biomass_reactions = [
+            get_biomass_reaction(model) for model in model.models
+        ]
         model.objective = sum([f.flux_expression for f in model.biomass_reactions])
         model.community_model.objective = model.objective
         return model
@@ -375,7 +377,7 @@ class ShuttleCommunityModel(CommunityModel):
                         vals[i, j] = np.round(self.shuttle_reactions[keys[i]].x, 5)
 
         df = pd.DataFrame(
-            vals, index=keys, columns=[m.id for m in self.models] + ["Shuttle Reaction"]
+            vals, index=keys, columns=[m.id for m in self.models] + ["Total exchange"]
         )
         # Only return nonzero
         df = df[df.abs().sum(1) > 0]
@@ -615,3 +617,213 @@ class ShuttleCommunityModel(CommunityModel):
             model = pickle.load(f)
             model._reset_model()
             return model
+
+
+class ShuttleCommunityCobraModel(BagOfReactionsModel):
+    def __init__(self, models, shared_exchanges=None):
+        self.models = models
+        # For this reactions we impose shuttle reactions if possible.
+        if shared_exchanges is None:
+            self.shared_exchanges = []
+            for model in models:
+                for ex in model.exchanges:
+                    if ex.id not in self.shared_exchanges:
+                        self.shared_exchanges.append(ex.id)
+
+        self._weights = np.ones(len(self.models))
+        self.biomass_reactions = []
+        self.biomass_id = []
+        for m in self.models:
+            rec = get_biomass_reaction(m)
+            id = rec.id + "__" + m.id
+            self.biomass_id.append(id)
+            self.biomass_reactions.append(self.community_model.reactions.get_by_id(id))
+        self.build_community()
+
+    def _set_weights(self, weights):
+        self._weights = weights
+        objective = []
+        for i, r in enumerate(self.biomass_reactions):
+            objective.append(self._weights[i] * r.flux_expression)
+
+        self.community_model.objective = sum(objective)
+        self.community_model.solver.update()
+
+    def _set_medium(self, medium):
+        self._medium = medium
+        self.community_model.medium = medium
+
+    def optimize(self):
+        df = self.community_model.optimize()
+        total_growth = df.objective_value
+        single_growths = []
+        for r in self.biomass_reactions:
+            single_growths.append(r.flux)
+        return total_growth, single_growths
+
+    def single_optimize(self, idx):
+        weights = np.zeros(len(self.models))
+        weights[idx] = 1.0
+        old_weights = self._weights
+        self._set_weights(weights)
+        growth = self.slim_optimize()
+        self._set_weights(old_weights)
+        return growth
+
+    def summary(self):
+        total_growth, single_growths = self.optimize()
+        exchanges = self.community_model.exchanges
+        non_zero_ids = []
+        non_zero_flux = []
+        for ex in exchanges:
+            if ex.flux != 0:
+                non_zero_ids.append(ex.id)
+                non_zero_flux.append(ex.flux)
+
+        vals = np.zeros(len(self.models))
+        for i in range(len(non_zero_ids)):
+            met = non_zero_ids[i][3:]
+            for j in range(len(self.models)):
+                shuttle_id = "SH_" + met.id + "__" + self.models[j].id
+                shuttle_rec = self.community_model.reactions.get_by_id(shuttle_id)
+                vals[i, j] = shuttle_rec.flux
+
+        df = pd.DataFrame(
+            vals,
+            index=non_zero_ids,
+            columns=[m.id for m in self.models] + ["Total exchange"],
+        )
+
+        print("Objective: ", total_growth)
+        for i in range(len(self.models)):
+            print(
+                self.models[i].id + " : ",
+                single_growths[i],
+                " with weights ",
+                self._weights[i],
+            )
+        return df
+
+    def build_community(self):
+        # Community model we will build
+        community_model = cobra.Model("Community")
+
+        # Collect new metabolite contained in each model
+        new_metabolites = []
+        for model in self.models:
+            for old_metabolite in model.metabolites:
+                new_metabolite = cobra.Metabolite()
+                for key, val in old_metabolite.__dict__.items():
+                    if (
+                        key != "_id"
+                        and key != "_model"
+                        and key != "_reaction"
+                        and key != "compartment"
+                    ):
+                        new_metabolite.__dict__[key] = val
+                new_metabolite.id = old_metabolite.id + "__" + model.id
+                new_metabolite.compartment = (
+                    old_metabolite.compartment + "__" + model.id
+                )
+                new_metabolites.append(new_metabolite)
+        # Add new metabolites to community model
+        community_model.add_metabolites(new_metabolites)
+
+        # Collect new reactions contained in each model
+        new_reactions = []
+        for model in self.models:
+            for old_reaction in model.reactions:
+                # Skip exchange reaction, they are no longer part of the internal models
+                if old_reaction.id[:3] == "EX_":
+                    continue
+                new_reaction = cobra.Reaction()
+                for key, val in old_reaction.__dict__.items():
+                    if (
+                        key != "_id"
+                        and key != "_model"
+                        and key != "_metabolites"
+                        and key != "compartment"
+                    ):
+                        new_reaction.__dict__[key] = val
+                new_reaction.id = old_reaction.id + "__" + model.id
+                for met, stoch in old_reaction.metabolites.items():
+                    new_met_id = met.id + "__" + model.id
+                    new_met = community_model.metabolites.get_by_id(new_met_id)
+                    new_reaction.add_metabolites({new_met: stoch})
+                new_reactions.append(new_reaction)
+        # Add new reactions to community model
+        community_model.add_reactions(new_reactions)
+
+        # Add new exchange reactions
+        external_metabolites = []
+        for model in self.models:
+            # The union of external metabolites
+            for met in model.metabolites:
+                if "_e" == met.id[-2:] and met.id not in external_metabolites:
+                    external_metabolites.append(met.id)
+        new_external_metabolites = []
+        for id in external_metabolites:
+            for model in self.models:
+                if id in [met.id for met in model.metabolites]:
+                    old_metabolite = model.metabolites.get_by_id(id)
+                    break
+            new_metabolite = cobra.Metabolite()
+            for key, val in old_metabolite.__dict__.items():
+                if (
+                    key != "_id"
+                    and key != "_model"
+                    and key != "_reaction"
+                    and key != "compartment"
+                ):
+                    new_metabolite.__dict__[key] = val
+            new_metabolite.id = old_metabolite.id
+            new_metabolite.compartment = "external"
+            new_external_metabolites.append(new_metabolite)
+        community_model.add_metabolites(new_external_metabolites)
+        for met in new_external_metabolites:
+            community_model.add_boundary(met)
+
+        # Add shuttle reactions
+        for model in self.models:
+            for met in new_external_metabolites:
+                if met.id in [met.id for met in model.metabolites]:
+                    met2 = community_model.metabolites.get_by_id(
+                        met.id + "__" + model.id
+                    )
+                else:
+                    continue
+                shuttle_reaction = cobra.Reaction()
+                id = met.id
+                shuttle_reaction.id = f"SH_{id}__{model.id}"
+                shuttle_reaction.name = f"Shuttle reaction for {id}"
+                shuttle_reaction.lower_bound = -100
+                shuttle_reaction.upper_bound = 1000
+                shuttle_reaction.add_metabolites({met: 1, met2: -1})
+                community_model.add_reaction(shuttle_reaction)
+        # Add shuttle constraints!
+        all_shuttles = [ex.id for ex in community_model.reactions if "SH_" == ex.id[:3]]
+        shuttle_constraints = []
+        for met in new_external_metabolites:
+            present_shuttles = []
+            for model in self.models:
+                id = f"SH_{met.id}__{model.id}"
+                if id in all_shuttles:
+                    present_shuttles.append(
+                        community_model.reactions.get_by_id(id).flux_expression
+                    )
+            exchange = community_model.reactions.get_by_id(
+                f"EX_{met.id}"
+            ).flux_expression
+            cons = community_model.problem.Constraint(
+                exchange - sum(present_shuttles),
+                lb=0,
+                ub=1000,
+            )
+            shuttle_constraints.append(cons)
+        community_model.add_cons_vars(shuttle_constraints)
+
+        self.community_model = community_model
+        self._set_weights(self.weights)
+        self.shuttle_reactions = [
+            ex for ex in community_model.reactions if "SH_" == ex.id[:3]
+        ]

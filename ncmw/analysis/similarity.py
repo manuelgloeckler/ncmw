@@ -102,7 +102,7 @@ def jaccard_similarity_matrices(models: Iterable):
 
 
 def resource_overlap(model1: Model, model2: Model):
-    """Coputes the resource overlap between two models
+    """Computes the resource overlap between two models
 
     Args:
         model1 (Model): Cobra model

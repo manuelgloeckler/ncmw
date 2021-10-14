@@ -67,9 +67,9 @@ def table_ex_transport(model: Model):
 
 
 def sekretion_uptake_fba(model: Model):
-    """This gives the uptake and sekreation reaction in a FBA solution
+    """This gives the uptake and sekretion reaction in a FBA solution
 
-    NOTE: This is not unique!
+    NOTE: This is not unique! Use the method base on FVA instead for unique solutions.
 
     Args:
         model (Model): A cobra model
