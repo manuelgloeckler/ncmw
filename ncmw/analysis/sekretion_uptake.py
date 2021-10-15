@@ -5,6 +5,8 @@ import re
 import pandas as pd
 import numpy as np
 
+from ncmw.utils import pad_dict_list
+
 
 def transport_reactions(model: Model):
     """This function return a list of potential transport reactions
@@ -90,17 +92,6 @@ def sekretion_uptake_fba(model: Model):
         if summary.secretion_flux.loc[id]["flux"] < 0
     ]
     return uptake, sekretion
-
-
-def pad_dict_list(dict_list, padel):
-    lmax = 0
-    for lname in dict_list.keys():
-        lmax = max(lmax, len(dict_list[lname]))
-    for lname in dict_list.keys():
-        ll = len(dict_list[lname])
-        if ll < lmax:
-            dict_list[lname] += [padel] * (lmax - ll)
-    return dict_list
 
 
 def sekretion_uptake_fva(fva):
@@ -199,7 +190,7 @@ def compute_all_uptake_sekretion_tables(models: list, fvas=None):
     return dfs
 
 
-def compute_uptake_growth_relationship(ids, model, h=100, upper_bound=None):
+def compute_uptake_growth_relationship(model, ids, h=100, custom_flux=None):
     """Computes the growth for multiple fixed flux values, while keeping the others variable."""
     medium = model.medium.copy()
     fluxes = []
@@ -207,8 +198,8 @@ def compute_uptake_growth_relationship(ids, model, h=100, upper_bound=None):
     for up in ids:
         old_f = medium[up]
         flux = np.linspace(old_f, 0, h)
-        if not (upper_bound == None):
-            flux = np.linspace(upper_bound, 0, h)
+        if not custom_flux is None:
+            flux = custom_flux
         growth = []
         with model:
             for f in flux:

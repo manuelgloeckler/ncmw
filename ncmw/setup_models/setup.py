@@ -35,6 +35,7 @@ def gapfill_model(model: Model, eps=1e-6, fill_model_base="base", **kwargs):
     if growth > eps:
         # Already has growth gapfilling is unnecessary
         return model, []
+        
     if isinstance(fill_model_base, Model):
         fill_model = fill_model_base
     elif fill_model_base == "ecoli" or fill_model_base == "salmonella":

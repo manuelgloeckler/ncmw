@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
 
   
   
@@ -35,6 +35,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -87,6 +88,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community.html">Community</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
@@ -161,12 +165,21 @@
 <span class="kn">from</span> <span class="nn">cobra.medium</span> <span class="kn">import</span> <span class="n">minimal_medium</span>
 <span class="kn">from</span> <span class="nn">cobra.flux_analysis</span> <span class="kn">import</span> <span class="n">flux_variability_analysis</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="compute_fvas"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_fvas">[docs]</a><span class="k">def</span> <span class="nf">compute_fvas</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Compute the FVA result for all models &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="compute_fvas"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_fvas">[docs]</a><span class="k">def</span> <span class="nf">compute_fvas</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Compute the FVA result for all models</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        models: List of models</span>
+<span class="sd">        fraction: Fraction of maximal biomass rate that must be achived</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List of DataFrames containing minimum and maximum fluxes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
         <span class="n">fva</span> <span class="o">=</span> <span class="n">flux_variability_analysis</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">fraction_of_optimum</span><span class="o">=</span><span class="n">fraction</span><span class="p">)</span>
@@ -174,16 +187,28 @@
     <span class="k">return</span> <span class="n">dfs</span></div>
 
 
-<div class="viewcode-block" id="compute_COMPM"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_COMPM">[docs]</a><span class="k">def</span> <span class="nf">compute_COMPM</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fvas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes the COMPM medium, given all the fva results</span>
+<div class="viewcode-block" id="compute_COMPM"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_COMPM">[docs]</a><span class="k">def</span> <span class="nf">compute_COMPM</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fvas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Computes the COMPM medium, given all the fva results. The COMPM is defined as</span>
+<span class="sd">    the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.</span>
+
+<span class="sd">    Mathematically it requires the FVA results for each reaction contained in the</span>
+<span class="sd">    medium! This contains the minimum flux required by the models to obtain</span>
+<span class="sd">    MBR. We denote it by :math:`\text{FVA}_{min; r}^{m_i}` for any reaction :math:`r` of model :math:`m_i`.</span>
+
+<span class="sd">    For reactions :math:`r \in M` within the medium :math:`M` of :math:`K` models we</span>
+<span class="sd">    define the COMPM as</span>
+
+<span class="sd">    .. math:: COMPM = \left\{ \min_{k = 1...K} \text{FVA}_{min;r}^{m_k} \right\}_{r \in M}</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fvas (list): [description]</span>
-<span class="sd">        reduction (Callable, optional): [description]. Defaults to min.</span>
+<span class="sd">        models (list): List of cobra metabolit models</span>
+<span class="sd">        fvas (list, optional): List of dataframes containing FVA results for the models.</span>
+<span class="sd">                               If argument is &quot;None&quot;, then it will be recomputed based on the given models.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fvas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fvas</span> <span class="o">=</span> <span class="n">compute_fvas</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">fvas</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">fvas</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fvas</span><span class="p">))</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     <span class="n">mediums</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>

@@ -3,7 +3,7 @@ import pandas as pd
 from cobra.medium import minimal_medium
 from cobra.flux_analysis import flux_variability_analysis
 
-from typing import Iterable, Callable, List
+from typing import Iterable, Callable, List, Dict
 import numpy as np
 
 
@@ -25,21 +25,23 @@ def compute_fvas(models: Iterable, fraction: float) -> List:
     return dfs
 
 
-def compute_COMPM(models: list, fvas: list = None):
-    r"""Computes the COMPM medium, given all the fva results. The COMPM is defined as the
-       medium, in which all models can achive their maximum biomass rate (MBR) if they
-       are alone.
+def compute_COMPM(models: list, fvas: list = None) -> Dict:
+    r"""Computes the COMPM medium, given all the fva results. The COMPM is defined as
+    the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.
 
-       Mathematically it requires the FVA results for each reaction contained in the
-       medium! This contains the minimum flux required by the models to obtain
-       MBR. We denote it by $FVA_{min; r}^{m}$ for any reaction $r$ of model $m$.
+    Mathematically it requires the FVA results for each reaction contained in the
+    medium! This contains the minimum flux required by the models to obtain
+    MBR. We denote it by :math:`\text{FVA}_{min; r}^{m_i}` for any reaction :math:`r` of model :math:`m_i`.
 
-       For any reaction $r \in M$ within the medium $M$ we then define the COMPM as
-       $$ COMPM = \{ \min_{m \in Models} FVA_{min;r}^{m} \}_{r \in M}$$
+    For reactions :math:`r \in M` within the medium :math:`M` of :math:`K` models we
+    define the COMPM as
+
+    .. math:: COMPM = \left\{ \min_{k = 1...K} \text{FVA}_{min;r}^{m_k} \right\}_{r \in M}
 
     Args:
-        fvas (list): [description]
-        reduction (Callable, optional): [description]. Defaults to min.
+        models (list): List of cobra metabolit models
+        fvas (list, optional): List of dataframes containing FVA results for the models.
+                               If argument is "None", then it will be recomputed based on the given models.
     """
     if fvas is None:
         fvas = compute_fvas(models, 1.0)

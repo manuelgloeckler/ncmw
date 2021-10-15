@@ -302,6 +302,7 @@ class ShuttleCommunityModel(CommunityModel):
 
         self.comm_model = mip.Model("Community Model")
         self.build_mip_model()
+        self._open_exchanges_for_shuttles(-100)
 
     def _set_weights(self, weights):
         self._weights = weights
@@ -380,7 +381,7 @@ class ShuttleCommunityModel(CommunityModel):
             vals, index=keys, columns=[m.id for m in self.models] + ["Total exchange"]
         )
         # Only return nonzero
-        df = df[df.abs().sum(1) > 0]
+        df = df[df["Total exchange"] != 0].sort_values(["Total exchange"])
 
         print("Objective: ", self.objective.x)
         for i in range(len(self.models)):
@@ -413,6 +414,7 @@ class ShuttleCommunityModel(CommunityModel):
             ]
         )
         self.comm_model.objective = maximize(self.objective)
+        self._open_exchanges_for_shuttles(-100)
 
     def build_mip_model(self):
         ids = [[] for _ in range(len(self.rec_id_dicts))]
@@ -630,6 +632,8 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
                     if ex.id not in self.shared_exchanges:
                         self.shared_exchanges.append(ex.id)
 
+        self.build_community()
+
         self._weights = np.ones(len(self.models))
         self.biomass_reactions = []
         self.biomass_id = []
@@ -638,7 +642,7 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
             id = rec.id + "__" + m.id
             self.biomass_id.append(id)
             self.biomass_reactions.append(self.community_model.reactions.get_by_id(id))
-        self.build_community()
+        self._set_weights(self._weights)
 
     def _set_weights(self, weights):
         self._weights = weights
@@ -680,19 +684,22 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
                 non_zero_ids.append(ex.id)
                 non_zero_flux.append(ex.flux)
 
-        vals = np.zeros(len(self.models))
+        vals = np.zeros((len(non_zero_ids), len(self.models) + 1))
+        shuttle_reactions_ids = [s.id for s in self.shuttle_reactions]
         for i in range(len(non_zero_ids)):
             met = non_zero_ids[i][3:]
             for j in range(len(self.models)):
-                shuttle_id = "SH_" + met.id + "__" + self.models[j].id
-                shuttle_rec = self.community_model.reactions.get_by_id(shuttle_id)
-                vals[i, j] = shuttle_rec.flux
+                shuttle_id = "SH_" + met + "__" + self.models[j].id
+                if shuttle_id in shuttle_reactions_ids:
+                    shuttle_rec = self.community_model.reactions.get_by_id(shuttle_id)
+                    vals[i, j] = shuttle_rec.flux
+        vals[:, -1] = np.array(non_zero_flux)
 
         df = pd.DataFrame(
             vals,
             index=non_zero_ids,
             columns=[m.id for m in self.models] + ["Total exchange"],
-        )
+        ).sort_values(["Total exchange"])
 
         print("Objective: ", total_growth)
         for i in range(len(self.models)):
@@ -822,8 +829,15 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
             shuttle_constraints.append(cons)
         community_model.add_cons_vars(shuttle_constraints)
 
+        # Set correct medium
+        medium = {}
+        for model in self.models:
+            for key, val in model.medium.items():
+                if key not in medium:
+                    medium[key] = val
+        community_model.medium = medium
+
         self.community_model = community_model
-        self._set_weights(self.weights)
         self.shuttle_reactions = [
             ex for ex in community_model.reactions if "SH_" == ex.id[:3]
         ]

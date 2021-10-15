@@ -89,6 +89,8 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community.html">Community</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
@@ -167,7 +169,66 @@
 <span class="kn">from</span> <span class="nn">sbi.inference</span> <span class="kn">import</span> <span class="n">SNLE</span>
 
 
+<div class="viewcode-block" id="compute_species_interaction_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_species_interaction_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_species_interaction_weights</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute interaction between two species.</span>
+
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Communiy model</span>
+<span class="sd">        df: Summary table</span>
+<span class="sd">        alpha: Parameter for postive interaction, larger implies that postive</span>
+<span class="sd">        interaction is wheighted more.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        [type]: [description]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">w_i</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">summary_i</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">summary_j</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+            <span class="n">consumed_j</span> <span class="o">=</span> <span class="n">summary_j</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="n">produced_i</span> <span class="o">=</span> <span class="n">summary_i</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">consumed_i</span> <span class="o">=</span> <span class="n">summary_i</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="n">positive_normalizer</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">negative_normalizer</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+                <span class="n">summary_m</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">m</span><span class="p">]]</span>
+                <span class="n">produced_m</span> <span class="o">=</span> <span class="n">summary_m</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="n">consumed_m</span> <span class="o">=</span> <span class="n">summary_m</span> <span class="o">&lt;</span> <span class="mi">0</span>
+                <span class="n">positive_normalizer</span> <span class="o">+=</span> <span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">produced_m</span><span class="p">[</span><span class="n">consumed_j</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">negative_normalizer</span> <span class="o">+=</span> <span class="n">model</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">consumed_m</span><span class="p">[</span><span class="n">consumed_j</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">positive_normalizer</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">w_i</span> <span class="o">*</span> <span class="n">produced_i</span><span class="p">[</span><span class="n">consumed_j</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">positive_normalizer</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*=</span> <span class="n">alpha</span>
+            <span class="k">if</span> <span class="n">negative_normalizer</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span>
+                    <span class="n">w_i</span> <span class="o">*</span> <span class="n">consumed_i</span><span class="p">[</span><span class="n">consumed_j</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">negative_normalizer</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">weights</span></div>
+
+
 <div class="viewcode-block" id="compute_community_interaction_graph"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_community_interaction_graph">[docs]</a><span class="k">def</span> <span class="nf">compute_community_interaction_graph</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute a graph that displays the community interaction</span>
+
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Cobra model</span>
+<span class="sd">        df: A summary file i.e. that returned by model.summary()</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Graph: Interaction graph</span>
+<span class="sd">        df: Relevant summary</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">df_help</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
     <span class="n">medium_col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_help</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df_help</span><span class="o">.</span><span class="n">index</span><span class="p">):</span>
@@ -217,7 +278,6 @@
     <span class="n">inf</span> <span class="o">=</span> <span class="n">SNLE</span><span class="p">(</span><span class="n">prior</span><span class="p">)</span>
     <span class="n">density_estimator</span> <span class="o">=</span> <span class="n">inf</span><span class="o">.</span><span class="n">append_simulations</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">xs</span><span class="p">)</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
     <span class="n">posterior</span> <span class="o">=</span> <span class="n">inf</span><span class="o">.</span><span class="n">build_posterior</span><span class="p">(</span>
-        <span class="n">density_estimator</span><span class="p">,</span>
         <span class="n">sample_with</span><span class="o">=</span><span class="s2">&quot;vi&quot;</span><span class="p">,</span>
         <span class="n">vi_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;flow&quot;</span><span class="p">:</span> <span class="s2">&quot;spline_autoregressive&quot;</span><span class="p">,</span> <span class="s2">&quot;bound&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s2">&quot;num_bins&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">},</span>
     <span class="p">)</span>

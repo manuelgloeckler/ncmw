@@ -8,7 +8,7 @@ from ncmw.community import (
     compute_pairwise_growth_relation_per_weight,
     compute_species_interaction_weights,
 )
-from utils import get_reference_network_weights
+from ncmw.utils import get_reference_network_weights
 from networkx.drawing.layout import circular_layout, bipartite_layout
 import networkx as nx
 import torch
@@ -266,6 +266,24 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
         )
     fig.suptitle("Community Interaction\n", fontsize=20, y=1.05)
     plt.legend(handles=pathes)
+    return fig
+
+
+def plot_community_summary(model, names: dict = dict()):
+    model_name = []
+    for model in model.models:
+        if model.id in names:
+            model_name.append(names[model.id])
+        else:
+            model_name.append(model.id.split("_")[0])
+    df = model.summary()
+    fig = plt.figure(figsize=(len(df) / 5 + 5, 5))
+    df[df.columns[:-1]].plot(kind="bar", stacked=True)
+    medium_bounds = [
+        model.community_model.exchanges.get_by_id(ex).lower_bound for ex in df.index
+    ]
+    plt.step(range(len(df)), medium_bounds, color="red")
+    plt.legend(["Medium"] + [name for name in model_name])
     return fig
 
 

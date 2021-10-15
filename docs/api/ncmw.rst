@@ -9,6 +9,7 @@ Subpackages
 
    ncmw.analysis
    ncmw.community
+   ncmw.scripts
    ncmw.setup_models
    ncmw.utils
    ncmw.visualization

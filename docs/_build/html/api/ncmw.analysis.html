@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
 
   
   
@@ -36,6 +36,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -100,6 +102,7 @@
 <li class="toctree-l3 current"><a class="reference internal" href="ncmw.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">ncmw.analysis package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ncmw.community.html">ncmw.community package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ncmw.scripts.html">ncmw.scripts package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ncmw.setup_models.html">ncmw.setup_models package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ncmw.utils.html">ncmw.utils package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ncmw.visualization.html">ncmw.visualization package</a></li>
@@ -214,13 +217,22 @@
 <span id="ncmw-analysis-medium-module"></span><h2>ncmw.analysis.medium module<a class="headerlink" href="#module-ncmw.analysis.medium" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.medium.compute_COMPM">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_COMPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_COMPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_COMPM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the COMPM medium, given all the fva results</p>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_COMPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_COMPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_COMPM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the COMPM medium, given all the fva results. The COMPM is defined as
+the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.</p>
+<p>Mathematically it requires the FVA results for each reaction contained in the
+medium! This contains the minimum flux required by the models to obtain
+MBR. We denote it by <span class="math notranslate nohighlight">\(\text{FVA}_{min; r}^{m_i}\)</span> for any reaction <span class="math notranslate nohighlight">\(r\)</span> of model <span class="math notranslate nohighlight">\(m_i\)</span>.</p>
+<p>For reactions <span class="math notranslate nohighlight">\(r \in M\)</span> within the medium <span class="math notranslate nohighlight">\(M\)</span> of <span class="math notranslate nohighlight">\(K\)</span> models we
+define the COMPM as</p>
+<div class="math notranslate nohighlight">
+\[COMPM = \left\{ \min_{k = 1...K} \text{FVA}_{min;r}^{m_k} \right\}_{r \in M}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fvas</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – [description]</p></li>
-<li><p><strong>reduction</strong> (<em>Callable</em><em>, </em><em>optional</em>) – [description]. Defaults to min.</p></li>
+<li><p><strong>models</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – List of cobra metabolit models</p></li>
+<li><p><strong>fvas</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – List of dataframes containing FVA results for the models.
+If argument is “None”, then it will be recomputed based on the given models.</p></li>
 </ul>
 </dd>
 </dl>
@@ -233,8 +245,22 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.medium.compute_fvas">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_fvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_fvas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_fvas" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_fvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_fvas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_fvas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the FVA result for all models</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – List of models</p></li>
+<li><p><strong>fraction</strong> – Fraction of maximal biomass rate that must be achived</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of DataFrames containing minimum and maximum fluxes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -298,8 +324,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.sekretion_uptake_fba">
 <span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">sekretion_uptake_fba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#sekretion_uptake_fba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.sekretion_uptake_fba" title="Permalink to this definition">¶</a></dt>
-<dd><p>This gives the uptake and sekreation reaction in a FBA solution</p>
-<p>NOTE: This is not unique!</p>
+<dd><p>This gives the uptake and sekretion reaction in a FBA solution</p>
+<p>NOTE: This is not unique! Use the method base on FVA instead for unique solutions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>model</strong> (<em>Model</em>) – A cobra model</p>
@@ -458,7 +484,7 @@ containing all pairwise jaccard similarities.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.resource_overlap">
 <span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">resource_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#resource_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.resource_overlap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coputes the resource overlap between two models</p>
+<dd><p>Computes the resource overlap between two models</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

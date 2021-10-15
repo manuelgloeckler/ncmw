@@ -35,6 +35,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -87,6 +88,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community.html">Community</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
@@ -237,7 +241,8 @@
 
 <div class="viewcode-block" id="CommunityModel.single_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.CommunityModel.single_optimize">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">single_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;This method returns the current objective value&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the current objective value, if the objective only</span>
+<span class="sd">        accounts a single model&quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="CommunityModel.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.CommunityModel.optimize">[docs]</a>    <span class="nd">@abstractmethod</span>
@@ -262,9 +267,10 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="CommunityModel.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.CommunityModel.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="bp">self</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="CommunityModel.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.CommunityModel.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="BagOfReactionsModel"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel">[docs]</a><span class="k">class</span> <span class="nc">BagOfReactionsModel</span><span class="p">(</span><span class="n">CommunityModel</span><span class="p">):</span>
@@ -397,7 +403,31 @@
         <span class="n">model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
         <span class="n">sol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BagOfReactionsModel.save"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This saves the model using pickle. For other format overwrite this</span>
+<span class="sd">        function&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">,</span> <span class="s2">&quot;wb+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">flux_expression</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span></div>
+
+<div class="viewcode-block" id="BagOfReactionsModel.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">models</span>
+        <span class="p">]</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">flux_expression</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">])</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">objective</span>
+        <span class="k">return</span> <span class="n">model</span></div></div>
 
 
 <div class="viewcode-block" id="ShuttleCommunityModel"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel">[docs]</a><span class="k">class</span> <span class="nc">ShuttleCommunityModel</span><span class="p">(</span><span class="n">CommunityModel</span><span class="p">):</span>
@@ -509,7 +539,7 @@
                         <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="n">vals</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Shuttle Reaction&quot;</span><span class="p">]</span>
+            <span class="n">vals</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Total exchange&quot;</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="c1"># Only return nonzero</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
@@ -601,7 +631,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ShuttleCommunityModel.computeCOOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.computeCOOPM">[docs]</a>    <span class="k">def</span> <span class="nf">computeCOOPM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MBR</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_tries</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<div class="viewcode-block" id="ShuttleCommunityModel.computeCOOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.computeCOOPM">[docs]</a>    <span class="k">def</span> <span class="nf">computeCOOPM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MBR</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_tries</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="n">minMBR</span> <span class="o">=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">MBR</span>
         <span class="c1"># thetas</span>
         <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
@@ -731,11 +761,234 @@
 
 <div class="viewcode-block" id="ShuttleCommunityModel.save"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This saves the model using pickle. For other format overwrite this function&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.lp&quot;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;_help.lp&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;_help.lp&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ShuttleCommunityModel.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.lp&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span></div></div>
+<div class="viewcode-block" id="ShuttleCommunityModel.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.load">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">model</span></div></div>
+
+
+<div class="viewcode-block" id="ShuttleCommunityCobraModel"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel">[docs]</a><span class="k">class</span> <span class="nc">ShuttleCommunityCobraModel</span><span class="p">(</span><span class="n">BagOfReactionsModel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">shared_exchanges</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
+        <span class="c1"># For this reactions we impose shuttle reactions if possible.</span>
+        <span class="k">if</span> <span class="n">shared_exchanges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">exchanges</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_id</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="n">rec</span> <span class="o">=</span> <span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">id</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">biomass_id</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_community</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="n">objective</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">):</span>
+            <span class="n">objective</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">r</span><span class="o">.</span><span class="n">flux_expression</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">objective</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_set_medium</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">=</span> <span class="n">medium</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">medium</span>
+
+<div class="viewcode-block" id="ShuttleCommunityCobraModel.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="n">total_growth</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">objective_value</span>
+        <span class="n">single_growths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">:</span>
+            <span class="n">single_growths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span></div>
+
+<div class="viewcode-block" id="ShuttleCommunityCobraModel.single_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.single_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">single_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
+        <span class="n">weights</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">old_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">old_weights</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">growth</span></div>
+
+<div class="viewcode-block" id="ShuttleCommunityCobraModel.summary"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="n">exchanges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">exchanges</span>
+        <span class="n">non_zero_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">non_zero_flux</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">exchanges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">flux</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">non_zero_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">non_zero_flux</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
+
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">non_zero_ids</span><span class="p">)):</span>
+            <span class="n">met</span> <span class="o">=</span> <span class="n">non_zero_ids</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">:]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)):</span>
+                <span class="n">shuttle_id</span> <span class="o">=</span> <span class="s2">&quot;SH_&quot;</span> <span class="o">+</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">shuttle_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">shuttle_id</span><span class="p">)</span>
+                <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">shuttle_rec</span><span class="o">.</span><span class="n">flux</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">vals</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">non_zero_ids</span><span class="p">,</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Total exchange&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Objective: &quot;</span><span class="p">,</span> <span class="n">total_growth</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">,</span>
+                <span class="n">single_growths</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="s2">&quot; with weights &quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ShuttleCommunityCobraModel.build_community"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.build_community">[docs]</a>    <span class="k">def</span> <span class="nf">build_community</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Community model we will build</span>
+        <span class="n">community_model</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="s2">&quot;Community&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Collect new metabolite contained in each model</span>
+        <span class="n">new_metabolites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">old_metabolite</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metabolites</span><span class="p">:</span>
+                <span class="n">new_metabolite</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">old_metabolite</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_id&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_model&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_reaction&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;compartment&quot;</span>
+                    <span class="p">):</span>
+                        <span class="n">new_metabolite</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="n">new_metabolite</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">old_metabolite</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">new_metabolite</span><span class="o">.</span><span class="n">compartment</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">old_metabolite</span><span class="o">.</span><span class="n">compartment</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                <span class="p">)</span>
+                <span class="n">new_metabolites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_metabolite</span><span class="p">)</span>
+        <span class="c1"># Add new metabolites to community model</span>
+        <span class="n">community_model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">new_metabolites</span><span class="p">)</span>
+
+        <span class="c1"># Collect new reactions contained in each model</span>
+        <span class="n">new_reactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">old_reaction</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="p">:</span>
+                <span class="c1"># Skip exchange reaction, they are no longer part of the internal models</span>
+                <span class="k">if</span> <span class="n">old_reaction</span><span class="o">.</span><span class="n">id</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EX_&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">new_reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">old_reaction</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_id&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_model&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_metabolites&quot;</span>
+                        <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;compartment&quot;</span>
+                    <span class="p">):</span>
+                        <span class="n">new_reaction</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="n">new_reaction</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">old_reaction</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">for</span> <span class="n">met</span><span class="p">,</span> <span class="n">stoch</span> <span class="ow">in</span> <span class="n">old_reaction</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">new_met_id</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                    <span class="n">new_met</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">new_met_id</span><span class="p">)</span>
+                    <span class="n">new_reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">({</span><span class="n">new_met</span><span class="p">:</span> <span class="n">stoch</span><span class="p">})</span>
+                <span class="n">new_reactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_reaction</span><span class="p">)</span>
+        <span class="c1"># Add new reactions to community model</span>
+        <span class="n">community_model</span><span class="o">.</span><span class="n">add_reactions</span><span class="p">(</span><span class="n">new_reactions</span><span class="p">)</span>
+
+        <span class="c1"># Add new exchange reactions</span>
+        <span class="n">external_metabolites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="c1"># The union of external metabolites</span>
+            <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metabolites</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;_e&quot;</span> <span class="o">==</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="ow">and</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">external_metabolites</span><span class="p">:</span>
+                    <span class="n">external_metabolites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">new_external_metabolites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">external_metabolites</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="p">[</span><span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metabolites</span><span class="p">]:</span>
+                    <span class="n">old_metabolite</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="n">new_metabolite</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Metabolite</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">old_metabolite</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_id&quot;</span>
+                    <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_model&quot;</span>
+                    <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;_reaction&quot;</span>
+                    <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;compartment&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">new_metabolite</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="n">new_metabolite</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">old_metabolite</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">new_metabolite</span><span class="o">.</span><span class="n">compartment</span> <span class="o">=</span> <span class="s2">&quot;external&quot;</span>
+            <span class="n">new_external_metabolites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_metabolite</span><span class="p">)</span>
+        <span class="n">community_model</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">(</span><span class="n">new_external_metabolites</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">new_external_metabolites</span><span class="p">:</span>
+            <span class="n">community_model</span><span class="o">.</span><span class="n">add_boundary</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
+
+        <span class="c1"># Add shuttle reactions</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">new_external_metabolites</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="p">[</span><span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">metabolites</span><span class="p">]:</span>
+                    <span class="n">met2</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">metabolites</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span>
+                        <span class="n">met</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">shuttle_reaction</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">Reaction</span><span class="p">()</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SH_</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Shuttle reaction for </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">({</span><span class="n">met</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">met2</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">})</span>
+                <span class="n">community_model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">shuttle_reaction</span><span class="p">)</span>
+        <span class="c1"># Add shuttle constraints!</span>
+        <span class="n">all_shuttles</span> <span class="o">=</span> <span class="p">[</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span> <span class="k">if</span> <span class="s2">&quot;SH_&quot;</span> <span class="o">==</span> <span class="n">ex</span><span class="o">.</span><span class="n">id</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]</span>
+        <span class="n">shuttle_constraints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">new_external_metabolites</span><span class="p">:</span>
+            <span class="n">present_shuttles</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                <span class="nb">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SH_</span><span class="si">{</span><span class="n">met</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">all_shuttles</span><span class="p">:</span>
+                    <span class="n">present_shuttles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">flux_expression</span>
+                    <span class="p">)</span>
+            <span class="n">exchange</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;EX_</span><span class="si">{</span><span class="n">met</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">flux_expression</span>
+            <span class="n">cons</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+                <span class="n">exchange</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">present_shuttles</span><span class="p">),</span>
+                <span class="n">lb</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">shuttle_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cons</span><span class="p">)</span>
+        <span class="n">community_model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">shuttle_constraints</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span> <span class="o">=</span> <span class="n">community_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ex</span> <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span> <span class="k">if</span> <span class="s2">&quot;SH_&quot;</span> <span class="o">==</span> <span class="n">ex</span><span class="o">.</span><span class="n">id</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="p">]</span></div></div>
 </pre></div>
 
            </div>
