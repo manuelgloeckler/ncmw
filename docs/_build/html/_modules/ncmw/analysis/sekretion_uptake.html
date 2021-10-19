@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
 
   
   
@@ -160,15 +160,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ncmw.analysis.sekretion_uptake</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">cobra</span>
-<span class="kn">from</span> <span class="nn">cobra</span> <span class="kn">import</span> <span class="n">Model</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">cobra</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Reaction</span><span class="p">,</span> <span class="n">Metabolite</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">ncmw.utils</span> <span class="kn">import</span> <span class="n">pad_dict_list</span>
 
-<div class="viewcode-block" id="transport_reactions"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.transport_reactions">[docs]</a><span class="k">def</span> <span class="nf">transport_reactions</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+
+<div class="viewcode-block" id="transport_reactions"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.transport_reactions">[docs]</a><span class="k">def</span> <span class="nf">transport_reactions</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;This function return a list of potential transport reactions</span>
 
 <span class="sd">    NOTE: This is a cheap heuristic</span>
@@ -189,14 +191,14 @@
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="table_ex_transport"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.table_ex_transport">[docs]</a><span class="k">def</span> <span class="nf">table_ex_transport</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="table_ex_transport"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.table_ex_transport">[docs]</a><span class="k">def</span> <span class="nf">table_ex_transport</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;This method heuristically checks if all exchange reaction has an associated transporter</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (Model): Cobra model</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        DataFrame: Table of indicators (0 indicates abscence, 1 indicates presence)</span>
+<span class="sd">        pd.DataFrame: Table of indicators (0 indicates abscence, 1 indicates presence)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">compartments</span> <span class="o">=</span> <span class="p">[</span><span class="nb">id</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">compartments</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
     <span class="n">metabolites_ex</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">medium</span><span class="p">]</span>
@@ -228,7 +230,7 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="sekretion_uptake_fba"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.sekretion_uptake_fba">[docs]</a><span class="k">def</span> <span class="nf">sekretion_uptake_fba</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="sekretion_uptake_fba"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.sekretion_uptake_fba">[docs]</a><span class="k">def</span> <span class="nf">sekretion_uptake_fba</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;This gives the uptake and sekretion reaction in a FBA solution</span>
 
 <span class="sd">    NOTE: This is not unique! Use the method base on FVA instead for unique solutions.</span>
@@ -254,26 +256,15 @@
     <span class="k">return</span> <span class="n">uptake</span><span class="p">,</span> <span class="n">sekretion</span></div>
 
 
-<div class="viewcode-block" id="pad_dict_list"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.pad_dict_list">[docs]</a><span class="k">def</span> <span class="nf">pad_dict_list</span><span class="p">(</span><span class="n">dict_list</span><span class="p">,</span> <span class="n">padel</span><span class="p">):</span>
-    <span class="n">lmax</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">lname</span> <span class="ow">in</span> <span class="n">dict_list</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">lmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lmax</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dict_list</span><span class="p">[</span><span class="n">lname</span><span class="p">]))</span>
-    <span class="k">for</span> <span class="n">lname</span> <span class="ow">in</span> <span class="n">dict_list</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">ll</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dict_list</span><span class="p">[</span><span class="n">lname</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">ll</span> <span class="o">&lt;</span> <span class="n">lmax</span><span class="p">:</span>
-            <span class="n">dict_list</span><span class="p">[</span><span class="n">lname</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">padel</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">lmax</span> <span class="o">-</span> <span class="n">ll</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">dict_list</span></div>
-
-
-<div class="viewcode-block" id="sekretion_uptake_fva"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.sekretion_uptake_fva">[docs]</a><span class="k">def</span> <span class="nf">sekretion_uptake_fva</span><span class="p">(</span><span class="n">fva</span><span class="p">):</span>
+<div class="viewcode-block" id="sekretion_uptake_fva"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.sekretion_uptake_fva">[docs]</a><span class="k">def</span> <span class="nf">sekretion_uptake_fva</span><span class="p">(</span><span class="n">fva</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;This computes the uptake and sekreation reaction using FVA, this is UNIQUE!</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        fva (DataFrame): Fva results</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        list: List of uptake reactions.</span>
-<span class="sd">        list: List of sekretion reactions.</span>
+<span class="sd">        list: List of uptake reactions</span>
+<span class="sd">        list: List of sekretion reactions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ex_fva</span> <span class="o">=</span> <span class="n">fva</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fva</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s2">&quot;EX_&quot;</span><span class="p">)]</span>
     <span class="n">uptake</span> <span class="o">=</span> <span class="n">ex_fva</span><span class="p">[</span><span class="n">ex_fva</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -282,11 +273,14 @@
 
 
 <div class="viewcode-block" id="compute_uptake_sekretion_table"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.compute_uptake_sekretion_table">[docs]</a><span class="k">def</span> <span class="nf">compute_uptake_sekretion_table</span><span class="p">(</span>
-    <span class="n">model_name1</span><span class="p">,</span> <span class="n">model_name2</span><span class="p">,</span> <span class="n">uptake1</span><span class="p">,</span> <span class="n">uptake2</span><span class="p">,</span> <span class="n">sekretion1</span><span class="p">,</span> <span class="n">sekretion2</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the uptake sekretion overlap</span>
-
-
+    <span class="n">model_name1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model_name2</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">uptake1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">uptake2</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">sekretion1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">sekretion2</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Constructs a table of the uptake sekretion and overlap for a pair of models</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model_name1: Name of the model 1</span>
@@ -297,7 +291,7 @@
 <span class="sd">        sekretion2: Sekretion reactions of model 2</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        DataFrame: Tabel of uptake/sekretions as well as Sekretion -&gt; Uptake relationships.</span>
+<span class="sd">        pd.DataFrame: Tabel of uptake/sekretions as well as Sekretion -&gt; Uptake relationships.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Common up/sekretion from SA to DP</span>
@@ -324,10 +318,10 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="compute_all_uptake_sekretion_tables"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.compute_all_uptake_sekretion_tables">[docs]</a><span class="k">def</span> <span class="nf">compute_all_uptake_sekretion_tables</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fvas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_all_uptake_sekretion_tables"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.compute_all_uptake_sekretion_tables">[docs]</a><span class="k">def</span> <span class="nf">compute_all_uptake_sekretion_tables</span><span class="p">(</span>
+    <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">fvas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Computes all uptake sekretion tables for all models.</span>
-
-
 
 <span class="sd">    Args:</span>
 <span class="sd">        models: Cobra models</span>
@@ -361,16 +355,31 @@
     <span class="k">return</span> <span class="n">dfs</span></div>
 
 
-<div class="viewcode-block" id="compute_uptake_growth_relationship"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.compute_uptake_growth_relationship">[docs]</a><span class="k">def</span> <span class="nf">compute_uptake_growth_relationship</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Computes the growth for multiple fixed flux values, while keeping the others variable.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="compute_uptake_growth_relationship"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.compute_uptake_growth_relationship">[docs]</a><span class="k">def</span> <span class="nf">compute_uptake_growth_relationship</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">h</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">custom_flux</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;For each reaction in with id contained in &quot;ids&quot; the method keeps all other</span>
+<span class="sd">    components within the medium constant but changes this one from a certain value to zero.</span>
+
+<span class="sd">    This can be used for a sensitivity analysis, as if certain metabolites are important</span>
+<span class="sd">    within the medium we expect that they strongly influence the growth!</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Fluxes used to compute the corresponding growths.</span>
+<span class="sd">            list: Growths computed using the corresponding fluxes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">medium</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">fluxes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">growths</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">up</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
-        <span class="n">old_f</span> <span class="o">=</span> <span class="n">medium</span><span class="p">[</span><span class="n">up</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">up</span> <span class="ow">in</span> <span class="n">medium</span><span class="p">:</span>
+            <span class="n">old_f</span> <span class="o">=</span> <span class="n">medium</span><span class="p">[</span><span class="n">up</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">old_f</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">old_f</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">upper_bound</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">upper_bound</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_flux</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flux</span> <span class="o">=</span> <span class="n">custom_flux</span>
         <span class="n">growth</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">with</span> <span class="n">model</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flux</span><span class="p">:</span>

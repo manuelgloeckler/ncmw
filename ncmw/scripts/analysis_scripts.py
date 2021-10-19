@@ -15,6 +15,8 @@ import sys, os
 import glob
 import json
 
+import matplotlib.pyplot as plt
+
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
 
@@ -41,6 +43,7 @@ from ncmw.visualization import (
     jacard_index_similarity_heatmap,
     plot_scaled_medium_growth,
     uptake_sekretion_venn_diagrams,
+    plot_growth_sensitivity,
 )
 
 
@@ -194,6 +197,16 @@ def run_analysis(cfg: DictConfig) -> None:
         )
         uptakes.append(uptake)
         sekretions.append(sekretion)
+
+        # Plots for uptake sensitivity!
+        fig = plot_growth_sensitivity(model, uptake)
+        fig.savefig(
+            PATH
+            + SEPERATOR
+            + "growth"
+            + SEPERATOR
+            + f"{model.id}_uptake_growth_sensitivity.pdf"
+        )
 
     for i in range(len(models)):
         for j in range(i + 1, len(models)):

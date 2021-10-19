@@ -62,8 +62,8 @@ def plot_scaled_medium_growth(
 def plot_growth_sensitivity(model, reaction_ids, upper_bound=20, lower_bound=0, h=300):
     flux = np.hstack(
         [
-            np.linspace(upper_bound, lower_bound + 1 + 1e-3, h // 1.5),
-            np.linspace(lower_bound - 1, lower_bound, h // 3),
+            np.linspace(upper_bound, lower_bound + 1 + 1e-3, int(h // 1.5)),
+            np.linspace(lower_bound + 1, lower_bound, int(h // 3)),
         ]
     )
     _, growths = compute_uptake_growth_relationship(
@@ -75,7 +75,10 @@ def plot_growth_sensitivity(model, reaction_ids, upper_bound=20, lower_bound=0, 
     df.index = [np.round(f, 1) for f in flux]
     fig = plt.figure(figsize=(12, 10))
     sns.heatmap(
-        df.T.sort_index(), cmap="Spectral", cbar_kws={"label": "Growth"}, fig=fig
+        df.T.sort_index(),
+        cmap="Spectral",
+        cbar_kws={"label": "Growth"},
+        rasterized=True,
     )
     plt.vlines(205, 0, df.shape[-1], linestyle="--", color="black")
     plt.xlabel("Medium concentration")

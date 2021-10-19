@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
 
   
   
@@ -35,6 +35,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -87,6 +88,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../community.html">Community</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Module Reference</a></li>
@@ -160,6 +164,10 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="kn">from</span> <span class="nn">ncmw.analysis</span> <span class="kn">import</span> <span class="n">compute_uptake_growth_relationship</span>
+
 
 <div class="viewcode-block" id="plot_scaled_medium_growth"><a class="viewcode-back" href="../../../api/ncmw.visualization.html#ncmw.visualization.growth_visualization.plot_scaled_medium_growth">[docs]</a><span class="k">def</span> <span class="nf">plot_scaled_medium_growth</span><span class="p">(</span>
     <span class="n">models</span><span class="p">,</span>
@@ -167,12 +175,12 @@
     <span class="n">max_scale</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">evaluations</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
     <span class="n">names</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
-    <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plots the growth for scaling the medium by a variable factor K.</span>
-<span class="sd">    </span>
-<span class="sd">    </span>
-<span class="sd">    </span>
+
+
+
 <span class="sd">    Args:</span>
 <span class="sd">        models: Cobra models</span>
 <span class="sd">        min_scale: Minimal scale</span>
@@ -180,10 +188,10 @@
 <span class="sd">        evaluations: Number of scales between min_scale and max_scale</span>
 <span class="sd">        names: Names dictionary</span>
 <span class="sd">        cmap: Color map for colors.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        fig: Plot</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
     <span class="n">cmap</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
@@ -202,7 +210,7 @@
                     <span class="n">medium</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">*=</span> <span class="n">k</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">medium</span> <span class="o">=</span> <span class="n">medium</span>
                 <span class="n">growths</span> <span class="o">+=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()]</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">growths</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">i</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">growths</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">cmap</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)))</span>
     <span class="n">model_name</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -210,6 +218,32 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">model_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">model_name</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="plot_growth_sensitivity"><a class="viewcode-back" href="../../../api/ncmw.visualization.html#ncmw.visualization.growth_visualization.plot_growth_sensitivity">[docs]</a><span class="k">def</span> <span class="nf">plot_growth_sensitivity</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">reaction_ids</span><span class="p">,</span> <span class="n">upper_bound</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
+    <span class="n">flux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">//</span> <span class="mf">1.5</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lower_bound</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">//</span> <span class="mi">3</span><span class="p">)),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">growths</span> <span class="o">=</span> <span class="n">compute_uptake_growth_relationship</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">reaction_ids</span><span class="p">,</span> <span class="n">custom_flux</span><span class="o">=</span><span class="n">flux</span>
+    <span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">growths</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">reaction_ids</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flux</span><span class="p">]</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(),</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Spectral&quot;</span><span class="p">,</span>
+        <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Growth&quot;</span><span class="p">},</span>
+        <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="mi">205</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Medium concentration&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">fig</span></div>
 </pre></div>
 

@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
 
   
   
@@ -163,6 +163,7 @@
 <span></span><span class="kn">import</span> <span class="nn">cobra</span>
 <span class="kn">import</span> <span class="nn">cobra.test</span>
 <span class="kn">from</span> <span class="nn">cobra.core</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">subprocess</span>
@@ -177,7 +178,9 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 
-<div class="viewcode-block" id="gapfill_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_model">[docs]</a><span class="k">def</span> <span class="nf">gapfill_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">fill_model_base</span><span class="o">=</span><span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="gapfill_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_model">[docs]</a><span class="k">def</span> <span class="nf">gapfill_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">fill_model_base</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;base&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds reactions to the model, such that it has growth in the given medium</span>
 
 <span class="sd">    Args:</span>
@@ -189,15 +192,15 @@
 <span class="sd">        documentation https://cobrapy.readthedocs.io/en/latest/gapfilling.html</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (Model): Cobra model that has growth if algorithm succeeds</span>
-<span class="sd">        (List): List of reactions that were added</span>
+<span class="sd">        Model: Cobra model that has growth if algorithm succeeds</span>
+<span class="sd">        list: List of reactions that were added</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">growth</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">growth</span> <span class="o">&gt;</span> <span class="n">eps</span><span class="p">:</span>
         <span class="c1"># Already has growth gapfilling is unnecessary</span>
         <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="p">[]</span>
-        
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fill_model_base</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
         <span class="n">fill_model</span> <span class="o">=</span> <span class="n">fill_model_base</span>
     <span class="k">elif</span> <span class="n">fill_model_base</span> <span class="o">==</span> <span class="s2">&quot;ecoli&quot;</span> <span class="ow">or</span> <span class="n">fill_model_base</span> <span class="o">==</span> <span class="s2">&quot;salmonella&quot;</span><span class="p">:</span>
@@ -257,17 +260,18 @@
     <span class="k">return</span> <span class="n">filled_model</span><span class="p">,</span> <span class="n">solution</span></div>
 
 
-<div class="viewcode-block" id="gapfill_medium"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_medium">[docs]</a><span class="k">def</span> <span class="nf">gapfill_medium</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">):</span>
+<div class="viewcode-block" id="gapfill_medium"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.gapfill_medium">[docs]</a><span class="k">def</span> <span class="nf">gapfill_medium</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;This will add the minimal set of exchange reactions such that the model</span>
 <span class="sd">    has more than eps growth.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (Model): Cobra model which has less than eps growth</span>
-<span class="sd">        eps ([type], optional): Value for which we consider the model to have zero growth . Defaults to 1e-6.</span>
+<span class="sd">        eps (float, optional): Value for which we consider the model to have zero</span>
+<span class="sd">                               growth . Defaults to 1e-6.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (Model): Cobra model with extended medium</span>
-<span class="sd">        (List): List of extended metabolites</span>
+<span class="sd">        Model: Cobra model with extended medium</span>
+<span class="sd">        list: List of extended metabolites</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model_help</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="c1"># if model_help.slim_optimize() &gt; eps:</span>
@@ -340,7 +344,7 @@
 <span class="sd">        medium (str): File name of a medium file in json format</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (Model): Cobra model</span>
+<span class="sd">        Model: Cobra model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Set bounds</span>
     <span class="n">configs_dict</span> <span class="o">=</span> <span class="n">get_default_configs</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
@@ -368,16 +372,16 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="score_memote"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.score_memote">[docs]</a><span class="k">def</span> <span class="nf">score_memote</span><span class="p">(</span><span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">report_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">solver_timout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">):</span>
+<div class="viewcode-block" id="score_memote"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.score_memote">[docs]</a><span class="k">def</span> <span class="nf">score_memote</span><span class="p">(</span><span class="n">model_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">report_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">solver_timout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Generates a memote evaluation report for the model quality.</span>
 
-<span class="sd">    NOTE: This typically requires a rather consistent model, otherwise it breaks</span>
+<span class="sd">    NOTE: This typically requires a rather consistent model, otherwise it breaks.</span>
 <span class="sd">    NOTE: This can take a while on a local computer, especially if the solver_timeout is high</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        model_path (str): Path to the model file: Typically SBML format</span>
-<span class="sd">        report_path (str): Path to the model file: Typically SBML format</span>
-<span class="sd">        solver_timout (int): Time in seconds until the solver timeouts.</span>
+<span class="sd">        str: Path to the model file: Typically SBML format</span>
+<span class="sd">        str: Path to the model file: Typically SBML format</span>
+<span class="sd">        int: Time in seconds until the solver timeouts.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
@@ -399,16 +403,18 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You may consider to score the model online: https://memote.io/&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="create_consistent_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.create_consistent_model">[docs]</a><span class="k">def</span> <span class="nf">create_consistent_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This will create a more consistent model</span>
+<div class="viewcode-block" id="create_consistent_model"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.create_consistent_model">[docs]</a><span class="k">def</span> <span class="nf">create_consistent_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;This will create a more consistent model, using fastcc</span>
+<span class="sd">    (https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424) and</span>
+<span class="sd">    also returns a summary report with the improvments.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        model (cobra.core.Model): Cobra metabolic model class</span>
-<span class="sd">        verbose (bool, optional): Print out results in console . Defaults to True.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            model (cobra.core.Model): Cobra metabolic model class</span>
+<span class="sd">            verbose (bool, optional): Print out results in console . Defaults to True.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        cobra.core.Model: Returns a more consistent cobra model.</span>
-<span class="sd">        pd.DataFrame: Returns some statistics that may be imprved.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            cobra.core.Model: Returns a more consistent cobra model.</span>
+<span class="sd">            pd.DataFrame: Returns some statistics that may be imprved.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">blocked_reactions</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">find_blocked_reactions</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">met_formulas</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_metabolite_compartment_formula</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -445,7 +451,7 @@
     <span class="k">return</span> <span class="n">consistent_model</span><span class="p">,</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="fastcc"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.fastcc">[docs]</a><span class="k">def</span> <span class="nf">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="fastcc"><a class="viewcode-back" href="../../../api/ncmw.setup_models.html#ncmw.setup_models.setup.fastcc">[docs]</a><span class="k">def</span> <span class="nf">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;FastCC algorithm to increase model quality by resolving conflicts and removing</span>
 <span class="sd">    unnecessary e.g. blocked pathways</span>
 <span class="sd">    https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424</span>

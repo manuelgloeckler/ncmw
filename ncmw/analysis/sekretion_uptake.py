@@ -1,5 +1,5 @@
-import cobra
-from cobra import Model
+from typing import List, Tuple, Iterable
+from cobra import Model, Reaction, Metabolite
 import re
 
 import pandas as pd
@@ -8,7 +8,7 @@ import numpy as np
 from ncmw.utils import pad_dict_list
 
 
-def transport_reactions(model: Model):
+def transport_reactions(model: Model) -> List[str]:
     """This function return a list of potential transport reactions
 
     NOTE: This is a cheap heuristic
@@ -29,14 +29,14 @@ def transport_reactions(model: Model):
     return res
 
 
-def table_ex_transport(model: Model):
+def table_ex_transport(model: Model) -> pd.DataFrame:
     """This method heuristically checks if all exchange reaction has an associated transporter
 
     Args:
         model (Model): Cobra model
 
     Returns:
-        DataFrame: Table of indicators (0 indicates abscence, 1 indicates presence)
+        pd.DataFrame: Table of indicators (0 indicates abscence, 1 indicates presence)
     """
     compartments = [id for id in model.compartments.keys()]
     metabolites_ex = [key[3:-2] for key in model.medium]
@@ -68,7 +68,7 @@ def table_ex_transport(model: Model):
     return df
 
 
-def sekretion_uptake_fba(model: Model):
+def sekretion_uptake_fba(model: Model) -> Tuple[List[str], List[str]]:
     """This gives the uptake and sekretion reaction in a FBA solution
 
     NOTE: This is not unique! Use the method base on FVA instead for unique solutions.
@@ -94,15 +94,15 @@ def sekretion_uptake_fba(model: Model):
     return uptake, sekretion
 
 
-def sekretion_uptake_fva(fva):
+def sekretion_uptake_fva(fva) -> Tuple[List, List]:
     """This computes the uptake and sekreation reaction using FVA, this is UNIQUE!
 
     Args:
         fva (DataFrame): Fva results
 
     Returns:
-        list: List of uptake reactions.
-        list: List of sekretion reactions.
+        list: List of uptake reactions
+        list: List of sekretion reactions
     """
     ex_fva = fva.loc[fva.index.str.contains("EX_")]
     uptake = ex_fva[ex_fva["minimum"] < 0].index.tolist()
@@ -111,11 +111,14 @@ def sekretion_uptake_fva(fva):
 
 
 def compute_uptake_sekretion_table(
-    model_name1, model_name2, uptake1, uptake2, sekretion1, sekretion2
-):
-    """Compute the uptake sekretion overlap
-
-
+    model_name1: str,
+    model_name2: str,
+    uptake1: List[str],
+    uptake2: List[str],
+    sekretion1: List[str],
+    sekretion2: List[str],
+) -> pd.DataFrame:
+    """Constructs a table of the uptake sekretion and overlap for a pair of models
 
     Args:
         model_name1: Name of the model 1
@@ -126,7 +129,7 @@ def compute_uptake_sekretion_table(
         sekretion2: Sekretion reactions of model 2
 
     Returns:
-        DataFrame: Tabel of uptake/sekretions as well as Sekretion -> Uptake relationships.
+        pd.DataFrame: Tabel of uptake/sekretions as well as Sekretion -> Uptake relationships.
 
     """
     # Common up/sekretion from SA to DP
@@ -153,10 +156,10 @@ def compute_uptake_sekretion_table(
     return df
 
 
-def compute_all_uptake_sekretion_tables(models: list, fvas=None):
+def compute_all_uptake_sekretion_tables(
+    models: List[Model], fvas: List[pd.DataFrame] = None
+) -> List[pd.DataFrame]:
     """Computes all uptake sekretion tables for all models.
-
-
 
     Args:
         models: Cobra models
@@ -190,13 +193,28 @@ def compute_all_uptake_sekretion_tables(models: list, fvas=None):
     return dfs
 
 
-def compute_uptake_growth_relationship(model, ids, h=100, custom_flux=None):
-    """Computes the growth for multiple fixed flux values, while keeping the others variable."""
+def compute_uptake_growth_relationship(
+    model: Model, ids: List[str], h: int = 100, custom_flux: Iterable = None
+) -> Tuple[Iterable, Iterable]:
+    """For each reaction in with id contained in "ids" the method keeps all other
+    components within the medium constant but changes this one from a certain value to zero.
+
+    This can be used for a sensitivity analysis, as if certain metabolites are important
+    within the medium we expect that they strongly influence the growth!
+
+        Returns:
+            list: Fluxes used to compute the corresponding growths.
+            list: Growths computed using the corresponding fluxes.
+
+    """
     medium = model.medium.copy()
     fluxes = []
     growths = []
     for up in ids:
-        old_f = medium[up]
+        if up in medium:
+            old_f = medium[up]
+        else:
+            old_f = 0
         flux = np.linspace(old_f, 0, h)
         if not custom_flux is None:
             flux = custom_flux

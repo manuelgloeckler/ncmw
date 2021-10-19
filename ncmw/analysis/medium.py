@@ -25,7 +25,7 @@ def compute_fvas(models: Iterable, fraction: float) -> List:
     return dfs
 
 
-def compute_COMPM(models: list, fvas: list = None) -> Dict:
+def compute_COMPM(models: list, fvas: list = None) -> List:
     r"""Computes the COMPM medium, given all the fva results. The COMPM is defined as
     the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.
 
@@ -42,10 +42,13 @@ def compute_COMPM(models: list, fvas: list = None) -> Dict:
         models (list): List of cobra metabolit models
         fvas (list, optional): List of dataframes containing FVA results for the models.
                                If argument is "None", then it will be recomputed based on the given models.
+
+
+    Returns:
+        mediums (list): List of COMPM mediums for each model
     """
     if fvas is None:
         fvas = compute_fvas(models, 1.0)
-    print(fvas)
     df = pd.concat(list(fvas))
     df = df.groupby(df.index).min()
     mediums = []

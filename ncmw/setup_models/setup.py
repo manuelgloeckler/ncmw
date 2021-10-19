@@ -1,6 +1,7 @@
 import cobra
 import cobra.test
 from cobra.core import Model
+from typing import Tuple, List
 import pandas as pd
 
 import subprocess
@@ -15,7 +16,9 @@ from ncmw.utils import (
 from copy import deepcopy
 
 
-def gapfill_model(model: Model, eps=1e-6, fill_model_base="base", **kwargs):
+def gapfill_model(
+    model: Model, eps: float = 1e-6, fill_model_base: str = "base", **kwargs
+):
     """Adds reactions to the model, such that it has growth in the given medium
 
     Args:
@@ -27,15 +30,15 @@ def gapfill_model(model: Model, eps=1e-6, fill_model_base="base", **kwargs):
         documentation https://cobrapy.readthedocs.io/en/latest/gapfilling.html
 
     Returns:
-        (Model): Cobra model that has growth if algorithm succeeds
-        (List): List of reactions that were added
+        Model: Cobra model that has growth if algorithm succeeds
+        list: List of reactions that were added
     """
     model = deepcopy(model)
     growth = model.slim_optimize()
     if growth > eps:
         # Already has growth gapfilling is unnecessary
         return model, []
-        
+
     if isinstance(fill_model_base, Model):
         fill_model = fill_model_base
     elif fill_model_base == "ecoli" or fill_model_base == "salmonella":
@@ -95,17 +98,18 @@ def gapfill_model(model: Model, eps=1e-6, fill_model_base="base", **kwargs):
     return filled_model, solution
 
 
-def gapfill_medium(model: Model, eps=1e-1):
+def gapfill_medium(model: Model, eps: float = 1e-1) -> Tuple[Model, List]:
     """This will add the minimal set of exchange reactions such that the model
     has more than eps growth.
 
     Args:
         model (Model): Cobra model which has less than eps growth
-        eps ([type], optional): Value for which we consider the model to have zero growth . Defaults to 1e-6.
+        eps (float, optional): Value for which we consider the model to have zero
+                               growth . Defaults to 1e-6.
 
     Returns:
-        (Model): Cobra model with extended medium
-        (List): List of extended metabolites
+        Model: Cobra model with extended medium
+        list: List of extended metabolites
     """
     model_help = deepcopy(model)
     # if model_help.slim_optimize() > eps:
@@ -178,7 +182,7 @@ def set_default_configs_and_snm3_medium(
         medium (str): File name of a medium file in json format
 
     Returns:
-        (Model): Cobra model
+        Model: Cobra model
     """
     # Set bounds
     configs_dict = get_default_configs(configs)
@@ -206,16 +210,16 @@ def set_default_configs_and_snm3_medium(
     return model
 
 
-def score_memote(model_path: str, report_path: str, solver_timout: int = 120):
+def score_memote(model_path: str, report_path: str, solver_timout: int = 120) -> None:
     """Generates a memote evaluation report for the model quality.
 
-    NOTE: This typically requires a rather consistent model, otherwise it breaks
+    NOTE: This typically requires a rather consistent model, otherwise it breaks.
     NOTE: This can take a while on a local computer, especially if the solver_timeout is high
 
     Args:
-        model_path (str): Path to the model file: Typically SBML format
-        report_path (str): Path to the model file: Typically SBML format
-        solver_timout (int): Time in seconds until the solver timeouts.
+        str: Path to the model file: Typically SBML format
+        str: Path to the model file: Typically SBML format
+        int: Time in seconds until the solver timeouts.
     """
     try:
         p = subprocess.Popen(
@@ -237,16 +241,18 @@ def score_memote(model_path: str, report_path: str, solver_timout: int = 120):
         print("You may consider to score the model online: https://memote.io/")
 
 
-def create_consistent_model(model: Model):
-    """This will create a more consistent model
+def create_consistent_model(model: Model) -> Tuple[Model, pd.DataFrame]:
+    """This will create a more consistent model, using fastcc
+    (https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424) and
+    also returns a summary report with the improvments.
 
-    Args:
-        model (cobra.core.Model): Cobra metabolic model class
-        verbose (bool, optional): Print out results in console . Defaults to True.
+        Args:
+            model (cobra.core.Model): Cobra metabolic model class
+            verbose (bool, optional): Print out results in console . Defaults to True.
 
-    Returns:
-        cobra.core.Model: Returns a more consistent cobra model.
-        pd.DataFrame: Returns some statistics that may be imprved.
+        Returns:
+            cobra.core.Model: Returns a more consistent cobra model.
+            pd.DataFrame: Returns some statistics that may be imprved.
     """
     blocked_reactions = cobra.flux_analysis.find_blocked_reactions(model)
     met_formulas = cobra.manipulation.check_metabolite_compartment_formula(model)
@@ -283,7 +289,7 @@ def create_consistent_model(model: Model):
     return consistent_model, df
 
 
-def fastcc(model: Model):
+def fastcc(model: Model) -> Model:
     """FastCC algorithm to increase model quality by resolving conflicts and removing
     unnecessary e.g. blocked pathways
     https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424

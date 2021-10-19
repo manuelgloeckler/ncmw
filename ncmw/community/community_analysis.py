@@ -81,7 +81,7 @@ def compute_community_interaction_graph(model, df):
     species_interaction = (help_array.sum(1) + medium_col) < -1e-6
     species_interaction
     df = df[species_interaction]
-    df = df.drop("Shuttle Reaction", 1)
+    df = df.drop(df.columns[-1], 1)
 
     # Build interaction graph
     G = nx.DiGraph()

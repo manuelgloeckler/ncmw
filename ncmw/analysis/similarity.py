@@ -1,11 +1,11 @@
-from typing import Iterable
+from typing import Iterable, Tuple, List
 from cobra.core import Model
 import pandas as pd
 
 import numpy as np
 
 
-def get_shared_metabolites_counts(model1: Model, model2: Model):
+def get_shared_metabolites_counts(model1: Model, model2: Model) -> Tuple[int, int]:
     """This method return the number of unique metabolites in both models .
 
     Args:
@@ -13,8 +13,8 @@ def get_shared_metabolites_counts(model1: Model, model2: Model):
         model2 (Model): Second cobra model
 
     Returns:
-        (int): Total number of metabolites in both models
-        (int): Total number of shared metabolites
+        int: Total number of metabolites in both models
+        int: Total number of shared metabolites
     """
     met1 = set(map(lambda x: x.id, model1.metabolites))
     met2 = set(map(lambda x: x.id, model2.metabolites))
@@ -25,7 +25,7 @@ def get_shared_metabolites_counts(model1: Model, model2: Model):
     return len(met_ids), len(common_met_ids)
 
 
-def get_shared_reactions_counts(model1: Model, model2: Model):
+def get_shared_reactions_counts(model1: Model, model2: Model) -> Tuple[int, int]:
     """This computes the number of shared reactions
 
     Args:
@@ -34,8 +34,8 @@ def get_shared_reactions_counts(model1: Model, model2: Model):
         prefix (str): Location to write file. Default is ""
 
     Returns:
-        (int): Total number of reactions in both models
-        (int): Total number of shared reactions
+        int: Total number of reactions in both models
+        int: Total number of shared reactions
     """
 
     rec1 = set(map(lambda x: x.id, model1.reactions))
@@ -47,17 +47,22 @@ def get_shared_reactions_counts(model1: Model, model2: Model):
     return len(rec_ids), len(common_rec_ids)
 
 
-def jaccard_similarity(model1: Model, model2: Model):
+def jaccard_similarity(model1: Model, model2: Model) -> Tuple[float, float]:
     """This returns the Jacard Similarity of both models with respect to the set
-    of metabolites and reactions
+    of metabolites and reactions.
+
+    Given two sets :math:`A` and :math:`B` (i.e.
+    reactions of two different models), the Jaccrad similarity is defined as
+
+    .. math:: JS(A,B) = \mid A \cap B\mid / \mid A \cup B \mid
 
     Args:
         model1 (Model): First cobra model
         model2 (Model): Second cobra model
 
     Returns:
-        (float): Jacard similarity of metabolite sets
-        (float): Jacard similarity of reaction sets
+        float: Jacard similarity of metabolite sets
+        float: Jacard similarity of reaction sets
     """
     total_mets, common_mets = get_shared_metabolites_counts(model1, model2)
     total_recs, common_recs = get_shared_reactions_counts(model1, model2)
@@ -66,17 +71,25 @@ def jaccard_similarity(model1: Model, model2: Model):
     return j_met, j_rec
 
 
-def jaccard_similarity_matrices(models: Iterable):
+def jaccard_similarity_matrices(
+    models: Iterable[Model],
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """The methods takes an Iterable of cobra models and returns a dictionary
-    containing all pairwise jaccard similarities.
+    containing all pairwise jaccard similarities for metabolites, reactions and exchange
+    reactions (i.e. resource overlap).
+
+    Given two sets :math:`A` and :math:`B` (i.e.
+    reactions of two different models), the Jaccrad similarity is defined as
+
+    .. math:: JS(A,B) = \mid A \cap B\mid / \mid A \cup B \mid
 
     Args:
         models (Iterable): List of cobra models
 
     Returns:
-        (df): DataFrame of all jaccard similarities for metabolites indexed by the model ids.
-        (df): DataFrame of all jaccard similarities for reaction indexed by the model ids.
-        (df): DataFrame for resourece overlap indexed by the model ids.
+        pd.DataFrame: DataFrame of all jaccard similarities for metabolites indexed by the model ids.
+        pd.DataFrame: DataFrame of all jaccard similarities for reaction indexed by the model ids.
+        pd.DataFrame: DataFrame for resourece overlap indexed by the model ids.
     """
     N = len(models)
     matrix_met = np.eye(N)
@@ -101,7 +114,7 @@ def jaccard_similarity_matrices(models: Iterable):
     return df1, df2, df3
 
 
-def resource_overlap(model1: Model, model2: Model):
+def resource_overlap(model1: Model, model2: Model) -> float:
     """Computes the resource overlap between two models
 
     Args:
@@ -109,7 +122,7 @@ def resource_overlap(model1: Model, model2: Model):
         model2 (Model): Cobra model
 
     Returns:
-        (float): Jacard index of resource overlap
+        float: Jacard index of resource overlap
     """
     in_ex1 = set([ex.id for ex in model1.exchanges if ex.lower_bound < 0])
     in_ex2 = set([ex.id for ex in model2.exchanges if ex.lower_bound < 0])
@@ -121,10 +134,20 @@ def resource_overlap(model1: Model, model2: Model):
 
 
 def write_out_common_metabolites(
-    model1: Model, model2, prefix: str = "common_reactions.csv"
+    models: List[Model], prefix: str = "common_reactions.csv"
 ):
-    # Check for correctness
-    common_metabolits = [met for met in model1.metabolites if met in model2.metabolites]
+    """This writes out the common reactions as excel sheet and will highligh all
+    exchange reaction with yellow color
+
+    Args:
+        models (list[Model]): List of cobra models
+        prefix (str): Name of the file
+
+    """
+    model = models[0]
+    common_metabolits = [
+        rec for rec in model.metabolites if all([rec in m.metabolites for m in models])
+    ]
     # Write csv
     df_dict = {"ID": [], "NAME": [], "FORMULA": [], "COMPARTMENT": []}
     for met in common_metabolits:
@@ -138,9 +161,20 @@ def write_out_common_metabolites(
 
 
 def write_out_common_reactions(
-    model1: Model, model2: Model, prefix: str = "common_metabolites.csv"
-):
-    common_reactions = [rec for rec in model1.reactions if rec in model2.reactions]
+    models: List[Model], prefix: str = "common_metabolites"
+) -> None:
+    """This writes out the common reactions as excel sheet and will highligh all
+    exchange reaction with yellow color
+
+    Args:
+        models (list[Model]): List of cobra models
+        prefix (str): name of the file
+
+    """
+    model = models[0]
+    common_reactions = [
+        rec for rec in model.reactions if all([rec in m.reactions for m in models])
+    ]
     # Write csv
     df_dict = {
         "ID": [],

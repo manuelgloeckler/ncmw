@@ -187,9 +187,9 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.build_community">build_community() (ncmw.community.community_models.ShuttleCommunityCobraModel method)</a>
+      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.build_community">build_community() (ncmw.community.community_models.ShuttleCommunityModel method)</a>
 </li>
-      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.build_mip_model">build_mip_model() (ncmw.community.community_models.ShuttleCommunityModel method)</a>
+      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.build_mip_model">build_mip_model() (ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -212,10 +212,10 @@
       <li><a href="api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.compute_convex_combination">compute_convex_combination() (ncmw.community.community_models.BagOfReactionsModel method)</a>
 
       <ul>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.compute_convex_combination">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_combination">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
-      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.compute_convex_COOPM">compute_convex_COOPM() (ncmw.community.community_models.ShuttleCommunityModel method)</a>
+      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_COOPM">compute_convex_COOPM() (ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       <li><a href="api/ncmw.community.html#ncmw.community.community_analysis.compute_dominant_weights">compute_dominant_weights() (in module ncmw.community.community_analysis)</a>
 </li>
@@ -240,7 +240,7 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.computeCOOPM">(ncmw.community.community_models.CommunityModel method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.computeCOOPM">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.computeCOOPM">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
       <li><a href="api/ncmw.setup_models.html#ncmw.setup_models.setup.create_consistent_model">create_consistent_model() (in module ncmw.setup_models.setup)</a>
@@ -316,7 +316,9 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.load">(ncmw.community.community_models.CommunityModel static method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.load">(ncmw.community.community_models.ShuttleCommunityModel static method)</a>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.load">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+</li>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.load">(ncmw.community.community_models.ShuttleCommunityModelMIP static method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -362,6 +364,8 @@
         <li><a href="api/ncmw.setup_models.html#module-ncmw.setup_models.setup">ncmw.setup_models.setup</a>
 </li>
         <li><a href="api/ncmw.utils.html#module-ncmw.utils">ncmw.utils</a>
+</li>
+        <li><a href="api/ncmw.utils.html#module-ncmw.utils.helpers">ncmw.utils.helpers</a>
 </li>
         <li><a href="api/ncmw.utils.html#module-ncmw.utils.utils_io">ncmw.utils.utils_io</a>
 </li>
@@ -459,8 +463,6 @@
         <li><a href="api/ncmw.scripts.html#module-ncmw.scripts.community_scripts">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ncmw.scripts.ncmw_scripts
 
@@ -468,6 +470,8 @@
         <li><a href="api/ncmw.scripts.html#module-ncmw.scripts.ncmw_scripts">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     ncmw.scripts.setup_scripts
 
@@ -494,6 +498,13 @@
 
       <ul>
         <li><a href="api/ncmw.utils.html#module-ncmw.utils">module</a>
+</li>
+      </ul></li>
+      <li>
+    ncmw.utils.helpers
+
+      <ul>
+        <li><a href="api/ncmw.utils.html#module-ncmw.utils.helpers">module</a>
 </li>
       </ul></li>
       <li>
@@ -549,9 +560,9 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.optimize">(ncmw.community.community_models.CommunityModel method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.optimize">(ncmw.community.community_models.ShuttleCommunityCobraModel method)</a>
-</li>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.optimize">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+</li>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.optimize">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -560,18 +571,22 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.pad_dict_list">pad_dict_list() (in module ncmw.analysis.sekretion_uptake)</a>
+      <li><a href="api/ncmw.utils.html#ncmw.utils.helpers.pad_dict_list">pad_dict_list() (in module ncmw.utils.helpers)</a>
 </li>
       <li><a href="api/ncmw.visualization.html#ncmw.visualization.community_visualization.plot_community_interaction">plot_community_interaction() (in module ncmw.visualization.community_visualization)</a>
+</li>
+      <li><a href="api/ncmw.visualization.html#ncmw.visualization.community_visualization.plot_community_summary">plot_community_summary() (in module ncmw.visualization.community_visualization)</a>
 </li>
       <li><a href="api/ncmw.visualization.html#ncmw.visualization.community_visualization.plot_community_uptake_graph">plot_community_uptake_graph() (in module ncmw.visualization.community_visualization)</a>
 </li>
       <li><a href="api/ncmw.visualization.html#ncmw.visualization.fva_visualization.plot_full_fva">plot_full_fva() (in module ncmw.visualization.fva_visualization)</a>
 </li>
-      <li><a href="api/ncmw.visualization.html#ncmw.visualization.fva_visualization.plot_medium_fva_range">plot_medium_fva_range() (in module ncmw.visualization.fva_visualization)</a>
+      <li><a href="api/ncmw.visualization.html#ncmw.visualization.growth_visualization.plot_growth_sensitivity">plot_growth_sensitivity() (in module ncmw.visualization.growth_visualization)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/ncmw.visualization.html#ncmw.visualization.fva_visualization.plot_medium_fva_range">plot_medium_fva_range() (in module ncmw.visualization.fva_visualization)</a>
+</li>
       <li><a href="api/ncmw.visualization.html#ncmw.visualization.community_visualization.plot_pairwise_growth_relation_per_weight">plot_pairwise_growth_relation_per_weight() (in module ncmw.visualization.community_visualization)</a>
 </li>
       <li><a href="api/ncmw.visualization.html#ncmw.visualization.community_visualization.plot_posterior_samples_for_observations">plot_posterior_samples_for_observations() (in module ncmw.visualization.community_visualization)</a>
@@ -619,6 +634,8 @@
 </li>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.save">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
 </li>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.save">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
+</li>
       </ul></li>
       <li><a href="api/ncmw.utils.html#ncmw.utils.utils_io.save_model">save_model() (in module ncmw.utils.utils_io)</a>
 </li>
@@ -630,9 +647,9 @@
 </li>
       <li><a href="api/ncmw.setup_models.html#ncmw.setup_models.setup.set_default_configs_and_snm3_medium">set_default_configs_and_snm3_medium() (in module ncmw.setup_models.setup)</a>
 </li>
-      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel">ShuttleCommunityCobraModel (class in ncmw.community.community_models)</a>
-</li>
       <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel">ShuttleCommunityModel (class in ncmw.community.community_models)</a>
+</li>
+      <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP">ShuttleCommunityModelMIP (class in ncmw.community.community_models)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -641,9 +658,9 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.single_optimize">(ncmw.community.community_models.CommunityModel method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.single_optimize">(ncmw.community.community_models.ShuttleCommunityCobraModel method)</a>
-</li>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.single_optimize">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+</li>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.single_optimize">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
       <li><a href="api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.slim_optimize">slim_optimize() (ncmw.community.community_models.BagOfReactionsModel method)</a>
@@ -651,7 +668,7 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.slim_optimize">(ncmw.community.community_models.CommunityModel method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.slim_optimize">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.slim_optimize">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
       <li><a href="api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.summary">summary() (ncmw.community.community_models.BagOfReactionsModel method)</a>
@@ -659,9 +676,9 @@
       <ul>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.CommunityModel.summary">(ncmw.community.community_models.CommunityModel method)</a>
 </li>
-        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityCobraModel.summary">(ncmw.community.community_models.ShuttleCommunityCobraModel method)</a>
-</li>
         <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.summary">(ncmw.community.community_models.ShuttleCommunityModel method)</a>
+</li>
+        <li><a href="api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.summary">(ncmw.community.community_models.ShuttleCommunityModelMIP method)</a>
 </li>
       </ul></li>
   </ul></td>

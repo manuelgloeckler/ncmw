@@ -4,6 +4,14 @@ ncmw.utils package
 Submodules
 ----------
 
+ncmw.utils.helpers module
+-------------------------
+
+.. automodule:: ncmw.utils.helpers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ncmw.utils.utils\_io module
 ---------------------------
 

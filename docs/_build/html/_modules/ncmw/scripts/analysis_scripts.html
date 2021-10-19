@@ -11,10 +11,10 @@
   
 
   
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/style.css" type="text/css" />
 
   
   
@@ -177,6 +177,8 @@
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
 <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_dir</span><span class="p">)</span>
 
@@ -203,6 +205,7 @@
     <span class="n">jacard_index_similarity_heatmap</span><span class="p">,</span>
     <span class="n">plot_scaled_medium_growth</span><span class="p">,</span>
     <span class="n">uptake_sekretion_venn_diagrams</span><span class="p">,</span>
+    <span class="n">plot_growth_sensitivity</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -356,6 +359,16 @@
         <span class="p">)</span>
         <span class="n">uptakes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">uptake</span><span class="p">)</span>
         <span class="n">sekretions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sekretion</span><span class="p">)</span>
+
+        <span class="c1"># Plots for uptake sensitivity!</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_growth_sensitivity</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">uptake</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="n">PATH</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="s2">&quot;growth&quot;</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_growth_sensitivity.pdf&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>

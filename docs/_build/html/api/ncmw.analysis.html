@@ -217,7 +217,7 @@
 <span id="ncmw-analysis-medium-module"></span><h2>ncmw.analysis.medium module<a class="headerlink" href="#module-ncmw.analysis.medium" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.medium.compute_COMPM">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_COMPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_COMPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_COMPM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_COMPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_COMPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_COMPM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the COMPM medium, given all the fva results. The COMPM is defined as
 the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.</p>
 <p>Mathematically it requires the FVA results for each reaction contained in the
@@ -234,6 +234,12 @@ define the COMPM as</p>
 <li><p><strong>fvas</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>, </em><em>optional</em>) – List of dataframes containing FVA results for the models.
 If argument is “None”, then it will be recomputed based on the given models.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of COMPM mediums for each model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>mediums (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)">list</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -268,7 +274,7 @@ If argument is “None”, then it will be recomputed based on the given models.
 <span id="ncmw-analysis-sekretion-uptake-module"></span><h2>ncmw.analysis.sekretion_uptake module<a class="headerlink" href="#module-ncmw.analysis.sekretion_uptake" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.compute_all_uptake_sekretion_tables">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_all_uptake_sekretion_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_all_uptake_sekretion_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_all_uptake_sekretion_tables" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_all_uptake_sekretion_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_all_uptake_sekretion_tables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_all_uptake_sekretion_tables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes all uptake sekretion tables for all models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -288,14 +294,24 @@ If argument is “None”, then it will be recomputed based on the given models.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.compute_uptake_growth_relationship">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_uptake_growth_relationship</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_uptake_growth_relationship"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_uptake_growth_relationship" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the growth for multiple fixed flux values, while keeping the others variable.</p>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_uptake_growth_relationship</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ids</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_flux</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterable</span><span class="p"><span class="pre">,</span> </span><span class="pre">Iterable</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_uptake_growth_relationship"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_uptake_growth_relationship" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each reaction in with id contained in “ids” the method keeps all other
+components within the medium constant but changes this one from a certain value to zero.</p>
+<p>This can be used for a sensitivity analysis, as if certain metabolites are important
+within the medium we expect that they strongly influence the growth!</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Returns:</dt><dd><p>list: Fluxes used to compute the corresponding growths.
+list: Growths computed using the corresponding fluxes.</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.compute_uptake_sekretion_table">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_uptake_sekretion_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptake1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptake2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekretion1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekretion2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_uptake_sekretion_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_uptake_sekretion_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the uptake sekretion overlap</p>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">compute_uptake_sekretion_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptake1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uptake2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekretion1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sekretion2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#compute_uptake_sekretion_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.compute_uptake_sekretion_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a table of the uptake sekretion and overlap for a pair of models</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -311,19 +327,14 @@ If argument is “None”, then it will be recomputed based on the given models.
 <dd class="field-even"><p>Tabel of uptake/sekretions as well as Sekretion -&gt; Uptake relationships.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>DataFrame</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.pad_dict_list">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">pad_dict_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#pad_dict_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.pad_dict_list" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.sekretion_uptake_fba">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">sekretion_uptake_fba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#sekretion_uptake_fba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.sekretion_uptake_fba" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">sekretion_uptake_fba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#sekretion_uptake_fba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.sekretion_uptake_fba" title="Permalink to this definition">¶</a></dt>
 <dd><p>This gives the uptake and sekretion reaction in a FBA solution</p>
 <p>NOTE: This is not unique! Use the method base on FVA instead for unique solutions.</p>
 <dl class="field-list simple">
@@ -342,15 +353,15 @@ list: List of sekretion reactions</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.sekretion_uptake_fva">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">sekretion_uptake_fva</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fva</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#sekretion_uptake_fva"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.sekretion_uptake_fva" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">sekretion_uptake_fva</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fva</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#sekretion_uptake_fva"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.sekretion_uptake_fva" title="Permalink to this definition">¶</a></dt>
 <dd><p>This computes the uptake and sekreation reaction using FVA, this is UNIQUE!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>fva</strong> (<em>DataFrame</em>) – Fva results</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of uptake reactions.
-list: List of sekretion reactions.</p>
+<dd class="field-even"><p>List of uptake reactions
+list: List of sekretion reactions</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
@@ -360,7 +371,7 @@ list: List of sekretion reactions.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.table_ex_transport">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">table_ex_transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#table_ex_transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.table_ex_transport" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">table_ex_transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#table_ex_transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.table_ex_transport" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method heuristically checks if all exchange reaction has an associated transporter</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -370,14 +381,14 @@ list: List of sekretion reactions.</p>
 <dd class="field-even"><p>Table of indicators (0 indicates abscence, 1 indicates presence)</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>DataFrame</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.transport_reactions">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">transport_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#transport_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.transport_reactions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">transport_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#transport_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.transport_reactions" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function return a list of potential transport reactions</p>
 <p>NOTE: This is a cheap heuristic</p>
 <dl class="field-list simple">
@@ -398,7 +409,7 @@ list: List of sekretion reactions.</p>
 <span id="ncmw-analysis-similarity-module"></span><h2>ncmw.analysis.similarity module<a class="headerlink" href="#module-ncmw.analysis.similarity" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.get_shared_metabolites_counts">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">get_shared_metabolites_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#get_shared_metabolites_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.get_shared_metabolites_counts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">get_shared_metabolites_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#get_shared_metabolites_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.get_shared_metabolites_counts" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method return the number of unique metabolites in both models .</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -409,17 +420,17 @@ list: List of sekretion reactions.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Total number of metabolites in both models
-(int): Total number of shared metabolites</p>
+int: Total number of shared metabolites</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.get_shared_reactions_counts">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">get_shared_reactions_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#get_shared_reactions_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.get_shared_reactions_counts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">get_shared_reactions_counts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#get_shared_reactions_counts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.get_shared_reactions_counts" title="Permalink to this definition">¶</a></dt>
 <dd><p>This computes the number of shared reactions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -431,19 +442,23 @@ list: List of sekretion reactions.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Total number of reactions in both models
-(int): Total number of shared reactions</p>
+int: Total number of shared reactions</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)">int</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.jaccard_similarity">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">jaccard_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#jaccard_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.jaccard_similarity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">jaccard_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#jaccard_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.jaccard_similarity" title="Permalink to this definition">¶</a></dt>
 <dd><p>This returns the Jacard Similarity of both models with respect to the set
-of metabolites and reactions</p>
+of metabolites and reactions.</p>
+<p>Given two sets <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> (i.e.
+reactions of two different models), the Jaccrad similarity is defined as</p>
+<div class="math notranslate nohighlight">
+\[JS(A,B) = \mid A \cap B\mid / \mid A \cup B \mid\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -453,37 +468,42 @@ of metabolites and reactions</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Jacard similarity of metabolite sets
-(float): Jacard similarity of reaction sets</p>
+float: Jacard similarity of reaction sets</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.jaccard_similarity_matrices">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">jaccard_similarity_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#jaccard_similarity_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.jaccard_similarity_matrices" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">jaccard_similarity_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#jaccard_similarity_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.jaccard_similarity_matrices" title="Permalink to this definition">¶</a></dt>
 <dd><p>The methods takes an Iterable of cobra models and returns a dictionary
-containing all pairwise jaccard similarities.</p>
+containing all pairwise jaccard similarities for metabolites, reactions and exchange
+reactions (i.e. resource overlap).</p>
+<p>Given two sets <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span> (i.e.
+reactions of two different models), the Jaccrad similarity is defined as</p>
+<div class="math notranslate nohighlight">
+\[JS(A,B) = \mid A \cap B\mid / \mid A \cup B \mid\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>models</strong> (<em>Iterable</em>) – List of cobra models</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>DataFrame of all jaccard similarities for metabolites indexed by the model ids.
-(df): DataFrame of all jaccard similarities for reaction indexed by the model ids.
-(df): DataFrame for resourece overlap indexed by the model ids.</p>
+pd.DataFrame: DataFrame of all jaccard similarities for reaction indexed by the model ids.
+pd.DataFrame: DataFrame for resourece overlap indexed by the model ids.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(df)</p>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.resource_overlap">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">resource_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#resource_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.resource_overlap" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">resource_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#resource_overlap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.resource_overlap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the resource overlap between two models</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -496,20 +516,40 @@ containing all pairwise jaccard similarities.</p>
 <dd class="field-even"><p>Jacard index of resource overlap</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)">float</a>)</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.write_out_common_metabolites">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">write_out_common_metabolites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'common_reactions.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#write_out_common_metabolites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.write_out_common_metabolites" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">write_out_common_metabolites</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'common_reactions.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#write_out_common_metabolites"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.write_out_common_metabolites" title="Permalink to this definition">¶</a></dt>
+<dd><p>This writes out the common reactions as excel sheet and will highligh all
+exchange reaction with yellow color</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>Model</em><em>]</em>) – List of cobra models</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Name of the file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.similarity.write_out_common_reactions">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">write_out_common_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'common_metabolites.csv'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#write_out_common_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.write_out_common_reactions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.similarity.</span></span><span class="sig-name descname"><span class="pre">write_out_common_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'common_metabolites'</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/constants.html#None" title="(in Python v3.8)"><span class="pre">None</span></a><a class="reference internal" href="../_modules/ncmw/analysis/similarity.html#write_out_common_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.similarity.write_out_common_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This writes out the common reactions as excel sheet and will highligh all
+exchange reaction with yellow color</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a><em>[</em><em>Model</em><em>]</em>) – List of cobra models</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ncmw.analysis">

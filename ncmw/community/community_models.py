@@ -118,6 +118,7 @@ class BagOfReactionsModel(CommunityModel):
         self.community_model = cobra.Model(
             "Community__" + "".join([model.id + "__" for model in models])
         )
+        self._type = "bag"
         for model in models:
             self.community_model += model
         self.models = models
@@ -268,10 +269,11 @@ class BagOfReactionsModel(CommunityModel):
         return model
 
 
-class ShuttleCommunityModel(CommunityModel):
+class ShuttleCommunityModelMIP(CommunityModel):
     def __init__(self, models, shared_exchanges=None):
         # Set up model data
         self.models = models
+        self._type = "compartmentalized"
         self.stoichiometry_matrixes = []
         self.rec_id_dicts = []
         self.met_id_dicts = []
@@ -621,7 +623,7 @@ class ShuttleCommunityModel(CommunityModel):
             return model
 
 
-class ShuttleCommunityCobraModel(BagOfReactionsModel):
+class ShuttleCommunityModel(BagOfReactionsModel):
     def __init__(self, models, shared_exchanges=None):
         self.models = models
         # For this reactions we impose shuttle reactions if possible.
@@ -631,6 +633,7 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
                 for ex in model.exchanges:
                     if ex.id not in self.shared_exchanges:
                         self.shared_exchanges.append(ex.id)
+        self._type = "compartmentalized"
 
         self.build_community()
 
@@ -652,10 +655,6 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
 
         self.community_model.objective = sum(objective)
         self.community_model.solver.update()
-
-    def _set_medium(self, medium):
-        self._medium = medium
-        self.community_model.medium = medium
 
     def optimize(self):
         df = self.community_model.optimize()
@@ -835,9 +834,40 @@ class ShuttleCommunityCobraModel(BagOfReactionsModel):
             for key, val in model.medium.items():
                 if key not in medium:
                     medium[key] = val
-        community_model.medium = medium
 
         self.community_model = community_model
         self.shuttle_reactions = [
             ex for ex in community_model.reactions if "SH_" == ex.id[:3]
         ]
+        self._set_medium(medium)
+
+    def save(self, path):
+        """This saves the model using pickle. For other format overwrite this
+        function"""
+        self.biomass_reactions = None
+        self.objective = None
+
+        with open(path + ".pkl", "wb+") as f:
+            pickle.dump(self, f)
+
+        self.biomass_ids = [
+            get_biomass_reaction(model).id + "__" + model.id for model in self.models
+        ]
+        self.biomass_reactions = [
+            self.community_model.reactions.get_by_id(i) for i in self.biomass_ids
+        ]
+        self.objective = sum([f.flux_expression for f in self.biomass_reactions])
+        self.community_model.objective = self.objective
+
+    def load(path):
+        with open(path, "rb") as f:
+            model = pickle.load(f)
+        model.biomass_ids = [
+            get_biomass_reaction(model).id + "__" + model.id for model in model.models
+        ]
+        model.biomass_reactions = [
+            model.community_model.reactions.get_by_id(i) for i in model.biomass_ids
+        ]
+        model.objective = sum([f.flux_expression for f in model.biomass_reactions])
+        model.community_model.objective = model.objective
+        return model

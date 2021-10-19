@@ -144,7 +144,7 @@ def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis")
             model_name.append(m.id.split("_")[0])
 
     names = np.array(model_name)
-    df_in = df["Shuttle Reaction"]
+    df_in = df[df.columns[-1]]
     shared_output = dict()
     for i, data in df.iterrows():
         data = data[:-1]
@@ -271,19 +271,21 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
 
 def plot_community_summary(model, names: dict = dict()):
     model_name = []
-    for model in model.models:
-        if model.id in names:
-            model_name.append(names[model.id])
+    for m in model.models:
+        if m.id in names:
+            model_name.append(names[m.id])
         else:
-            model_name.append(model.id.split("_")[0])
+            model_name.append(m.id.split("_")[0])
     df = model.summary()
     fig = plt.figure(figsize=(len(df) / 5 + 5, 5))
-    df[df.columns[:-1]].plot(kind="bar", stacked=True)
+    ax = plt.gca()
+    df[df.columns[:-1]].plot(kind="bar", stacked=True, ax=ax)
     medium_bounds = [
         model.community_model.exchanges.get_by_id(ex).lower_bound for ex in df.index
     ]
-    plt.step(range(len(df)), medium_bounds, color="red")
-    plt.legend(["Medium"] + [name for name in model_name])
+    ax.step(range(len(df)), medium_bounds, color="red")
+    ax.legend(["Medium"] + [name for name in model_name], loc="upper center")
+    fig.tight_layout()
     return fig
 
 

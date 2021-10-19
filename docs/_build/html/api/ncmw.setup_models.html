@@ -215,28 +215,25 @@
 <span id="ncmw-setup-models-setup-module"></span><h2>ncmw.setup_models.setup module<a class="headerlink" href="#module-ncmw.setup_models.setup" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.setup_models.setup.create_consistent_model">
-<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">create_consistent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#create_consistent_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.create_consistent_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>This will create a more consistent model</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<em>cobra.core.Model</em>) – Cobra metabolic model class</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a><em>, </em><em>optional</em>) – Print out results in console . Defaults to True.</p></li>
-</ul>
+<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">create_consistent_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#create_consistent_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.create_consistent_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will create a more consistent model, using fastcc
+(<a class="reference external" href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424">https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424</a>) and
+also returns a summary report with the improvments.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>model (cobra.core.Model): Cobra metabolic model class
+verbose (bool, optional): Print out results in console . Defaults to True.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Returns a more consistent cobra model.
+<dt>Returns:</dt><dd><p>cobra.core.Model: Returns a more consistent cobra model.
 pd.DataFrame: Returns some statistics that may be imprved.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>cobra.core.Model</p>
-</dd>
 </dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.setup_models.setup.fastcc">
-<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">fastcc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#fastcc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.fastcc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">fastcc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">cobra.core.model.Model</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#fastcc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.fastcc" title="Permalink to this definition">¶</a></dt>
 <dd><p>FastCC algorithm to increase model quality by resolving conflicts and removing
 unnecessary e.g. blocked pathways
 <a class="reference external" href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424">https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003424</a></p>
@@ -252,29 +249,30 @@ unnecessary e.g. blocked pathways
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.setup_models.setup.gapfill_medium">
-<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">gapfill_medium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#gapfill_medium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.gapfill_medium" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">gapfill_medium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">cobra.core.model.Model</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#gapfill_medium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.gapfill_medium" title="Permalink to this definition">¶</a></dt>
 <dd><p>This will add the minimal set of exchange reactions such that the model
 has more than eps growth.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Cobra model which has less than eps growth</p></li>
-<li><p><strong>eps</strong> (<em>[</em><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#type" title="(in Python v3.8)"><em>type</em></a><em>]</em><em>, </em><em>optional</em>) – Value for which we consider the model to have zero growth . Defaults to 1e-6.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a><em>, </em><em>optional</em>) – Value for which we consider the model to have zero
+growth . Defaults to 1e-6.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Cobra model with extended medium
-(List): List of extended metabolites</p>
+list: List of extended metabolites</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(Model)</p>
+<dd class="field-odd"><p>Model</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.setup_models.setup.gapfill_model">
-<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">gapfill_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_model_base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'base'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#gapfill_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.gapfill_model" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">gapfill_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_model_base</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'base'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#gapfill_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.gapfill_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds reactions to the model, such that it has growth in the given medium</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -289,26 +287,26 @@ has more than eps growth.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Cobra model that has growth if algorithm succeeds
-(List): List of reactions that were added</p>
+list: List of reactions that were added</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(Model)</p>
+<dd class="field-odd"><p>Model</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.setup_models.setup.score_memote">
-<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">score_memote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">report_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_timout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">120</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#score_memote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.score_memote" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.setup_models.setup.</span></span><span class="sig-name descname"><span class="pre">score_memote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">report_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver_timout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">120</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/constants.html#None" title="(in Python v3.8)"><span class="pre">None</span></a><a class="reference internal" href="../_modules/ncmw/setup_models/setup.html#score_memote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.setup_models.setup.score_memote" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a memote evaluation report for the model quality.</p>
-<p>NOTE: This typically requires a rather consistent model, otherwise it breaks
+<p>NOTE: This typically requires a rather consistent model, otherwise it breaks.
 NOTE: This can take a while on a local computer, especially if the solver_timeout is high</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>model_path</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the model file: Typically SBML format</p></li>
-<li><p><strong>report_path</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Path to the model file: Typically SBML format</p></li>
-<li><p><strong>solver_timout</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – Time in seconds until the solver timeouts.</p></li>
+<li><p><strong>str</strong> – Path to the model file: Typically SBML format</p></li>
+<li><p><strong>str</strong> – Path to the model file: Typically SBML format</p></li>
+<li><p><strong>int</strong> – Time in seconds until the solver timeouts.</p></li>
 </ul>
 </dd>
 </dl>
@@ -330,7 +328,7 @@ NOTE: This can take a while on a local computer, especially if the solver_timeou
 <dd class="field-even"><p>Cobra model</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(Model)</p>
+<dd class="field-odd"><p>Model</p>
 </dd>
 </dl>
 </dd></dl>

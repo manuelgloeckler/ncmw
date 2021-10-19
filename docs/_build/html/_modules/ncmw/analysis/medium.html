@@ -187,7 +187,7 @@
     <span class="k">return</span> <span class="n">dfs</span></div>
 
 
-<div class="viewcode-block" id="compute_COMPM"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_COMPM">[docs]</a><span class="k">def</span> <span class="nf">compute_COMPM</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fvas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="viewcode-block" id="compute_COMPM"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.medium.compute_COMPM">[docs]</a><span class="k">def</span> <span class="nf">compute_COMPM</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">fvas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Computes the COMPM medium, given all the fva results. The COMPM is defined as</span>
 <span class="sd">    the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.</span>
 
@@ -204,10 +204,13 @@
 <span class="sd">        models (list): List of cobra metabolit models</span>
 <span class="sd">        fvas (list, optional): List of dataframes containing FVA results for the models.</span>
 <span class="sd">                               If argument is &quot;None&quot;, then it will be recomputed based on the given models.</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">        mediums (list): List of COMPM mediums for each model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">fvas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fvas</span> <span class="o">=</span> <span class="n">compute_fvas</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fvas</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fvas</span><span class="p">))</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     <span class="n">mediums</span> <span class="o">=</span> <span class="p">[]</span>

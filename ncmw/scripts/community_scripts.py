@@ -32,6 +32,7 @@ from ncmw.visualization import (
     plot_posterior_samples_for_observations,
     plot_community_uptake_graph,
     plot_species_interaction,
+    plot_community_summary,
 )
 
 from ncmw.utils.utils_io import (
@@ -55,8 +56,6 @@ from ncmw.utils import (
     get_result_path,
     SEPERATOR,
 )
-
-
 
 
 @hydra.main(config_path="../../data/hydra", config_name="config.yaml")
@@ -161,6 +160,14 @@ def run_community(cfg: DictConfig) -> None:
             path = PATH + SEPERATOR + "community_models" + SEPERATOR + type(m).__name__
             m.save(path)
             log.info(f"Saving community models: {path}")
+
+    log.info(f"Community summary on default medium: ")
+    for m in community_models:
+        if m._type == "compartmentalized":
+            fig = plot_community_summary(m, cfg.visualization.names)
+            fig.savefig(
+                PATH + SEPERATOR + "experiments" + SEPERATOR + f"community_summary.pdf"
+            )
 
     # Medias
     medium_prefix = PATH_res + SEPERATOR + "analysis" + SEPERATOR
