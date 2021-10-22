@@ -13,6 +13,7 @@ from copy import deepcopy
 
 import sys, os
 import glob
+import pickle
 
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
@@ -69,6 +70,16 @@ def run_setup(cfg: DictConfig) -> None:
             "Could not generate output directory, maybe we do not have permission's to do so?"
         )
 
+    # Load configurations over previous runs
+    if os.path.exists(PATH + SEPERATOR + ".configs"):
+        with open(PATH + SEPERATOR + ".configs", "rb") as f:
+            old_cfg = pickle.load(f)
+    else:
+        old_cfg = cfg
+
+    with open(PATH + SEPERATOR + ".configs", "wb") as f:
+        pickle.dump(cfg, f)
+
     log.info(f"Generating result directory in {PATH}")
 
     models_folder = cfg.setup.models
@@ -83,7 +94,14 @@ def run_setup(cfg: DictConfig) -> None:
     models_already_done = []
     for filepath in glob.iglob(PATH + SEPERATOR + "snm3_models" + SEPERATOR + "*.xml"):
         for i in range(len(models)):
-            if models[i].id in filepath and not cfg.overwrite_all:
+            if (
+                models[i].id in filepath
+                and not cfg.overwrite_all
+                and cfg.setup.fastcc == old_cfg.setup.fastcc
+                and cfg.setup.set_bounds_and_medium
+                == old_cfg.setup.set_bounds_and_medium
+                and cfg.setup.gapfill == old_cfg.setup.gapfill
+            ):
                 models_already_done.append(models[i])
                 log.info(f"Already done model construction for {models[i].id}")
 
@@ -184,9 +202,14 @@ def run_setup(cfg: DictConfig) -> None:
                 + ".html"
             )
             if (
-                check_for_substring_in_folder(out_file, out_file)
+                check_for_substring_in_folder(
+                    PATH + SEPERATOR + "quality_report", out_file
+                )
+                and cfg.setup.memote_solver_time_out
+                == old_cfg.setup.memote_solver_time_out
                 and not cfg.overwrite_all
             ):
+                log.info(f"Already done memote report for {model.id}")
                 continue
             p = score_memote(
                 file, out_file, solver_timout=str(cfg.setup.memote_solver_time_out)
