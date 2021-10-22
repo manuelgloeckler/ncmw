@@ -94,11 +94,12 @@ def plot_species_interaction(
         connectionstyle="arc3, rad = 0.1",
     )
     cbar = fig.colorbar(
-        matplotlib.cm.ScalarMappable(matplotlib.colors.Normalize(-1, 1), cmap=cmap2)
+        matplotlib.cm.ScalarMappable(matplotlib.colors.Normalize(-1, 1), cmap=cmap2),
+        fraction=0.5,
     )
     cbar.set_label("Interaction (Red=harmful, Blue=Benefitial)", rotation=270)
     cbar.set_ticks([-1, 0, 1])
-
+    fig.tight_layout()
     return fig
 
 

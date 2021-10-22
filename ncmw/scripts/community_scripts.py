@@ -245,39 +245,6 @@ def run_community(cfg: DictConfig) -> None:
     for m in community_models:
         if isinstance(m, ShuttleCommunityModel):
             m.weights = np.ones(len(m.weights))
-            medium_coopm = m.computeCOOPM(m.slim_optimize())
-            m.medium = medium_coopm
-            df = m.summary()
-            fig1 = plot_community_interaction(m, df, names=cfg.visualization.names)
-            fig1.savefig(
-                PATH
-                + SEPERATOR
-                + "experiments"
-                + SEPERATOR
-                + type(m).__name__
-                + "_coopm_community_interaction.pdf"
-            )
-            fig1 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
-            fig1.savefig(
-                PATH
-                + SEPERATOR
-                + "experiments"
-                + SEPERATOR
-                + type(m).__name__
-                + "_coopm_uptake_flux.png",
-                dpi=1000,
-            )
-
-            fig1 = plot_species_interaction(m, df, names=cfg.visualization.names)
-            fig1.savefig(
-                PATH
-                + SEPERATOR
-                + "experiments"
-                + SEPERATOR
-                + type(m).__name__
-                + "_coopm_species_interaction.pdf"
-            )
-
             medium_compm = COMPMS[0]
             m.medium = medium_compm
             df = m.summary()
@@ -308,6 +275,39 @@ def run_community(cfg: DictConfig) -> None:
                 + SEPERATOR
                 + type(m).__name__
                 + "_compm_species_interaction.pdf"
+            )
+
+            medium_coopm = m.computeCOOPM(m.slim_optimize(), enforce_survival=True)
+            m.medium = medium_coopm
+            df = m.summary()
+            fig1 = plot_community_interaction(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_community_interaction.pdf"
+            )
+            fig1 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_uptake_flux.png",
+                dpi=1000,
+            )
+
+            fig1 = plot_species_interaction(m, df, names=cfg.visualization.names)
+            fig1.savefig(
+                PATH
+                + SEPERATOR
+                + "experiments"
+                + SEPERATOR
+                + type(m).__name__
+                + "_coopm_species_interaction.pdf"
             )
 
     # COOPM
@@ -346,6 +346,7 @@ def run_community(cfg: DictConfig) -> None:
     log.info(f"Compute community COOPMs enforced survival")
     for m, compm, weight in zip(community_models, COMPMS, weights):
         for w in weight:
+            log.info(f"Computing coopm for community with weights {w}")
             m.medium = compm
             m.weights = w
             MBR = m.slim_optimize()

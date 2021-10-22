@@ -35,7 +35,7 @@ def plot_scaled_medium_growth(
     cmap = matplotlib.cm.get_cmap(cmap)
 
     # Title and axes
-    plt.title("Scaled medium growth behaviour")
+    plt.title("Scaled medium growth behavior")
     plt.xlabel("Factor")
     plt.ylabel("Growth")
     K = np.linspace(min_scale, max_scale, evaluations)

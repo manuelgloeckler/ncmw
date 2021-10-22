@@ -1,5 +1,5 @@
 import os
-import sys
+import glob
 import json
 
 import pandas as pd
@@ -106,6 +106,14 @@ def get_biomass_reaction(model):
             return rec
 
 
+def check_for_substring_in_folder(PATH: str, substring: str, type: str = "*") -> bool:
+    for filepath in glob.iglob(PATH + SEPERATOR + type):
+        if substring in filepath:
+            return True
+
+    return False
+
+
 def get_models(folder: str, prefix=DATA_PATH):
     """Returns all models in the directory"""
     directory = prefix + folder
@@ -119,6 +127,8 @@ def get_models(folder: str, prefix=DATA_PATH):
             model = load_yaml_model(directory + SEPERATOR + filename)
         elif filename.endswith(".mat"):
             model = load_matlab_model(directory + SEPERATOR + filename)
+        elif filename.startswith("."):
+            pass
         else:
             raise ValueError("Unknown format")
         models.append(model)

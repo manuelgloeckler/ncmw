@@ -1,7 +1,7 @@
 fastcc: True
 set_bounds_and_medium: True
 memote_evaluation: True
-memote_solver_time_out: 500
+memote_solver_time_out: 10
 gapfill: "medium" 
 configs: "default.json"
 medium: "snm3.json"

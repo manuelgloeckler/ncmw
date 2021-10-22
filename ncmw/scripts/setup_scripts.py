@@ -24,7 +24,7 @@ from ncmw.utils.utils_io import (
     get_result_path,
     SEPERATOR,
     save_model,
-    get_model_paths,
+    check_for_substring_in_folder,
 )
 from ncmw.setup_models import *
 
@@ -36,6 +36,8 @@ def run_setup_hydra(cfg: DictConfig) -> None:
 
 def run_setup(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
+    cobra_loger = logging.getLogger("Cobra")
+    cobra_loger.setLevel(logging.WARNING)
     log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
@@ -63,12 +65,14 @@ def run_setup(cfg: DictConfig) -> None:
         if not os.path.exists(PATH + SEPERATOR + "gapfill"):
             os.mkdir(PATH + SEPERATOR + "gapfill")
     except ValueError:
-        raise ValueError("Could not generate output directory, maybe we do not have permission's to do so?")
-        
+        raise ValueError(
+            "Could not generate output directory, maybe we do not have permission's to do so?"
+        )
+
     log.info(f"Generating result directory in {PATH}")
 
     models_folder = cfg.setup.models
-    log.info(f"Loading all models in the folder DATA/{models_folder}")
+    log.info(f"Loading all models in the folder {DATA_PATH}{models_folder}")
     models = get_models(models_folder)
     for model in models:
         log.info("Id: " + model.id)
@@ -76,20 +80,21 @@ def run_setup(cfg: DictConfig) -> None:
         log.info(f"Metabolites: {len(model.metabolites)}")
 
     # Check if models allready exists then stop
+    models_already_done = []
     for filepath in glob.iglob(PATH + SEPERATOR + "snm3_models" + SEPERATOR + "*.xml"):
-        models_already_done = []
         for i in range(len(models)):
-            if models[i].id in filepath:
+            if models[i].id in filepath and not cfg.overwrite_all:
                 models_already_done.append(models[i])
-        for m in models_already_done:
-            log.info(f"Alread done {m.id}")
-            models.remove(m)
+                log.info(f"Already done model construction for {models[i].id}")
 
     if cfg.setup.fastcc:
         log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
         consistent_models = []
         reports = []
         for model in models:
+            if model in models_already_done:
+                consistent_models.append(model)
+                continue
             cmodel, df = create_consistent_model(model)
             consistent_models.append(cmodel)
             reports.append(df)
@@ -99,17 +104,19 @@ def run_setup(cfg: DictConfig) -> None:
                 + SEPERATOR
                 + "quality_report"
                 + SEPERATOR
-                + "fast_cc"
                 + model.id
+                + "_fastcc_report"
                 + ".csv"
             )
             df.to_csv(out_file)
 
         models = consistent_models
 
-    files = []
     gapfill_dict = {"Id": [], "Additions": [], "Growth": []}
     for i, model_i in enumerate(models):
+        if model_i in models_already_done:
+            models[i] = model_i
+            continue
         if cfg.setup.set_bounds_and_medium:
             log.info(
                 f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium} for {model_i.id}"
@@ -138,7 +145,6 @@ def run_setup(cfg: DictConfig) -> None:
                 gapfill_dict["Additions"].append(gapfilled_reactions)
             elif cfg.setup.gapfill == "medium":
                 model, extended_exchanges = gapfill_medium(model, cfg.eps)
-                print(model)
                 log.info(
                     f"Following metabolites were added to the medium: {extended_exchanges}"
                 )
@@ -155,11 +161,10 @@ def run_setup(cfg: DictConfig) -> None:
             log.info("You may have to check if the extensions are 'plausible'...")
             log.info(f"Gapfilling succeded, Growth: {growth}")
 
-        if cfg.setup.set_bounds_and_medium:
-            model.id += cfg.setup.medium.split(".")[0]
         file = PATH + SEPERATOR + "snm3_models" + SEPERATOR + model.id + ".xml"
-        files.append(file)
         save_model(model, file)
+        models[i] = model
+
     df = pd.DataFrame(gapfill_dict)
     df.to_csv(PATH + SEPERATOR + "gapfill" + SEPERATOR + "gapfill_report.csv")
 
@@ -167,7 +172,8 @@ def run_setup(cfg: DictConfig) -> None:
         # Start two memote jobs in parallel
         log.info("Computing memote reports, this can take several minutes...")
         i = 0
-        for file, model in zip(files, models):
+        for model in models:
+            file = PATH + SEPERATOR + "snm3_models" + SEPERATOR + model.id + ".xml"
             out_file = (
                 PATH
                 + SEPERATOR
@@ -177,14 +183,18 @@ def run_setup(cfg: DictConfig) -> None:
                 + model.id
                 + ".html"
             )
+            if (
+                check_for_substring_in_folder(out_file, out_file)
+                and not cfg.overwrite_all
+            ):
+                continue
             p = score_memote(
                 file, out_file, solver_timout=str(cfg.setup.memote_solver_time_out)
             )
-            i += 1
-            if (i + 1) % 5 == 0:
+
+            if (i % 5) == 0:
                 p.wait()
 
     end_time = time.time()
     runtime = end_time - start_time
     log.info(f"Finished Workflow in {runtime} seconds")
-

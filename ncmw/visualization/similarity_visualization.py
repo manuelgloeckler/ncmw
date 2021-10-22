@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib_venn import venn2
 import matplotlib
+import numpy as np
 
 
 def jacard_index_similarity_heatmap(ji_met, ji_rec, ji_ro, names: dict = dict()):
@@ -56,37 +57,154 @@ def uptake_sekretion_venn_diagrams(
     uptakes = [set(up) for up in uptakes]
     sekretions = [set(sek) for sek in sekretions]
 
-    assert len(uptakes) == N, "We need for each model a uptake and sekretion."
-    assert len(sekretions) == N, "We need for each model a uptake and sekretion."
+    assert len(uptakes) == N, "We need for each model a uptake and secretion."
+    assert len(sekretions) == N, "We need for each model a uptake and secretion."
 
-    fig, axes = plt.subplots(N, N, figsize=(2 * 5, N * 2))
+    fig, axes = plt.subplots(N, N, figsize=(2 * N + 2, N * 2 + 2))
     for i in range(N):
         for j in range(i + 1, N):
-            axes[i, j].set_title("Uptake")
+            axes[i, j].set_title("Uptake", fontsize=10)
             axes[i, j].xaxis.set_visible(False)
-            venn2(
+            out = venn2(
                 [uptakes[i], uptakes[j]],
                 ax=axes[i, j],
                 set_labels=[titles[i], titles[j]],
                 set_colors=[cmap(i / N), cmap(j / N)],
             )
+            for text in out.set_labels:
+                text.set_fontsize(8)
 
     for i in range(N):
         axes[i, i].axis("off")
 
     for j in range(N):
         for i in range(j + 1, N):
-            axes[i, j].set_title("Sekretion")
-            venn2(
+            axes[i, j].set_title("Secretion", fontsize=10)
+            out = venn2(
                 [sekretions[i], sekretions[j]],
                 ax=axes[i, j],
                 set_labels=[titles[i], titles[j]],
                 set_colors=[cmap(i / N), cmap(j / N)],
             )
+            for text in out.set_labels:
+                text.set_fontsize(8)
 
     for i in range(N):
         axes[-1, i].xaxis.set_visible(True)
         axes[-1, i].set_xlabel(models[i].id)
 
+    return fig
+
+
+def cross_feed_venn_diagrams(
+    models, uptakes, sekretions, names: dict = dict(), cmap=None
+):
+    N = len(models)
+    cmap = matplotlib.cm.get_cmap(cmap)
+    titles = []
+    for model in models:
+        if model.id in names:
+            titles.append(names[model.id])
+        else:
+            titles.append(model.id.split("_")[0])
+    uptakes = [set(up) for up in uptakes]
+    sekretions = [set(sek) for sek in sekretions]
+
+    assert len(uptakes) == N, "We need for each model a uptake and secretion."
+    assert len(sekretions) == N, "We need for each model a uptake and secretion."
+
+    fig, axes = plt.subplots(N, N, figsize=(2 * N + 2, N * 2 + 2))
+    for i in range(N):
+        for j in range(i + 1, N):
+            axes[i, j].xaxis.set_visible(False)
+            out = venn2(
+                [uptakes[i], sekretions[j]],
+                ax=axes[i, j],
+                set_labels=[titles[i] + " UP", titles[j] + " SEC"],
+                set_colors=[cmap(i / N), cmap(j / N)],
+            )
+            for text in out.set_labels:
+                text.set_fontsize(8)
+
+    for i in range(N):
+        axes[i, i].axis("off")
+
+    for j in range(N):
+        for i in range(j + 1, N):
+            out = venn2(
+                [uptakes[i], sekretions[j]],
+                ax=axes[i, j],
+                set_labels=[titles[i] + " UP", titles[j] + " SEC"],
+                set_colors=[cmap(i / N), cmap(j / N)],
+            )
+            for text in out.set_labels:
+                text.set_fontsize(8)
+
+    for i in range(N):
+        axes[-1, i].xaxis.set_visible(True)
+        axes[-1, i].set_xlabel(models[i].id)
+
+    plt.subplots_adjust(hspace=0.5, wspace=0.5)
+
+    return fig
+
+
+def expected_community_interaction(
+    models,
+    uptakes,
+    sekretions,
+    names: dict = dict(),
+):
+    N = len(models)
+    titles = []
+    for model in models:
+        if model.id in names:
+            titles.append(names[model.id])
+        else:
+            titles.append(model.id.split("_")[0])
+    uptakes = [set(up) for up in uptakes]
+    sekretions = [set(sek) for sek in sekretions]
+
+    assert len(uptakes) == N, "We need for each model a uptake and secretion."
+    assert len(sekretions) == N, "We need for each model a uptake and secretion."
+
+    fig = plt.figure(figsize=(int(N / 2 + 4), int(N / 2 + 4)))
+    expected_interaction = np.zeros((N, N))
+
+    for i in range(N):
+        for j in range(N):
+            if i == j:
+                continue
+            consumed_i = uptakes[i]
+            produced_i = sekretions[i]
+            consumed_j = uptakes[j]
+            positive_normalizer = 0
+            negative_normalizer = 0
+            for m in range(N):
+                produced_m = sekretions[m]
+                consumed_m = uptakes[m]
+                positive_normalizer += len(produced_m.intersection(consumed_j))
+                negative_normalizer += len(consumed_m.intersection(consumed_j))
+            if positive_normalizer != 0:
+                expected_interaction[i, j] = (
+                    len(produced_i.intersection(consumed_j)) / positive_normalizer
+                )
+            else:
+                expected_interaction[i, j] += 0
+            if negative_normalizer != 0:
+                expected_interaction[i, j] -= (
+                    len(consumed_i.intersection(consumed_j)) / negative_normalizer
+                )
+            else:
+                expected_interaction[i, j] -= 0
+    sns.heatmap(
+        expected_interaction,
+        xticklabels=titles,
+        yticklabels=titles,
+        ax=fig.gca(),
+        center=0,
+        cmap=matplotlib.cm.get_cmap("jet_r"),
+    )
+    fig.suptitle("Expected community interaction")
     fig.tight_layout()
     return fig

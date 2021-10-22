@@ -259,7 +259,6 @@ def create_consistent_model(model: Model) -> Tuple[Model, pd.DataFrame]:
     mass_charge_balance = cobra.manipulation.check_mass_balance(model)
 
     consistent_model = fastcc(model)
-    consistent_model.id = model.id + "_consistent"
     blocked_reactions_consistent = cobra.flux_analysis.find_blocked_reactions(
         consistent_model
     )

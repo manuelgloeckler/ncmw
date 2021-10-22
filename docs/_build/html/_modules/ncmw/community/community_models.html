@@ -212,6 +212,18 @@
     <span class="k">def</span> <span class="nf">medium</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metabolites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exchanges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exchanges</span>
+
     <span class="nd">@medium</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">medium</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_medium</span><span class="p">(</span><span class="n">medium</span><span class="p">)</span>
@@ -286,6 +298,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">medium</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">metabolites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exchanges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">exchanges</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="n">flux_expression</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span>
@@ -306,14 +321,45 @@
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BagOfReactionsModel.slim_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.slim_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">slim_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BagOfReactionsModel.slim_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.slim_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">slim_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the current community objective</span>
+<span class="sd">   </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Community objective</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BagOfReactionsModel.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BagOfReactionsModel.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">enforce_survival</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">enforce_survival</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">enforce_survival</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">),</span> <span class="s2">&quot;Minimal percentage must be between 0 and 1.&quot;</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">)</span>
+            <span class="n">constraint_growth</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">f</span><span class="o">.</span><span class="n">flux_expression</span>
+                    <span class="o">-</span> <span class="n">enforce_survival</span>
+                    <span class="o">/</span> <span class="n">N</span>
+                    <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">r</span><span class="o">.</span><span class="n">flux_expression</span>
+                            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span>
+                        <span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">lb</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
         <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
         <span class="n">total_growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
         <span class="n">single_growths</span> <span class="o">=</span> <span class="p">[</span><span class="n">sol</span><span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">enforce_survival</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">remove_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span></div>
 
 <div class="viewcode-block" id="BagOfReactionsModel.single_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.single_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">single_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
@@ -329,26 +375,26 @@
 <div class="viewcode-block" id="BagOfReactionsModel.summary"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BagOfReactionsModel.computeCOOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.computeCOOPM">[docs]</a>    <span class="k">def</span> <span class="nf">computeCOOPM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MBR</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<div class="viewcode-block" id="BagOfReactionsModel.computeCOOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.BagOfReactionsModel.computeCOOPM">[docs]</a>    <span class="k">def</span> <span class="nf">computeCOOPM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MBR</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
         <span class="n">minMBR</span> <span class="o">=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">MBR</span>
-        <span class="n">medium</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">biomass</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">flux_expression</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span>
-        <span class="p">]</span>
+        <span class="n">medium</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">biomass</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">flux_expression</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">]</span>
+        <span class="c1"># total_growth =</span>
 
         <span class="c1"># Binary variables: Theta_i</span>
         <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">medium</span><span class="p">)):</span>
-            <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;theta_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">))</span>
+            <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="s2">&quot;theta_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="c1"># Constraints for exchanges, which are turned of for theta_i = 1</span>
         <span class="n">theta_constraints</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">medium</span><span class="p">):</span>
-            <span class="n">reaction</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
-            <span class="n">min_bound</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">lower_bound</span>
-            <span class="n">cons</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+            <span class="n">reaction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <span class="n">min_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mf">20.0</span>
+            <span class="n">cons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">reaction</span><span class="o">.</span><span class="n">flux_expression</span> <span class="o">+</span> <span class="n">min_bound</span> <span class="o">*</span> <span class="n">thetas</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
                 <span class="n">lb</span><span class="o">=</span><span class="n">min_bound</span><span class="p">,</span>
                 <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -358,29 +404,49 @@
         <span class="c1"># Constraints for growth rates, which must be at least 10% MBR</span>
         <span class="k">if</span> <span class="n">enforce_survival</span><span class="p">:</span>
             <span class="n">constraint_growth</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">minMBR</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">lb</span><span class="o">=</span><span class="mf">0.01</span> <span class="o">*</span> <span class="n">minMBR</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">biomass</span><span class="p">)</span>
             <span class="p">]</span>
+            <span class="n">constraint_growth</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+                    <span class="nb">sum</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">biomass</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">biomass</span><span class="p">))</span>
+                        <span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">lb</span><span class="o">=</span><span class="n">minMBR</span><span class="p">,</span>
+                    <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">constraint_growth</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
-                <span class="nb">sum</span><span class="p">(</span><span class="n">biomass</span><span class="p">),</span> <span class="n">lb</span><span class="o">=</span><span class="n">minMBR</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span>
+            <span class="n">constraint_growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span>
+                <span class="nb">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">biomass</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">biomass</span><span class="p">))]),</span>
+                <span class="n">lb</span><span class="o">=</span><span class="n">minMBR</span><span class="p">,</span>
+                <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Adding new variables and constraints.</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">theta_constraints</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">theta_constraints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">add_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
 
         <span class="c1"># Objevtive is maximising turned of exchanges, that is sum of theta_is</span>
-        <span class="n">objective</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Objective</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">thetas</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">problem</span><span class="o">.</span><span class="n">Objective</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">thetas</span><span class="p">),</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">objective</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-        <span class="n">sol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
         <span class="n">COOPM</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">medium</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sol</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">COOPM</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="nb">id</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">remove_cons_vars</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">remove_cons_vars</span><span class="p">(</span><span class="n">theta_constraints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">remove_cons_vars</span><span class="p">(</span><span class="n">constraint_growth</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">COOPM</span></div>
 
@@ -431,360 +497,6 @@
         <span class="k">return</span> <span class="n">model</span></div></div>
 
 
-<div class="viewcode-block" id="ShuttleCommunityModelMIP"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP">[docs]</a><span class="k">class</span> <span class="nc">ShuttleCommunityModelMIP</span><span class="p">(</span><span class="n">CommunityModel</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">shared_exchanges</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># Set up model data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="s2">&quot;compartmentalized&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry_matrixes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">met_id_dicts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-            <span class="n">S</span><span class="p">,</span> <span class="n">met_id</span><span class="p">,</span> <span class="n">rec_id</span> <span class="o">=</span> <span class="n">create_stoichiometry_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry_matrixes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec_id</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">met_id_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_id</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">medium</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_medium</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bounds</span><span class="p">()</span>
-
-        <span class="c1"># Set shuttle reactions to all exchanges if not specified</span>
-        <span class="k">if</span> <span class="n">shared_exchanges</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">ex</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">exchanges</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">))</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span> <span class="o">=</span> <span class="n">mip</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="s2">&quot;Community Model&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">build_mip_model</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_exchanges_for_shuttles</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">xsum</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">))</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_set_medium</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">medium</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">medium</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="o">-</span><span class="n">medium</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span> <span class="o">=</span> <span class="n">medium</span>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="n">total_growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">single_growths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">):</span>
-            <span class="n">single_growths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.single_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.single_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">single_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
-        <span class="n">weights</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">old_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
-        <span class="n">growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">old_weights</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">growth</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.slim_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.slim_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">slim_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">x</span></div>
-
-    <span class="k">def</span> <span class="nf">_get_exchange_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">exchanges</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">rec_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="p">):</span>
-            <span class="n">ex_dict</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">rec_id</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="s2">&quot;EX_&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                    <span class="n">ex_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-            <span class="n">exchanges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex_dict</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">exchanges</span>
-
-    <span class="k">def</span> <span class="nf">_open_exchanges_for_shuttles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bound</span><span class="o">=-</span><span class="mi">10</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">rec_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">rec_id</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">bound</span>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.summary"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="n">exchanges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_exchange_flux</span><span class="p">()</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">dic</span> <span class="ow">in</span> <span class="n">exchanges</span><span class="p">:</span>
-            <span class="n">keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dic</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">))</span>
-
-        <span class="n">vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">exchanges</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exchanges</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">exchanges</span><span class="p">)</span> <span class="ow">and</span> <span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">exchanges</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
-                    <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">exchanges</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exchanges</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">:</span>
-                        <span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="n">vals</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;Total exchange&quot;</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="c1"># Only return nonzero</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Total exchange&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;Total exchange&quot;</span><span class="p">])</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Objective: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)):</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-                <span class="s2">&quot; with weights &quot;</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">df</span></div>
-
-    <span class="k">def</span> <span class="nf">_reset_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">mip</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">var_by_name</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
-                <span class="n">x_i</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">var_by_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-                <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_i</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_medium</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_medium</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">xsum</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">))</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_open_exchanges_for_shuttles</span><span class="p">(</span><span class="o">-</span><span class="mi">100</span><span class="p">)</span>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.build_mip_model"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.build_mip_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_mip_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ids</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="p">))]</span>
-        <span class="n">x_sh</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">x_sh_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span><span class="p">:</span>
-                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_medium</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">lb</span><span class="o">=-</span><span class="n">val</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
-            <span class="n">x_sh_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
-            <span class="n">x_sh</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">rec_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rec_id_dicts</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">rec_id</span><span class="p">:</span>
-                    <span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">rec_id</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ids</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
-
-        <span class="c1"># Flux first model</span>
-        <span class="n">xs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">):</span>
-            <span class="n">xs_j</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bounds</span><span class="p">):</span>
-                <span class="n">xs_j</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">lb</span><span class="o">=</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="o">=</span><span class="n">ub</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))]</span>
-            <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xs_j</span><span class="p">)</span>
-
-        <span class="c1"># Stoichiometry</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">S</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stoichiometry_matrixes</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span>
-                    <span class="n">xsum</span><span class="p">(</span><span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">xs</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span>
-                <span class="p">)</span>
-
-        <span class="c1"># Shuttel constraints</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shared_exchanges</span><span class="p">):</span>
-            <span class="n">exchanges</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">xs</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">ids</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span> <span class="k">if</span> <span class="n">ids</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span><span class="o">-</span><span class="n">x_sh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">xsum</span><span class="p">(</span><span class="n">exchanges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-
-        <span class="n">fd</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;.lp&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span> <span class="o">=</span> <span class="n">x_sh_dict</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">xsum</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">))</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.computeCOOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.computeCOOPM">[docs]</a>    <span class="k">def</span> <span class="nf">computeCOOPM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MBR</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_tries</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="n">minMBR</span> <span class="o">=</span> <span class="n">fraction</span> <span class="o">*</span> <span class="n">MBR</span>
-        <span class="c1"># thetas</span>
-        <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">thetas_constraint</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">medium</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;EX_o2_e&quot;</span><span class="p">:</span>
-                <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">20.0</span>
-            <span class="k">if</span> <span class="s2">&quot;_fe&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">var_type</span><span class="o">=</span><span class="n">BINARY</span><span class="p">)</span>
-            <span class="n">thetas_constraint</span> <span class="o">+=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">V_min</span> <span class="o">*</span> <span class="n">theta</span> <span class="o">&gt;=</span> <span class="n">V_min</span><span class="p">)</span>
-            <span class="p">]</span>
-            <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-        <span class="c1"># Both must grow</span>
-        <span class="k">if</span> <span class="n">enforce_survival</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">minMBR</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">&gt;=</span> <span class="n">minMBR</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="n">xsum</span><span class="p">(</span><span class="n">thetas</span><span class="p">))</span>
-
-        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimization Status: &quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">coopm</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">coopm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">coopm</span>
-        <span class="k">elif</span> <span class="n">n_tries</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">new_fraction</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">fraction</span>
-            <span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The optimization failed, maybe some of the model is unable to achive fraction*MBR. We reduce the fraction to </span><span class="si">{</span><span class="n">new_fraction</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computeCOOPM</span><span class="p">(</span>
-                <span class="n">MBR</span><span class="p">,</span>
-                <span class="n">new_fraction</span><span class="p">,</span>
-                <span class="n">enforce_survival</span><span class="o">=</span><span class="n">enforce_survival</span><span class="p">,</span>
-                <span class="n">n_tries</span><span class="o">=</span><span class="n">n_tries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">coopm</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The optimization failed, maybe some of the model is unable to achive fraction*MBR.&quot;</span>
-            <span class="p">)</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.compute_convex_combination"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_combination">[docs]</a>    <span class="k">def</span> <span class="nf">compute_convex_combination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">maxbiomass</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">alphas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;The weights must sum to one!&quot;</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="s2">&quot;Scpecify a weight for each model...&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span>
-            <span class="nb">max</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">single_optimize</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">))])</span> <span class="o">&gt;</span> <span class="n">maxbiomass</span>
-        <span class="p">),</span> <span class="s2">&quot;Each of the models must reach the maxbiomass...&quot;</span>
-        <span class="c1"># Alpha objective...</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="o">&lt;=</span> <span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">maxbiomass</span>
-            <span class="p">)</span>
-        <span class="n">growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">summary</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.compute_convex_COOPM"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_COOPM">[docs]</a>    <span class="k">def</span> <span class="nf">compute_convex_COOPM</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">maxbiomass</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">enforce_survival</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">alphas</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;The weights must sum to one!&quot;</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="s2">&quot;Scpecify a weight for each model...&quot;</span>
-        <span class="n">minMBR</span> <span class="o">=</span> <span class="n">maxbiomass</span> <span class="o">*</span> <span class="n">fraction</span>
-        <span class="n">thetas</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">thetas_constraint</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;EX_o2_e&quot;</span><span class="p">:</span>
-                <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span>
-            <span class="k">if</span> <span class="s2">&quot;_fe&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                <span class="n">V_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_var</span><span class="p">(</span><span class="n">var_type</span><span class="o">=</span><span class="n">BINARY</span><span class="p">)</span>
-            <span class="n">thetas_constraint</span> <span class="o">+=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">V_min</span> <span class="o">*</span> <span class="n">theta</span> <span class="o">&gt;=</span> <span class="n">V_min</span><span class="p">)</span>
-            <span class="p">]</span>
-            <span class="n">thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-        <span class="c1"># Growth constraints</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alphas</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">add_constr</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">biomass_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-                <span class="o">==</span> <span class="n">alphas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">maxbiomass</span>
-            <span class="p">)</span>
-        <span class="c1"># # Both must grow</span>
-        <span class="c1"># if enforce_survival:</span>
-        <span class="c1">#     for i in range(len(self.models)):</span>
-        <span class="c1">#         self.comm_model.add_constr(</span>
-        <span class="c1">#             self.weights[i] * self.xs[i][self.biomass_ids[i]]</span>
-        <span class="c1">#             &gt;= alphas[i] * minMBR</span>
-        <span class="c1">#         )</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     self.comm_model.add_constr(self.objective &gt;= minMBR)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">maximize</span><span class="p">(</span><span class="n">xsum</span><span class="p">(</span><span class="n">thetas</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-
-        <span class="n">coopm</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">coopm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">coopm</span></div>
-
-    <span class="k">def</span> <span class="nf">_get_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">all_bounds</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
-            <span class="n">bounds</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">reactions</span><span class="p">:</span>
-                <span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">rec</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">rec</span><span class="o">.</span><span class="n">upper_bound</span><span class="p">))</span>
-            <span class="n">all_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">all_bounds</span>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.save"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;This saves the model using pickle. For other format overwrite this function&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;_help.lp&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;_help.lp&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comm_model</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shuttle_reactions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="ShuttleCommunityModelMIP.load"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModelMIP.load">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">_reset_model</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">model</span></div></div>
-
-
 <div class="viewcode-block" id="ShuttleCommunityModel"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel">[docs]</a><span class="k">class</span> <span class="nc">ShuttleCommunityModel</span><span class="p">(</span><span class="n">BagOfReactionsModel</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">shared_exchanges</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
@@ -802,6 +514,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">biomass_id</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metabolites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">metabolites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reactions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">reactions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exchanges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">exchanges</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="n">rec</span> <span class="o">=</span> <span class="n">get_biomass_reaction</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;__&quot;</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">id</span>
@@ -818,22 +533,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">objective</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ShuttleCommunityModel.optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">community_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
-        <span class="n">total_growth</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">objective_value</span>
-        <span class="n">single_growths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">biomass_reactions</span><span class="p">:</span>
-            <span class="n">single_growths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span></div>
+    <span class="c1"># def optimize(self):</span>
+    <span class="c1">#     df = self.community_model.optimize()</span>
+    <span class="c1">#     total_growth = df.objective_value</span>
+    <span class="c1">#     single_growths = []</span>
+    <span class="c1">#     for r in self.biomass_reactions:</span>
+    <span class="c1">#         single_growths.append(r.flux)</span>
+    <span class="c1">#     return total_growth, single_growths</span>
 
-<div class="viewcode-block" id="ShuttleCommunityModel.single_optimize"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.single_optimize">[docs]</a>    <span class="k">def</span> <span class="nf">single_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
-        <span class="n">weights</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">old_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
-        <span class="n">growth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slim_optimize</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_weights</span><span class="p">(</span><span class="n">old_weights</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">growth</span></div>
+    <span class="c1"># def single_optimize(self, idx):</span>
+    <span class="c1">#     weights = np.zeros(len(self.models))</span>
+    <span class="c1">#     weights[idx] = 1.0</span>
+    <span class="c1">#     old_weights = self._weights</span>
+    <span class="c1">#     self._set_weights(weights)</span>
+    <span class="c1">#     growth = self.slim_optimize()</span>
+    <span class="c1">#     self._set_weights(old_weights)</span>
+    <span class="c1">#     return growth</span>
 
 <div class="viewcode-block" id="ShuttleCommunityModel.summary"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_models.ShuttleCommunityModel.summary">[docs]</a>    <span class="k">def</span> <span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">total_growth</span><span class="p">,</span> <span class="n">single_growths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
@@ -964,7 +679,7 @@
                 <span class="nb">id</span> <span class="o">=</span> <span class="n">met</span><span class="o">.</span><span class="n">id</span>
                 <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SH_</span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Shuttle reaction for </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+                <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="o">-</span><span class="mi">50</span>
                 <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
                 <span class="n">shuttle_reaction</span><span class="o">.</span><span class="n">add_metabolites</span><span class="p">({</span><span class="n">met</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">met2</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">})</span>
                 <span class="n">community_model</span><span class="o">.</span><span class="n">add_reaction</span><span class="p">(</span><span class="n">shuttle_reaction</span><span class="p">)</span>

@@ -4,7 +4,7 @@ save_models: True
 weights:
   one_to_one: True
   fair: True
-  dominant_weights: True
+  dominant_weights: False
   custom: []
 compute_summary: False
 pairwise_growth: True

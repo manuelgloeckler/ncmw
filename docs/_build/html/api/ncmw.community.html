@@ -36,6 +36,8 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -211,6 +213,72 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-ncmw.community.MIP_community_model_DEPRECATED">
+<span id="ncmw-community-mip-community-model-deprecated-module"></span><h2>ncmw.community.MIP_community_model_DEPRECATED module<a class="headerlink" href="#module-ncmw.community.MIP_community_model_DEPRECATED" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ncmw.community.MIP_community_model_DEPRECATED.</span></span><span class="sig-name descname"><span class="pre">ShuttleCommunityModelMIP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_exchanges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ncmw.community.community_models.CommunityModel</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.build_mip_model">
+<span class="sig-name descname"><span class="pre">build_mip_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.build_mip_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.build_mip_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.computeCOOPM">
+<span class="sig-name descname"><span class="pre">computeCOOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_tries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.computeCOOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.computeCOOPM" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method computes the COOPM medium</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.compute_convex_COOPM">
+<span class="sig-name descname"><span class="pre">compute_convex_COOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxbiomass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.compute_convex_COOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.compute_convex_COOPM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.compute_convex_combination">
+<span class="sig-name descname"><span class="pre">compute_convex_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxbiomass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.compute_convex_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.compute_convex_combination" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.load">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method return the current objective value and additional information</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>This saves the model using pickle. For other format overwrite this function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.single_optimize">
+<span class="sig-name descname"><span class="pre">single_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.single_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.single_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the current objective value, if the objective only
+accounts a single model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.slim_optimize">
+<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.slim_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the current objective value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/MIP_community_model_DEPRECATED.html#ShuttleCommunityModelMIP.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.MIP_community_model_DEPRECATED.ShuttleCommunityModelMIP.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method should report a summary of the model</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-ncmw.community.community_analysis">
 <span id="ncmw-community-community-analysis-module"></span><h2>ncmw.community.community_analysis module<a class="headerlink" href="#module-ncmw.community.community_analysis" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
@@ -221,7 +289,10 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_community_interaction_graph">
 <span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_community_interaction_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_community_interaction_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_community_interaction_graph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute a graph that displays the community interaction</p>
+<dd><p>Compute a graph that displays the community interaction. We say that model i
+interacts with model j if i produces something that j needs, but is not provided by
+the medium! We consider each pair of external metabolites and connect them by this
+criterium.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -246,14 +317,35 @@ df: Relevant summary</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_dominant_weights">
-<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_dominant_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_dominant_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_dominant_weights" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_dominant_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><span class="pre">ncmw.community.community_models.CommunityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_val</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_dominant_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_dominant_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each community member we compute the weight in which one of the members has
+a dominant weight. For example if <span class="math notranslate nohighlight">\(m_i\)</span> is the dominant model then <span class="math notranslate nohighlight">\(w_i =\)</span></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>community_model</strong> (<a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><em>CommunityModel</em></a>) – A community model</p></li>
+<li><p><strong>high_val</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The largest weight value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of weigt vector, for any member of the community. In each
+vector one member can be thought as “dominant”</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[np.array]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_fair_weights">
-<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_fair_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_fair_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_fair_weights" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_fair_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><span class="pre">ncmw.community.community_models.CommunityModel</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.array</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_fair_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_fair_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute fair weights, fair in the sense that organisms with high single growth
-has a low weights…</p>
+has a low weights such that all species have the same weighted MBR. More precisely
+if <span class="math notranslate nohighlight">\(G_i\)</span> is the growth of model i, the corresponding unnormalized weight is defined as</p>
+<div class="math notranslate nohighlight">
+\[w_i = 1/(G_i +1e-32)\]</div>
+<p>We then normalize the vector such that  <span class="math notranslate nohighlight">\(\sum_i w_i = 1\)</span></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>community_model</strong> – Cobra Model</p>
@@ -269,27 +361,54 @@ has a low weights…</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight">
-<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_pairwise_growth_relation_per_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_alphas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_pairwise_growth_relation_per_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_pairwise_growth_relation_per_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><span class="pre">ncmw.community.community_models.CommunityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.array</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.array</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_pairwise_growth_relation_per_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>We compar the pairwise growth relation as following: Be <span class="math notranslate nohighlight">\(\alpha \in
+[0,1]\)</span> and <span class="math notranslate nohighlight">\(G_i, G_j\)</span> the growth expression for model i and j. Then we
+maximize the community objective <span class="math notranslate nohighlight">\(\alpha G_i + (1-\alpha)G_j\)</span> and report the
+growth values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>community_model</strong> – Community model</p></li>
+<li><p><strong>idx1</strong> – Index of community member which is tested</p></li>
+<li><p><strong>idx2</strong> – Index of second community member which is tested</p></li>
+<li><p><strong>h</strong> – Number of growth evaluations, for different weights.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The values of  <span class="math notranslate nohighlight">\(\alpha\)</span> on which we the growths.
+np.array: The growth values of the first model.
+np.array: The growth values of the second model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_species_interaction_weights">
-<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_species_interaction_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_species_interaction_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_species_interaction_weights" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute interaction between two species.</p>
+<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_species_interaction_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><span class="pre">ncmw.community.community_models.CommunityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_species_interaction_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_species_interaction_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute interaction between two species. The values lie between -1 (negative
+interaction) and + 1 postitive interaction. Be <span class="math notranslate nohighlight">\(p_{ij}\)</span> the number of
+metabolites produced by i and consumed by j. Be <span class="math notranslate nohighlight">\(c_{ij}\)</span> the number of
+metabolites consumed by both i and j. Then we compute the interaction as</p>
+<div class="math notranslate nohighlight">
+\[w_{ij} = w_i* ( p_{ij}/\sum_k p_{ik} - c_{ij}/\sum_k c_{ik})\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> – Communiy model</p></li>
 <li><p><strong>df</strong> – Summary table</p></li>
-<li><p><strong>alpha</strong> – Parameter for postive interaction, larger implies that postive</p></li>
-<li><p><strong>is wheighted more.</strong> (<em>interaction</em>) – </p></li>
+<li><p><strong>alpha</strong> – Parameter for postive interaction, larger implies that postive
+interaction is wheighted more.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
+<dd class="field-even"><p>N x N matrix of interaction weights between species.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3.8/library/functions.html#type" title="(in Python v3.8)">type</a>]</p>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -304,7 +423,7 @@ has a low weights…</p>
 <p>This is a community model, which treats the community as a bag of all reactions that at least one the species has.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.computeCOOPM">
-<span class="sig-name descname"><span class="pre">computeCOOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.computeCOOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.computeCOOPM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">computeCOOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.computeCOOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.computeCOOPM" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method computes the COOPM medium</p>
 </dd></dl>
 
@@ -320,7 +439,7 @@ has a low weights…</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.optimize">
-<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.optimize" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method return the current objective value and additional information</p>
 </dd></dl>
 
@@ -340,8 +459,16 @@ accounts a single model</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.slim_optimize">
-<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.slim_optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method returns the current objective value</p>
+<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.slim_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current community objective</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Community objective</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)">float</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -363,6 +490,11 @@ accounts a single model</p>
 <dd><p>This method computes the COOPM medium</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.exchanges">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">exchanges</span></span><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.exchanges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.load">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#CommunityModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.load" title="Permalink to this definition">¶</a></dt>
@@ -373,11 +505,21 @@ accounts a single model</p>
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">medium</span></span><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.medium" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.metabolites">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">metabolites</span></span><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.metabolites" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.optimize">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#CommunityModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.optimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method return the current objective value and additional information</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.reactions">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">reactions</span></span><a class="headerlink" href="#ncmw.community.community_models.CommunityModel.reactions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.CommunityModel.save">
@@ -426,12 +568,6 @@ accounts a single model</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.optimize">
-<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method return the current objective value and additional information</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>This saves the model using pickle. For other format overwrite this
@@ -439,78 +575,8 @@ function</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.single_optimize">
-<span class="sig-name descname"><span class="pre">single_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.single_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.single_optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method returns the current objective value, if the objective only
-accounts a single model</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.summary">
 <span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method should report a summary of the model</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ncmw.community.community_models.</span></span><span class="sig-name descname"><span class="pre">ShuttleCommunityModelMIP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_exchanges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ncmw.community.community_models.CommunityModel</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.build_mip_model">
-<span class="sig-name descname"><span class="pre">build_mip_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.build_mip_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.build_mip_model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.computeCOOPM">
-<span class="sig-name descname"><span class="pre">computeCOOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_tries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.computeCOOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.computeCOOPM" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method computes the COOPM medium</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_COOPM">
-<span class="sig-name descname"><span class="pre">compute_convex_COOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxbiomass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.compute_convex_COOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_COOPM" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_combination">
-<span class="sig-name descname"><span class="pre">compute_convex_combination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxbiomass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.compute_convex_combination"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.compute_convex_combination" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.load">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.load" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.optimize">
-<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method return the current objective value and additional information</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>This saves the model using pickle. For other format overwrite this function</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.single_optimize">
-<span class="sig-name descname"><span class="pre">single_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.single_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.single_optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method returns the current objective value, if the objective only
-accounts a single model</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.slim_optimize">
-<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.slim_optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method returns the current objective value</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModelMIP.summary">
-<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModelMIP.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModelMIP.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method should report a summary of the model</p>
 </dd></dl>
 

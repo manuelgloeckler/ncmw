@@ -1,3 +1,5 @@
+from ncmw.community.community_models import CommunityModel
+from typing import List, Tuple
 import numpy as np
 import pandas as pd
 
@@ -7,19 +9,24 @@ import torch
 from sbi.inference import SNLE
 
 
-def compute_species_interaction_weights(model, df, alpha=1):
-    """Compute interaction between two species.
+def compute_species_interaction_weights(
+    model: CommunityModel, df: pd.DataFrame, alpha: float = 1.0
+):
+    """Compute interaction between two species. The values lie between -1 (negative
+    interaction) and + 1 postitive interaction. Be :math:`p_{ij}` the number of
+    metabolites produced by i and consumed by j. Be :math:`c_{ij}` the number of
+    metabolites consumed by both i and j. Then we compute the interaction as
 
-
+    .. math:: w_{ij} = w_i* ( p_{ij}/\sum_k p_{ik} - c_{ij}/\sum_k c_{ik})
 
     Args:
         model: Communiy model
         df: Summary table
         alpha: Parameter for postive interaction, larger implies that postive
-        interaction is wheighted more.
+               interaction is wheighted more.
 
     Returns:
-        [type]: [description]
+        np.array: N x N matrix of interaction weights between species.
 
     """
     N = len(model.models)
@@ -50,12 +57,15 @@ def compute_species_interaction_weights(model, df, alpha=1):
                     w_i * consumed_i[consumed_j].sum() / negative_normalizer
                 )
             else:
-                weights[i, j]
+                weights[i, j] -= 0
     return weights
 
 
 def compute_community_interaction_graph(model, df):
-    """Compute a graph that displays the community interaction
+    """Compute a graph that displays the community interaction. We say that model i
+    interacts with model j if i produces something that j needs, but is not provided by
+    the medium! We consider each pair of external metabolites and connect them by this
+    criterium.
 
 
 
@@ -105,7 +115,9 @@ def community_weight_posterior(model):
             model.weights = weight.numpy()
             growths = torch.tensor(model.optimize()[-1])
             xs.append(growths)
-        return torch.vstack(xs).float()
+        xs = torch.vstack(xs).float()
+        xs += 0.05 * torch.rand_like(xs)
+        return xs
 
     prior = torch.distributions.Dirichlet(torch.ones(N))
     prior.set_default_validate_args(False)
@@ -123,21 +135,37 @@ def community_weight_posterior(model):
 
 
 def compute_pairwise_growth_relation_per_weight(
-    community_model, idx1, idx2, num_alphas=1000
-):
+    community_model: CommunityModel, idx1: int, idx2: int, h: int = 200
+) -> Tuple[np.array, np.array, np.array]:
+    """We compare the pairwise growth relation as following: Be :math:`\\alpha \in
+    [0,1]` and :math:`G_i, G_j` the growth expression for model i and j. Then we
+    maximize the community objective :math:`\\alpha G_i + (1-\\alpha)G_j` and report the
+    growth values.
+
+    Args:
+        community_model: Community model
+        idx1: Index of community member which is tested
+        idx2: Index of second community member which is tested
+        h: Number of growth evaluations, for different weights.
+
+    Returns:
+        np.array: The values of  :math:`\\alpha` on which we the growths.
+        np.array: The growth values of the first model.
+        np.array: The growth values of the second model.
+    """
     weights = community_model.weights
     N = len(weights)
     weight_mask1 = np.zeros(N)
     weight_mask1[idx1] = 1.0
     weight_mask2 = np.zeros(N)
     weight_mask2[idx2] = 1.0
-    alpha = np.linspace(0, 1, num_alphas)
+    alpha = np.linspace(0, 1, h)
     alphas = alpha.reshape(-1, 1).repeat(N, 1)
     alpha_weights = alphas * weight_mask1 + (1 - alphas) * weight_mask2
 
-    growth1 = np.zeros(num_alphas)
-    growth2 = np.zeros(num_alphas)
-    for i in range(num_alphas):
+    growth1 = np.zeros(h)
+    growth2 = np.zeros(h)
+    for i in range(h):
         community_model.weights = alpha_weights[i]
         _, single_growths = community_model.optimize()
         growth1[i] = single_growths[idx1]
@@ -145,11 +173,14 @@ def compute_pairwise_growth_relation_per_weight(
     return alpha, growth1, growth2
 
 
-def compute_fair_weights(community_model):
+def compute_fair_weights(community_model: CommunityModel) -> np.array:
     """Compute fair weights, fair in the sense that organisms with high single growth
-    has a low weights...
+    has a low weights such that all species have the same weighted MBR. More precisely
+    if :math:`G_i` is the growth of model i, the corresponding unnormalized weight is defined as
 
+    .. math:: w_i = 1/(G_i +1e-32)
 
+    We then normalize the vector such that  :math:`\sum_i w_i = 1`
 
     Args:
         community_model: Cobra Model
@@ -160,11 +191,26 @@ def compute_fair_weights(community_model):
     """
     N = len(community_model.models)
     weights = np.array([community_model.single_optimize(i) for i in range(N)])
+    weights = 1 / (weights + 1e-32)
+    weights /= weights.sum()
+    return weights
 
-    return 1 - weights / weights.sum()
 
+def compute_dominant_weights(
+    community_model: CommunityModel, high_val: float = 0.9
+) -> List[np.array]:
+    """For each community member we compute the weight in which one of the members has
+    a dominant weight. For example if :math:`m_i` is the dominant model then :math:`w_i =`high-val and all other :math:`w_j = (1-high-val)/(N-1)`
 
-def compute_dominant_weights(community_model, high_val=0.9):
+    Args:
+        community_model (CommunityModel): A community model
+        high_val (float): The largest weight value
+
+    Returns:
+        List[np.array]: List of weigt vector, for any member of the community. In each
+        vector one member can be thought as "dominant"
+
+    """
     N = len(community_model.models)
     others_w = (1 - high_val) / (N - 1)
     weights = []

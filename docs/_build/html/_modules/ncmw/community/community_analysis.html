@@ -160,7 +160,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ncmw.community.community_analysis</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span> <span class="nn">ncmw.community.community_models</span> <span class="kn">import</span> <span class="n">CommunityModel</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
@@ -169,19 +171,24 @@
 <span class="kn">from</span> <span class="nn">sbi.inference</span> <span class="kn">import</span> <span class="n">SNLE</span>
 
 
-<div class="viewcode-block" id="compute_species_interaction_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_species_interaction_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_species_interaction_weights</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute interaction between two species.</span>
+<div class="viewcode-block" id="compute_species_interaction_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_species_interaction_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_species_interaction_weights</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">CommunityModel</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute interaction between two species. The values lie between -1 (negative</span>
+<span class="sd">    interaction) and + 1 postitive interaction. Be :math:`p_{ij}` the number of</span>
+<span class="sd">    metabolites produced by i and consumed by j. Be :math:`c_{ij}` the number of</span>
+<span class="sd">    metabolites consumed by both i and j. Then we compute the interaction as</span>
 
-
+<span class="sd">    .. math:: w_{ij} = w_i* ( p_{ij}/\sum_k p_{ik} - c_{ij}/\sum_k c_{ik})</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model: Communiy model</span>
 <span class="sd">        df: Summary table</span>
 <span class="sd">        alpha: Parameter for postive interaction, larger implies that postive</span>
-<span class="sd">        interaction is wheighted more.</span>
+<span class="sd">               interaction is wheighted more.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        [type]: [description]</span>
+<span class="sd">        np.array: N x N matrix of interaction weights between species.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
@@ -217,7 +224,10 @@
 
 
 <div class="viewcode-block" id="compute_community_interaction_graph"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_community_interaction_graph">[docs]</a><span class="k">def</span> <span class="nf">compute_community_interaction_graph</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute a graph that displays the community interaction</span>
+    <span class="sd">&quot;&quot;&quot;Compute a graph that displays the community interaction. We say that model i</span>
+<span class="sd">    interacts with model j if i produces something that j needs, but is not provided by</span>
+<span class="sd">    the medium! We consider each pair of external metabolites and connect them by this</span>
+<span class="sd">    criterium.</span>
 
 
 
@@ -267,7 +277,9 @@
             <span class="n">model</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">weight</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
             <span class="n">growths</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">growths</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">xs</span> <span class="o">+=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand_like</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xs</span>
 
     <span class="n">prior</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Dirichlet</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
     <span class="n">prior</span><span class="o">.</span><span class="n">set_default_validate_args</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -285,21 +297,37 @@
 
 
 <div class="viewcode-block" id="compute_pairwise_growth_relation_per_weight"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight">[docs]</a><span class="k">def</span> <span class="nf">compute_pairwise_growth_relation_per_weight</span><span class="p">(</span>
-    <span class="n">community_model</span><span class="p">,</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span><span class="p">,</span> <span class="n">num_alphas</span><span class="o">=</span><span class="mi">1000</span>
-<span class="p">):</span>
+    <span class="n">community_model</span><span class="p">:</span> <span class="n">CommunityModel</span><span class="p">,</span> <span class="n">idx1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">idx2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;We compar the pairwise growth relation as following: Be :math:`\\alpha \in</span>
+<span class="sd">    [0,1]` and :math:`G_i, G_j` the growth expression for model i and j. Then we</span>
+<span class="sd">    maximize the community objective :math:`\\alpha G_i + (1-\\alpha)G_j` and report the</span>
+<span class="sd">    growth values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        community_model: Community model</span>
+<span class="sd">        idx1: Index of community member which is tested</span>
+<span class="sd">        idx2: Index of second community member which is tested</span>
+<span class="sd">        h: Number of growth evaluations, for different weights.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array: The values of  :math:`\\alpha` on which we the growths.</span>
+<span class="sd">        np.array: The growth values of the first model.</span>
+<span class="sd">        np.array: The growth values of the second model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">weights</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
     <span class="n">weight_mask1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="n">weight_mask1</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">weight_mask2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
     <span class="n">weight_mask2</span><span class="p">[</span><span class="n">idx2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_alphas</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
     <span class="n">alphas</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">alpha_weights</span> <span class="o">=</span> <span class="n">alphas</span> <span class="o">*</span> <span class="n">weight_mask1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alphas</span><span class="p">)</span> <span class="o">*</span> <span class="n">weight_mask2</span>
 
-    <span class="n">growth1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_alphas</span><span class="p">)</span>
-    <span class="n">growth2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_alphas</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_alphas</span><span class="p">):</span>
+    <span class="n">growth1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="n">growth2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">h</span><span class="p">):</span>
         <span class="n">community_model</span><span class="o">.</span><span class="n">weights</span> <span class="o">=</span> <span class="n">alpha_weights</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">single_growths</span> <span class="o">=</span> <span class="n">community_model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
         <span class="n">growth1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">single_growths</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>
@@ -307,11 +335,14 @@
     <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">growth1</span><span class="p">,</span> <span class="n">growth2</span></div>
 
 
-<div class="viewcode-block" id="compute_fair_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_fair_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_fair_weights</span><span class="p">(</span><span class="n">community_model</span><span class="p">):</span>
+<div class="viewcode-block" id="compute_fair_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_fair_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_fair_weights</span><span class="p">(</span><span class="n">community_model</span><span class="p">:</span> <span class="n">CommunityModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Compute fair weights, fair in the sense that organisms with high single growth</span>
-<span class="sd">    has a low weights...</span>
+<span class="sd">    has a low weights such that all species have the same weighted MBR. More precisely</span>
+<span class="sd">    if :math:`G_i` is the growth of model i, the corresponding unnormalized weight is defined as</span>
 
+<span class="sd">    .. math:: w_i = 1/(G_i +1e-32)</span>
 
+<span class="sd">    We then normalize the vector such that  :math:`\sum_i w_i = 1`</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        community_model: Cobra Model</span>
@@ -322,11 +353,26 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">community_model</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">community_model</span><span class="o">.</span><span class="n">single_optimize</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">)])</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">weights</span> <span class="o">+</span> <span class="mf">1e-32</span><span class="p">)</span>
+    <span class="n">weights</span> <span class="o">/=</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">weights</span></div>
 
-    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">weights</span> <span class="o">/</span> <span class="n">weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="compute_dominant_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_dominant_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_dominant_weights</span><span class="p">(</span>
+    <span class="n">community_model</span><span class="p">:</span> <span class="n">CommunityModel</span><span class="p">,</span> <span class="n">high_val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;For each community member we compute the weight in which one of the members has</span>
+<span class="sd">    a dominant weight. For example if :math:`m_i` is the dominant model then :math:`w_i =`high-val and all other :math:`w_j = (1-high-val)/(N-1)`</span>
 
-<div class="viewcode-block" id="compute_dominant_weights"><a class="viewcode-back" href="../../../api/ncmw.community.html#ncmw.community.community_analysis.compute_dominant_weights">[docs]</a><span class="k">def</span> <span class="nf">compute_dominant_weights</span><span class="p">(</span><span class="n">community_model</span><span class="p">,</span> <span class="n">high_val</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<span class="sd">    Args:</span>
+<span class="sd">        community_model (CommunityModel): A community model</span>
+<span class="sd">        high_val (float): The largest weight value</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[np.array]: List of weigt vector, for any member of the community. In each</span>
+<span class="sd">        vector one member can be thought as &quot;dominant&quot;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">community_model</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
     <span class="n">others_w</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">high_val</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">weights</span> <span class="o">=</span> <span class="p">[]</span>

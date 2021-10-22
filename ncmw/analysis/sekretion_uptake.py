@@ -9,15 +9,14 @@ from ncmw.utils import pad_dict_list
 
 
 def transport_reactions(model: Model) -> List[str]:
-    """This function return a list of potential transport reactions
+    """This function return a list of potential transport reactions, we define a
+    transport reaction as a reaction which contains metabolites from atleast two different compartments!
 
-    NOTE: This is a cheap heuristic
+        Args:
+            model (Model): A cobra model
 
-    Args:
-        model (Model): A cobra model
-
-    Returns:
-        list: List of names that potentially are transport reaction
+        Returns:
+            list: List of names that potentially are transport reaction
     """
     compartment_name = ["_" + id for id in model.compartments.keys()]
     res = []
@@ -30,7 +29,7 @@ def transport_reactions(model: Model) -> List[str]:
 
 
 def table_ex_transport(model: Model) -> pd.DataFrame:
-    """This method heuristically checks if all exchange reaction has an associated transporter
+    """This method checks if all exchange reaction has an associated transporter
 
     Args:
         model (Model): Cobra model
