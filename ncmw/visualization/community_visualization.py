@@ -60,23 +60,23 @@ def plot_species_interaction(
 ):
     G = nx.DiGraph()
     weights = compute_species_interaction_weights(model, df)
-    names = []
+    names_list = []
     for m in model.models:
         if m.id in names:
-            names.append(names[m.id])
+            names_list.append(names[m.id])
         else:
-            names.append(m.id.split("_")[0])
+            names_list.append(m.id.split("_")[0])
     cmap = matplotlib.cm.get_cmap(cmap)
     cmap2 = matplotlib.cm.get_cmap("jet_r")
-    G.add_nodes_from(names)
+    G.add_nodes_from(names_list)
 
     edge_color = []
-    colors = [cmap(i / len(names)) for i in range(len(names))]
+    colors = [cmap(i / len(names_list)) for i in range(len(names_list))]
     for i in range(len(model.models)):
         for j in range(len(model.models)):
             if i != j and np.abs(weights[i, j]) > interaction_cutoff:
-                n1 = names[i]
-                n2 = names[j]
+                n1 = names_list[i]
+                n2 = names_list[j]
                 G.add_edge(n1, n2, weight=weights[i, j])
                 edge_color.append(cmap2((weights[i, j] + 1) / 2))
 
@@ -95,11 +95,10 @@ def plot_species_interaction(
     )
     cbar = fig.colorbar(
         matplotlib.cm.ScalarMappable(matplotlib.colors.Normalize(-1, 1), cmap=cmap2),
-        fraction=0.5,
+        shrink=0.8,
     )
     cbar.set_label("Interaction (Red=harmful, Blue=Benefitial)", rotation=270)
     cbar.set_ticks([-1, 0, 1])
-    fig.tight_layout()
     return fig
 
 
@@ -173,13 +172,13 @@ def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis")
             n = name[i]
             flux = f[i]
             G.add_edge(ex, n, weight=flux)
-            widths.append(flux / 4)
+            widths.append(flux / 2)
             edge_color.append(cmap(np.argmax(names == n) / len(names)))
 
     M = len(shared_output.keys())
     N = len(names)
     pos = bipartite_layout(G, names)
-    fig = plt.figure(figsize=(N + 5, M))
+    fig = plt.figure(figsize=(N + 2, int(M / 2) + 2))
     plt.title("Shared Uptake", fontsize=30)
     nx.draw(
         G,
@@ -190,6 +189,7 @@ def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis")
         width=widths,
         node_color=colors,
         edge_color=edge_color,  # Cannot be save by savefig???
+        connectionstyle="arc3, rad = 0.1",
     )
     fig.tight_layout()
 
@@ -270,14 +270,14 @@ def plot_community_interaction(model, df, names: dict = dict(), cmap: str = None
     return fig
 
 
-def plot_community_summary(model, names: dict = dict()):
+def plot_community_summary(model, summary, names: dict = dict()):
     model_name = []
     for m in model.models:
         if m.id in names:
             model_name.append(names[m.id])
         else:
             model_name.append(m.id.split("_")[0])
-    df = model.summary()
+    df = summary
     fig = plt.figure(figsize=(len(df) / 5 + 5, 5))
     ax = plt.gca()
     df[df.columns[:-1]].plot(kind="bar", stacked=True, ax=ax)
@@ -290,7 +290,7 @@ def plot_community_summary(model, names: dict = dict()):
     return fig
 
 
-def plot_pairwise_growth_relation_per_weight(model, names: dict = dict()):
+def plot_pairwise_growth_relation_per_weight(model, names: dict = dict(), h=100):
     """Plots all pairwise growth relationships. for all possible weights $(\alpha,
     1-\alpha)$.
 
@@ -310,7 +310,7 @@ def plot_pairwise_growth_relation_per_weight(model, names: dict = dict()):
     for i in range(N):
         for j in range(i + 1, N):
             alphas, growth1, growth2 = compute_pairwise_growth_relation_per_weight(
-                model, i, j
+                model, i, j, h=h
             )
             growth_dict[(i, j)] = (growth1, growth2)
             growth_dict[(j, i)] = (growth2, growth1)

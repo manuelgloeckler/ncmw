@@ -37,7 +37,7 @@ def run_setup_hydra(cfg: DictConfig) -> None:
 
 def run_setup(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
-    cobra_loger = logging.getLogger("Cobra")
+    cobra_loger = logging.getLogger()
     cobra_loger.setLevel(logging.WARNING)
     log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))

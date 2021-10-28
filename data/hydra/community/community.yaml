@@ -1,10 +1,35 @@
 bag_of_reactions_model: True
 shuttle_reactions_model: True
+shuttle_reaction_params:
+  shared_reactions: None
+  shuttle_reaction_lower_bound: -50
+  shuttle_reaction_upper_bound: 1000
+  shuttle_regularization: True
+  shuttle_regularization_factor: 1000
+main_weights: "ones"
+base_models: "setup"
 save_models: True
+save_as_sbml: True
+coopm_params:
+  fraction: 0.1
+  enforce_survival: 0.01
+medium:
+  default: True
+  compm: True
+  coopm: True
+optimize_params:
+  enforce_survival: 0
+conpute_community_fva: True
+community_fva_params:
+  fraction_of_optimum: 0.9
+  processes: 4
+cooperative_tradeoff_params:
+  alpha: 0.9
 weights:
-  one_to_one: True
+  ones: True
   fair: True
-  dominant_weights: False
   custom: []
 compute_summary: False
 pairwise_growth: True
+pairwise_growth_params:
+  h: 100

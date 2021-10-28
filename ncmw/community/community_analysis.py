@@ -167,7 +167,7 @@ def compute_pairwise_growth_relation_per_weight(
     growth2 = np.zeros(h)
     for i in range(h):
         community_model.weights = alpha_weights[i]
-        _, single_growths = community_model.optimize()
+        _, single_growths, _ = community_model.optimize()
         growth1[i] = single_growths[idx1]
         growth2[i] = single_growths[idx2]
     return alpha, growth1, growth2
@@ -225,12 +225,14 @@ def compute_community_summary(community_model, weights):
     df_total = pd.DataFrame()
     for i in range(len(weights)):
         community_model.weights = weights[i]
-        sol = community_model.optimize()
+        growth, single_growth, sol = community_model.optimize()
         df = pd.DataFrame(
-            dict(zip([m.id for m in community_model.models], np.round(sol[1], 3))),
+            dict(
+                zip([m.id for m in community_model.models], np.round(single_growth, 3))
+            ),
             index=[i],
         )
-        df["Total"] = np.round(sol[0], 3)
+        df["Total"] = np.round(growth, 3)
         df["Weight"] = str(community_model.weights)
         df_total = df_total.append(df)
     return df_total
