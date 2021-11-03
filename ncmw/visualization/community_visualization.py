@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
+import seaborn as sns
 
 from ncmw.community import (
     compute_community_interaction_graph,
@@ -14,6 +15,7 @@ import networkx as nx
 import torch
 from copy import deepcopy
 from sbi.analysis import pairplot
+import pandas as pd
 
 
 def plot_reference_interaction(interaction_cutoff=0, cmap="viridis"):
@@ -102,7 +104,7 @@ def plot_species_interaction(
     return fig
 
 
-def plot_posterior_samples_for_observations(model, observations):
+def plot_posterior_samples_for_observation(model, posterior, observation):
     """This method plots posterior samples p(w|x) where x is the observed biomass
     values. For this purpuse we assume a Dirichlet prior on weights. This also gurantees
     that the weights sum to one.
@@ -117,21 +119,46 @@ def plot_posterior_samples_for_observations(model, observations):
             list : A list of figures for each observation.
 
     """
-    posterior = community_weight_posterior(model)
-    figs = []
-    for x_o in observations:
-        x_o = torch.tensor(x_o).float()
-        posterior.set_default_x(x_o)
-        posterior.train(loss="elbo", warm_up_rounds=100)
-        samples = posterior.sample((20000,))
-        fig, axes = pairplot(
-            samples, labels=["Weights: " + m.id.split("_")[0] for m in model.models]
-        )
-        fig.suptitle(
-            f"Observed Growth: {[np.round(float(x),4) for x in x_o]}", fontsize=15
-        )
-        figs.append(fig)
-    return figs
+    x_o = torch.tensor(observation).float()
+    posterior.set_default_x(x_o)
+    posterior.train(loss="elbo", warm_up_rounds=100)
+    samples = posterior.sample((20000,))
+    fig, axes = pairplot(
+        samples, labels=["Weights: " + m.id.split("_")[0] for m in model.models]
+    )
+    fig.suptitle(
+        f"Observed Growth:   {[np.round(float(x),4) for x in x_o]}", fontsize=15
+    )
+
+    return fig
+
+
+def plot_weight_growth_pairplot(model, weights, growths, names=dict()):
+
+    model_name = []
+    for m in model.models:
+        if m.id in names:
+            model_name.append(names[m.id])
+        else:
+            model_name.append(m.id.split("_")[0])
+
+    N = weights.shape[-1]
+    df = pd.DataFrame(torch.hstack((weights, growths)).numpy())
+    df.columns = [f"Weight {i}" for i in range(N)] + [f"Growth {i}" for i in range(N)]
+
+    fig = sns.pairplot(
+        df,
+        kind="reg",
+        x_vars=[f"Weight {model_name[i]}" for i in range(5)],
+        y_vars=[f"Growth {model_name[i]}" for i in range(5)],
+        markers="+",
+        plot_kws={
+            "truncate": True,
+            "scatter_kws": {"alpha": 0.5},
+            "line_kws": {"color": "darkblue"},
+        },
+    )
+    return fig
 
 
 def plot_community_uptake_graph(model, df, names: dict = dict(), cmap="viridis"):

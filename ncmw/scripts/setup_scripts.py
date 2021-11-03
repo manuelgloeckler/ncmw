@@ -105,30 +105,6 @@ def run_setup(cfg: DictConfig) -> None:
                 models_already_done.append(models[i])
                 log.info(f"Already done model construction for {models[i].id}")
 
-    if cfg.setup.fastcc:
-        log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
-        consistent_models = []
-        reports = []
-        for model in models:
-            if model in models_already_done:
-                consistent_models.append(model)
-                continue
-            cmodel, df = create_consistent_model(model)
-            consistent_models.append(cmodel)
-            reports.append(df)
-            log.info(df)
-            out_file = (
-                PATH
-                + SEPERATOR
-                + "quality_report"
-                + SEPERATOR
-                + model.id
-                + "_fastcc_report"
-                + ".csv"
-            )
-            df.to_csv(out_file)
-
-        models = consistent_models
 
     gapfill_dict = {"Id": [], "Additions": [], "Growth": []}
     for i, model_i in enumerate(models):
@@ -185,6 +161,32 @@ def run_setup(cfg: DictConfig) -> None:
 
     df = pd.DataFrame(gapfill_dict)
     df.to_csv(PATH + SEPERATOR + "gapfill" + SEPERATOR + "gapfill_report.csv")
+    
+    # Fastcc after gapfill !
+    if cfg.setup.fastcc:
+        log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
+        consistent_models = []
+        reports = []
+        for model in models:
+            if model in models_already_done:
+                consistent_models.append(model)
+                continue
+            cmodel, df = create_consistent_model(model)
+            consistent_models.append(cmodel)
+            reports.append(df)
+            log.info(df)
+            out_file = (
+                PATH
+                + SEPERATOR
+                + "quality_report"
+                + SEPERATOR
+                + model.id
+                + "_fastcc_report"
+                + ".csv"
+            )
+            df.to_csv(out_file)
+
+        models = consistent_models
 
     if cfg.setup.memote_evaluation:
         # Start two memote jobs in parallel

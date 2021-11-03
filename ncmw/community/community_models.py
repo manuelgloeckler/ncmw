@@ -130,6 +130,16 @@ class BagOfReactionsModel(CommunityModel):
     """This is a community model, which treats the community as a bag of all reactions that at least one the species has."""
 
     def __init__(self, models: list):
+        """This will create a BagOfReactionsModel form a list of models. This is
+        equivalent to create a model that contains the union of all reactions and metabolites
+        within at least one model in the list.
+
+
+                Args:
+                    models: List of cobra models
+
+
+        """
         self.community_model = cobra.Model(
             "Community__" + "".join([model.id + "__" for model in models])
         )
@@ -190,6 +200,20 @@ class BagOfReactionsModel(CommunityModel):
         return self.optimize(enforce_survival=enforce_survival)[0]
 
     def cooperative_tradeoff(self, alpha: float = 0.9):
+        """Performs a cooperative tradeoff optimization strategy, which requires two
+            steps: First a FBA solution is obtain, we call it MBR. Then we minimize the
+            L2 norm of a vector containing all individual growths under the constraint
+            that the community objective is greater than :math:`\alpha \cdot MBR`
+
+        Args:
+            alpha: Tradeoff value, must be between 0 and 1.
+
+        Returns:
+            community_growth : Value of the community objective
+            individual_growth: List of individual growths
+            solution: Cobra solution object, containing fluxes for all reactions
+
+        """
         MBR = self.slim_optimize()
         assert (
             "glpk" not in self.community_model.solver.interface.__name__
@@ -296,6 +320,18 @@ class BagOfReactionsModel(CommunityModel):
         )
 
     def optimize(self, enforce_survival=0):
+        """Performs FBA on the community model
+
+        Args:
+            enforce_survival: Must be between 0 and 1. It constraint the community such
+            that all member must have atleast X % of the community growth e.g. if
+            enforce survival=1 then all members must have the same fraction of the total
+            growth.
+        Returns:
+            community_growth : Value of the community objective
+            individual_growth: List of individual growths
+            solution: Cobra solution object, containing fluxes for all reactions
+        """
         if enforce_survival > 0:
             assert (
                 enforce_survival <= 1 and enforce_survival > 0
@@ -325,6 +361,7 @@ class BagOfReactionsModel(CommunityModel):
         )
 
     def compute_COOPM(self, MBR, fraction=0.1, enforce_survival=0.1):
+        """Computes the COOPM medium"""
         minMBR = fraction * MBR
         medium = list(self.medium.keys())
         # biomass = [f.flux_expression for f in self.biomass_reactions]
@@ -459,6 +496,24 @@ class BagOfReactionsModel(CommunityModel):
 
 class ShuttleCommunityModel(BagOfReactionsModel):
     def __init__(self, models, shared_exchanges=None, **kwargs):
+        """Constructs a shuttle community model. Each community member obtains it's own
+        compartment. The interaction between compartments and the external environment
+        is mediate by so called "shuttle reactions".
+
+        Args:
+            models: List of models that will form a community
+            shared_exchanges: A list of exchange reactions which can be shared between
+                members. By default all exchanges can be shared.
+            shuttle_reaction_lower_bound: The lower bound of the shuttle reactions
+                (default: -50).
+            shuttle_reaction_upper_bound: The upper bound of the shuttle reactions
+                (default: 1000).
+            shuttle_regularization: A boolean value if we enable this regularization.
+            This ensures that members that has zero growth (are dead) cannot exchange metabolites (default: True).
+            shuttle_regularization_factor: A factor the regulates the strength of
+                regularization. The larger the value the smaller the regularization
+                (default: 1000).
+        """
         self.models = models
         # For this reactions we impose shuttle reactions if possible.
         if shared_exchanges is None:
@@ -507,7 +562,20 @@ class ShuttleCommunityModel(BagOfReactionsModel):
         self.community_model.objective = sum(objective)
         self.community_model.solver.update()
 
-    def summary(self, enforce_survival=0, cooperative_tradeoff=None):
+    def summary(self, enforce_survival: float = 0, cooperative_tradeoff: float = None):
+        """Creates a community summary. We list all exchanges between members of the
+            community and between the environment.
+
+
+
+        Args:
+            enforce_survival: Enforce a minimium percentage of growth for each member.
+            cooperative_tradeoff: Perform cooperative tradeoff.
+
+        Returns:
+            pd.DataFrame: Table of fluxes.
+
+        """
         if cooperative_tradeoff is None:
             total_growth, single_growths, sol = self.optimize(
                 enforce_survival=enforce_survival
@@ -729,7 +797,9 @@ class ShuttleCommunityModel(BagOfReactionsModel):
         self.community_model.objective = self.objective
         self.community_model.solver.update()
 
+    @staticmethod
     def load(path):
+        """Loads the model"""
         with open(path, "rb") as f:
             model = pickle.load(f)
 

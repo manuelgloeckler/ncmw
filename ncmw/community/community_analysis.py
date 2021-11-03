@@ -106,32 +106,52 @@ def compute_community_interaction_graph(model, df):
     return G, df
 
 
-def community_weight_posterior(model):
+def community_weight_posterior(
+    model,
+    enforce_survival=0.0,
+    num_simulations=10000,
+    cooperative_tradeoff=None,
+    noise=0.05,
+    prior="dirichlet",
+):
     N = len(model.models)
 
     def simulator(thetas):
         xs = []
         for weight in thetas:
             model.weights = weight.numpy()
-            growths = torch.tensor(model.optimize()[-1])
+            if cooperative_tradeoff is None:
+                growths = torch.tensor(
+                    model.optimize(enforce_survival=enforce_survival)[1]
+                )
+            else:
+                growths = torch.tensor(
+                    model.cooperative_tradeoff(cooperative_tradeoff)[1]
+                )
             xs.append(growths)
         xs = torch.vstack(xs).float()
-        xs += 0.05 * torch.rand_like(xs)
+        xs += noise * torch.rand_like(xs)
         return xs
 
-    prior = torch.distributions.Dirichlet(torch.ones(N))
-    prior.set_default_validate_args(False)
+    if prior == "dirichlet":
+        prior = torch.distributions.Dirichlet(torch.ones(N))
+        prior.set_default_validate_args(False)
+    elif prior == "boxuniform":
+        prior = torch.distributions.Independent(
+            torch.distributions.Uniform(torch.zeros(N), torch.ones(N)), 1
+        )
+        prior.set_default_validate_args(False)
 
-    thetas = prior.sample((N * 1000,))
+    thetas = prior.sample((num_simulations,))
     xs = simulator(thetas)
 
     inf = SNLE(prior)
-    density_estimator = inf.append_simulations(thetas, xs).train()
+    _ = inf.append_simulations(thetas, xs).train()
     posterior = inf.build_posterior(
         sample_with="vi",
         vi_parameters={"flow": "spline_autoregressive", "bound": 15, "num_bins": 15},
     )
-    return posterior
+    return posterior, thetas, xs
 
 
 def compute_pairwise_growth_relation_per_weight(

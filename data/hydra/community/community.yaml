@@ -25,11 +25,14 @@ community_fva_params:
   processes: 4
 cooperative_tradeoff_params:
   alpha: 0.9
-weights:
-  ones: True
-  fair: True
-  custom: []
-compute_summary: False
 pairwise_growth: True
 pairwise_growth_params:
   h: 100
+compute_infer_weights: True
+infer_weights:
+  simulations_for_different_weights: 2000
+  observed_individual_biomass: balanced
+  medium: default
+  enforce_survival: 0. 
+  competitive_tradeoff: False
+  competitive_tradeoff_alpha: 0.9

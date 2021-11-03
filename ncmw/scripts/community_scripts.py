@@ -29,10 +29,11 @@ from ncmw.utils.utils_io import (
 from ncmw.visualization import (
     plot_pairwise_growth_relation_per_weight,
     plot_community_interaction,
-    plot_posterior_samples_for_observations,
+    plot_posterior_samples_for_observation,
     plot_community_uptake_graph,
     plot_species_interaction,
     plot_community_summary,
+    plot_weight_growth_pairplot,
 )
 
 from ncmw.utils.utils_io import (
@@ -49,6 +50,7 @@ from ncmw.community import (
     compute_fair_weights,
     compute_community_summary,
     compute_dominant_weights,
+    community_weight_posterior,
 )
 
 from ncmw.utils import (
@@ -92,6 +94,8 @@ def run_community(cfg: DictConfig) -> None:
             os.mkdir(PATH + SEPERATOR + "community_models")
         if not os.path.exists(PATH + SEPERATOR + "medium"):
             os.mkdir(PATH + SEPERATOR + "medium")
+        if not os.path.exists(PATH + SEPERATOR + "weight_inference"):
+            os.mkdir(PATH + SEPERATOR + "weight_inference")
         if not os.path.exists(PATH + SEPERATOR + "experiments_BagOfReactionsModel"):
             os.mkdir(PATH + SEPERATOR + "experiments_BagOfReactionsModel")
         if not os.path.exists(PATH + SEPERATOR + "experiments_ShuttleCommunityModel"):
@@ -273,7 +277,7 @@ def run_community(cfg: DictConfig) -> None:
                 os.mkdir(path_to_save)
             log.info(f"Community FBA/FVA results on medium: {medium_name}")
             df_growth_summary = pd.DataFrame()
-           
+
             m = type(m).load(
                 PATH
                 + SEPERATOR
@@ -282,7 +286,7 @@ def run_community(cfg: DictConfig) -> None:
                 + f"{type(m).__name__}.pkl"
             )
             m.medium = medium
-           
+
             log.info("Computing FVA")
             fraction_of_optimal = cfg.community.cooperative_tradeoff_params["alpha"]
             if cfg.community.conpute_community_fva:
@@ -326,7 +330,7 @@ def run_community(cfg: DictConfig) -> None:
             ] = df_fba_cooperative_tradeoff["fluxes"]
             log.info("Saving all flux analysis")
             df_fva.to_csv(path_to_save + SEPERATOR + f"flux_analysis.csv")
-           
+
             if cfg.community.pairwise_growth:
                 # we reload it here as it, check why need
                 m = type(m).load(
@@ -414,387 +418,57 @@ def run_community(cfg: DictConfig) -> None:
                     + "species_interaction_cooperative_tradeoff.pdf"
                 )
 
-        # log.info("Compute weight posteriors")
-    # for m in community_models:
-    #     m.weights = np.ones(len(m.weights))
-    #     medium_coopm = COOPMS_enforced[tuple(m.weights)]
-    #     maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    #     balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    #     observations = [balanced_observation]
-    #     for i in range(len(m.models)):
-    #         dominant_observation = np.ones(len(m.models)) * min(
-    #             0.1, np.min(maximal_growths)
-    #         )
-    #         dominant_observation[i] = maximal_growths[i]
-    #         observations.append(dominant_observation)
+    log.info("Compute weight posteriors")
+    if cfg.community.compute_infer_weights:
+        for m in community_models:
+            m.weights = np.ones(len(m.weights))
+            m.medium = all_medias[cfg.community.infer_weights.medium]
+            if cfg.community.infer_weights.observed_individual_biomass == "balanced":
+                maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
+                balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
+                observation = balanced_observation
+            else:
+                observation = cfg.community.infer_weights.observed_individual_biomass
+                assert len(
+                    cfg.community.infer_weights.observed_individual_biomass
+                ) == len(
+                    m.models
+                ), "You have to specify for each community member an observed growth."
+                for o in observation:
+                    assert o >= 0, "The observed growth must be greater than zero!"
 
-    #     figs = plot_posterior_samples_for_observations(m, observations)
-    #     for i in range(len(figs)):
-    #         figs[i].savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + f"_coopm_weight_posterior_{i}.pdf"
-    #         )
+            alpha = None
+            if cfg.community.infer_weights.competitive_tradeoff:
+                alpha = cfg.community.infer_weights.competitive_tradeoff_alpha
+            posterior, weights, growths = community_weight_posterior(
+                m,
+                num_simulations=cfg.community.infer_weights.simulations_for_different_weights,
+                enforce_survival=cfg.community.infer_weights.enforce_survival,
+                cooperative_tradeoff=alpha,
+            )
 
-    #     medium_compm = COMPMS[0]
-    #     m.medium = medium_compm
-    #     maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    #     balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    #     observations = [balanced_observation]
-    #     for i in range(len(m.models)):
-    #         dominant_observation = np.ones(len(m.models)) * min(
-    #             0.1, np.min(maximal_growths)
-    #         )
-    #         dominant_observation[i] = maximal_growths[i]
-    #         observations.append(dominant_observation)
+            fig = plot_weight_growth_pairplot(
+                m, weights, growths, names=cfg.visualization.names
+            )
+            fig.savefig(
+                PATH
+                + SEPERATOR
+                + "weight_inference"
+                + SEPERATOR
+                + type(m).__name__
+                + "weight_growth_pairplot.pdf"
+            )
 
-    #     figs = plot_posterior_samples_for_observations(m, observations)
-    #     for i in range(len(figs)):
-    #         figs[i].savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + f"_compm_weight_posterior_{i}.pdf"
-    #         )
-
-    # m.weights = np.ones(len(m.weights))
-    # medium_coopm = COOPMS_enforced[tuple(m.weights)]
-    # maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    # balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    # observations = [balanced_observation]
-    # for i in range(len(m.models)):
-    #     dominant_observation = np.ones(len(m.models)) * min(
-    #         0.1, np.min(maximal_growths)
-    #     )
-    #     dominant_observation[i] = maximal_growths[i]
-    #     observations.append(dominant_observation)
-
-    # figs = plot_posterior_samples_for_observations(m, observations)
-    # for i in range(len(figs)):
-    #     figs[i].savefig(
-    #         PATH
-    #         + SEPERATOR
-    #         + "experiments"
-    #         + SEPERATOR
-    #         + type(m).__name__
-    #         + f"_coopm_weight_posterior_{i}.pdf"
-    #     )
-
-    # medium_compm = COMPMS[0]
-    # m.medium = medium_compm
-    # maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    # balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    # observations = [balanced_observation]
-    # for i in range(len(m.models)):
-    #     dominant_observation = np.ones(len(m.models)) * min(
-    #         0.1, np.min(maximal_growths)
-    #     )
-    #     dominant_observation[i] = maximal_growths[i]
-    #     observations.append(dominant_observation)
-
-    # figs = plot_posterior_samples_for_observations(m, observations)
-    # for i in range(len(figs)):
-    #     figs[i].savefig(
-    #         PATH
-    #         + SEPERATOR
-    #         + "experiments"
-    #         + SEPERATOR
-    #         + type(m).__name__
-    #         + f"_compm_weight_posterior_{i}.pdf"
-    #     )
+            fig = plot_posterior_samples_for_observation(m, posterior, observation)
+            fig.savefig(
+                PATH
+                + SEPERATOR
+                + "weight_inference"
+                + SEPERATOR
+                + type(m).__name__
+                + "weight_posterior.pdf"
+            )
 
     end_time = time.time()
     runtime = end_time - start_time
     log.info(f"Finished Workflow in {runtime} seconds")
-
-    # # Weights to consider
-    # weights = []
-    # for m in community_models:
-    #     ws = []
-    #     if cfg.community.weights.one_to_one:
-    #         ws.append(np.ones(num_models))
-    #     if cfg.community.weights.fair:
-    #         ws.append(compute_fair_weights(m))
-    #     if cfg.community.weights.dominant_weights:
-    #         ws.extend(compute_dominant_weights(m))
-    #     if cfg.community.weights.custom != []:
-    #         for weight in cfg.community.weights:
-    #             assert (
-    #                 len(weight) == num_models
-    #             ), "The custom weights must have dimension equal to the number of models in the community!"
-    #             ws.append(weight)
-    #     weights.append(ws)
-    # log.info(f"We consider following weights: {weights}")
-
-    # log.info(f"Compute community COMPM")
-    # COMPMS = []
-    # SNM3s = []
-    # for m in community_models:
-    #     COMPM = dict()
-    #     for medium in mediums:
-    #         if "COMPM" in medium:
-    #             COMPM = {**COMPM, **mediums[medium]}
-    #     COMPMS.append(COMPM)
-    #     # COMPMS
-    #     path = (
-    #         PATH
-    #         + SEPERATOR
-    #         + "medium"
-    #         + SEPERATOR
-    #         + "COMPM_"
-    #         + type(m).__name__
-    #         + ".json"
-    #     )
-    #     with open(path, "w+") as f:
-    #         json.dump(COMPM, f)
-    #     log.info(f"Saving COMPMs: {path}")
-    #     # Also save default medium
-    #     path = (
-    #         PATH
-    #         + SEPERATOR
-    #         + "medium"
-    #         + SEPERATOR
-    #         + "SNM3_"
-    #         + type(m).__name__
-    #         + ".json"
-    #     )
-    #     with open(path, "w+") as f:
-    #         json.dump(m.medium, f)
-    #     SNM3s.append(m.medium)
-    #     log.info(f"Saving COMPMs: {path}")
-
-    # log.info(f"Compute community visualization")
-    # for m in community_models:
-    #     if isinstance(m, ShuttleCommunityModel):
-    #         m.weights = np.ones(len(m.weights))
-    #         medium_compm = COMPMS[0]
-    #         m.medium = medium_compm
-    #         df = m.summary()
-    #         fig2 = plot_community_interaction(m, df, names=cfg.visualization.names)
-    #         fig2.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_compm_community_interaction.pdf"
-    #         )
-    #         fig2 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
-    #         fig2.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_compm_uptake_flux.png"
-    #         )
-
-    #         fig2 = plot_species_interaction(m, df, names=cfg.visualization.names)
-    #         fig2.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_compm_species_interaction.pdf"
-    #         )
-
-    #         medium_coopm = m.computeCOOPM(m.slim_optimize(), enforce_survival=True)
-    #         m.medium = medium_coopm
-    #         df = m.summary()
-    #         fig1 = plot_community_interaction(m, df, names=cfg.visualization.names)
-    #         fig1.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_coopm_community_interaction.pdf"
-    #         )
-    #         fig1 = plot_community_uptake_graph(m, df, names=cfg.visualization.names)
-    #         fig1.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_coopm_uptake_flux.png",
-    #             dpi=1000,
-    #         )
-
-    #         fig1 = plot_species_interaction(m, df, names=cfg.visualization.names)
-    #         fig1.savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + "_coopm_species_interaction.pdf"
-    #         )
-
-    # # COOPM
-    # log.info(f"Compute community COOPMs enforced survival")
-    # COOPMS_enforced = dict()
-    # for m, compm, weight in zip(community_models, COMPMS, weights):
-    #     for w in weight:
-    #         m.medium = compm
-    #         m.weights = w
-    #         MBR = m.slim_optimize()
-    #         if MBR is None:
-    #             MBR = 0
-    #         try:
-    #             coopm = m.computeCOOPM(MBR)
-    #         except:
-    #             coopm = dict()
-    #         if tuple(w) in COOPMS_enforced:
-    #             COOPMS_enforced[tuple(w)].append(coopm)
-    #         else:
-    #             COOPMS_enforced[tuple(w)] = [coopm]
-    #         path = (
-    #             PATH
-    #             + SEPERATOR
-    #             + "medium"
-    #             + SEPERATOR
-    #             + "COOPM_survival"
-    #             + str([np.round(i, 2) for i in w])
-    #             + type(m).__name__
-    #             + ".json"
-    #         )
-    #         with open(path, "w+") as f:
-    #             json.dump(coopm, f)
-
-    # COOPMS_not_enforced = dict()
-
-    # log.info(f"Compute community COOPMs enforced survival")
-    # for m, compm, weight in zip(community_models, COMPMS, weights):
-    #     for w in weight:
-    #         log.info(f"Computing coopm for community with weights {w}")
-    #         m.medium = compm
-    #         m.weights = w
-    #         MBR = m.slim_optimize()
-    #         if MBR is None:
-    #             MBR = 0
-    #         try:
-    #             coopm = m.computeCOOPM(MBR, enforce_survival=False)
-    #         except:
-    #             coopm = dict()
-    #         if tuple(w) in COOPMS_not_enforced:
-    #             COOPMS_not_enforced[tuple(w)].append(coopm)
-    #         else:
-    #             COOPMS_not_enforced[tuple(w)] = [coopm]
-    #         path = (
-    #             PATH
-    #             + SEPERATOR
-    #             + "medium"
-    #             + SEPERATOR
-    #             + "COOPM_"
-    #             + str([np.round(i, 2) for i in w])
-    #             + type(m).__name__
-    #             + ".json"
-    #         )
-    #         with open(path, "w+") as f:
-    #             json.dump(coopm, f)
-
-    # log.info(f"Compute community growth summary on snm3")
-    # for i, m in enumerate(community_models):
-    #     df = pd.DataFrame()
-    #     # SNM3
-    #     m.medium = SNM3s[i]
-    #     df_snm3 = compute_community_summary(m, weights[i])
-    #     df_snm3["Medium"] = "SNM3"
-    #     df = df.append(df_snm3)
-
-    #     # COMPM
-    #     m.medium = COMPMS[i]
-    #     df_compm = compute_community_summary(m, weights[i])
-    #     df_compm["Medium"] = "COMPM"
-    #     df = df.append(df_compm)
-
-    #     # COOPM enforced
-    #     for weight in weights[i]:
-    #         coopms = COOPMS_enforced[tuple(weight)]
-    #         if len(coopms) > 1:
-    #             coopm = coopms[i]
-    #         else:
-    #             coopm = coopms[0]
-    #         m.medium = coopm
-    #         df_coopm = compute_community_summary(m, [weight])
-    #         df_coopm["Medium"] = "COOPM_enforced_survival"
-    #         df = df.append(df_coopm)
-
-    #         coopms = COOPMS_not_enforced[tuple(weight)]
-    #         if len(coopms) > 1:
-    #             coopm = coopms[i]
-    #         else:
-    #             coopm = coopms[0]
-    #         m.medium = coopm
-    #         df_coopm = compute_community_summary(m, [weight])
-    #         df_coopm["Medium"] = "COOPM"
-    #         df = df.append(df_coopm)
-
-    #     path = (
-    #         PATH
-    #         + SEPERATOR
-    #         + "experiments"
-    #         + SEPERATOR
-    #         + type(m).__name__
-    #         + "_growth_summary.csv"
-    #     )
-    #     df.to_csv(path)
-
-    # log.info("Compute weight posteriors")
-    # for m in community_models:
-    #     m.weights = np.ones(len(m.weights))
-    #     medium_coopm = COOPMS_enforced[tuple(m.weights)]
-    #     maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    #     balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    #     observations = [balanced_observation]
-    #     for i in range(len(m.models)):
-    #         dominant_observation = np.ones(len(m.models)) * min(
-    #             0.1, np.min(maximal_growths)
-    #         )
-    #         dominant_observation[i] = maximal_growths[i]
-    #         observations.append(dominant_observation)
-
-    #     figs = plot_posterior_samples_for_observations(m, observations)
-    #     for i in range(len(figs)):
-    #         figs[i].savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + f"_coopm_weight_posterior_{i}.pdf"
-    #         )
-
-    #     medium_compm = COMPMS[0]
-    #     m.medium = medium_compm
-    #     maximal_growths = [m.single_optimize(i) for i in range(len(m.models))]
-    #     balanced_observation = np.ones(len(m.models)) * np.min(maximal_growths)
-    #     observations = [balanced_observation]
-    #     for i in range(len(m.models)):
-    #         dominant_observation = np.ones(len(m.models)) * min(
-    #             0.1, np.min(maximal_growths)
-    #         )
-    #         dominant_observation[i] = maximal_growths[i]
-    #         observations.append(dominant_observation)
-
-    #     figs = plot_posterior_samples_for_observations(m, observations)
-    #     for i in range(len(figs)):
-    #         figs[i].savefig(
-    #             PATH
-    #             + SEPERATOR
-    #             + "experiments"
-    #             + SEPERATOR
-    #             + type(m).__name__
-    #             + f"_compm_weight_posterior_{i}.pdf"
-    #         )
-
-    # end_time = time.time()
-    # runtime = end_time - start_time
-    # log.info(f"Finished Workflow in {runtime} seconds")

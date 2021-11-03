@@ -9,9 +9,10 @@ from .growth_visualization import plot_scaled_medium_growth, plot_growth_sensiti
 from .community_visualization import (
     plot_pairwise_growth_relation_per_weight,
     plot_community_interaction,
-    plot_posterior_samples_for_observations,
+    plot_posterior_samples_for_observation,
     plot_community_uptake_graph,
     plot_species_interaction,
     plot_reference_interaction,
     plot_community_summary,
+    plot_weight_growth_pairplot,
 )
