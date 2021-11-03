@@ -1,3 +1,6 @@
+.. image:: https://zenodo.org/badge/377459650.svg
+   :target: https://zenodo.org/badge/latestdoi/377459650
+
 ========================================
 NCMW (Nasal community modeling workflow)
 ========================================
