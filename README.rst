@@ -1,11 +1,14 @@
-.. image:: https://zenodo.org/badge/377459650.svg
-   :target: https://zenodo.org/badge/latestdoi/377459650
+|DOI|
+
+.. |DOI| image:: https://zenodo.org/badge/377459650.svg
+        :target: https://zenodo.org/badge/latestdoi/377459650
 
 ========================================
 NCMW (Nasal community modeling workflow)
 ========================================
 A metabolic modeling workflow for communities of organisms in an nasal medium. This implements functionality to analyze the interaction of metabolic models within a community. 
 
+The full documentation can be found on: https://manuelgloeckler.github.io/ncmw/
 
 Installation
 ============
