@@ -144,13 +144,15 @@ def plot_weight_growth_pairplot(model, weights, growths, names=dict()):
 
     N = weights.shape[-1]
     df = pd.DataFrame(torch.hstack((weights, growths)).numpy())
-    df.columns = [f"Weight {i}" for i in range(N)] + [f"Growth {i}" for i in range(N)]
+    df.columns = [f"Weight {model_name[i]}" for i in range(N)] + [
+        f"Growth {model_name[i]}" for i in range(N)
+    ]
 
     fig = sns.pairplot(
         df,
         kind="reg",
-        x_vars=[f"Weight {model_name[i]}" for i in range(5)],
-        y_vars=[f"Growth {model_name[i]}" for i in range(5)],
+        x_vars=[f"Weight {model_name[i]}" for i in range(N)],
+        y_vars=[f"Growth {model_name[i]}" for i in range(N)],
         markers="+",
         plot_kws={
             "truncate": True,
