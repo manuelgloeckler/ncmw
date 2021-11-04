@@ -174,10 +174,12 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">ncmw.visualization.similarity_visualization</span> <span class="kn">import</span> <span class="n">expected_community_interaction</span>
 
 <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_dir</span><span class="p">)</span>
@@ -187,6 +189,7 @@
     <span class="n">get_models</span><span class="p">,</span>
     <span class="n">get_result_path</span><span class="p">,</span>
     <span class="n">SEPERATOR</span><span class="p">,</span>
+    <span class="n">check_for_substring_in_folder</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -206,6 +209,7 @@
     <span class="n">plot_scaled_medium_growth</span><span class="p">,</span>
     <span class="n">uptake_sekretion_venn_diagrams</span><span class="p">,</span>
     <span class="n">plot_growth_sensitivity</span><span class="p">,</span>
+    <span class="n">cross_feed_venn_diagrams</span><span class="p">,</span>
 <span class="p">)</span>
 
 
@@ -217,6 +221,8 @@
 <div class="viewcode-block" id="run_analysis"><a class="viewcode-back" href="../../../api/ncmw.scripts.html#ncmw.scripts.analysis_scripts.run_analysis">[docs]</a><span class="k">def</span> <span class="nf">run_analysis</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">DictConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">global_loger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+    <span class="n">global_loger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hostname: </span><span class="si">{</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -245,109 +251,147 @@
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;similarity&quot;</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;similarity&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;sekretion_uptake&quot;</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;sekretion_uptake&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">pass</span>
 
+    <span class="c1"># Load configurations over previous runs</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;.configs&quot;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;.configs&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">old_cfg</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">old_cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;.configs&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">require_setup</span><span class="p">:</span>
         <span class="n">model_PATH</span> <span class="o">=</span> <span class="n">PATH_res</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;setup&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;snm3_models&quot;</span>
-        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_PATH</span><span class="p">),</span> <span class="s2">&quot;We require the setup to run first.&quot;</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+            <span class="n">model_PATH</span>
+        <span class="p">),</span> <span class="s2">&quot;We require the setup to run first if you set analysis.require_setup=true!&quot;</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading models&quot;</span><span class="p">)</span>
         <span class="n">models</span> <span class="o">=</span> <span class="n">get_models</span><span class="p">(</span>
             <span class="s2">&quot;snm3_models&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="n">PATH_res</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;setup&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading original models, WITHOUT setup&quot;</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading original models, WITHOUT setup, as specified.&quot;</span><span class="p">)</span>
         <span class="n">models</span> <span class="o">=</span> <span class="n">get_models</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">setup</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
 
-    <span class="c1"># Check which results are already there</span>
-    <span class="n">models</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
-    <span class="c1"># models_mask = np.zeros(len(models), dtype=np.int32)</span>
-    <span class="c1"># for filepath in glob.iglob(PATH + SEPERATOR + &quot;flux_analysis&quot; + SEPERATOR + &quot;*&quot;):</span>
-    <span class="c1">#     models_already_done = []</span>
-    <span class="c1">#     for i in range(len(models)):</span>
-    <span class="c1">#         if models[i].id in filepath:</span>
-    <span class="c1">#             models_already_done.append(i)</span>
-    <span class="c1">#     for m in list(set(models_already_done)):</span>
-    <span class="c1">#         models_mask[m] = 1</span>
+    <span class="n">done_dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">done_models</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span> <span class="o">==</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;*.csv&quot;</span>
+            <span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fva was already done for </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">PATH</span>
+                    <span class="o">+</span> <span class="n">SEPERATOR</span>
+                    <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span>
+                    <span class="o">+</span> <span class="n">SEPERATOR</span>
+                    <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                    <span class="o">+</span> <span class="s2">&quot;_fva_fba_results&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span>
+                    <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                <span class="n">done_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                <span class="n">done_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generating fva results&quot;</span><span class="p">)</span>
-    <span class="c1"># dfs = compute_fvas(models[models_mask], cfg.analysis.fva_fraction)</span>
-    <span class="n">dfs</span> <span class="o">=</span> <span class="n">compute_fvas</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">dfs</span><span class="p">)):</span>
-        <span class="c1"># if models_mask[i] == 0:</span>
+    <span class="n">remaining_models</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span> <span class="k">if</span> <span class="n">m</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">done_models</span><span class="p">]</span>
+    <span class="n">remaining_dfs</span> <span class="o">=</span> <span class="n">compute_fvas</span><span class="p">(</span><span class="n">remaining_models</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">remaining_models</span><span class="p">,</span> <span class="n">remaining_dfs</span><span class="p">)):</span>
         <span class="n">sol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;flux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">fluxes</span>
         <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
-            <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;fva_&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
+            <span class="n">PATH</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+            <span class="o">+</span> <span class="s2">&quot;_fva_fba_results&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
         <span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    <span class="c1">#     elif models_mask[i] == 1:</span>
-    <span class="c1">#         df = pd.read_csv(</span>
-    <span class="c1">#             PATH</span>
-    <span class="c1">#             + SEPERATOR</span>
-    <span class="c1">#             + &quot;flux_analysis&quot;</span>
-    <span class="c1">#             + SEPERATOR</span>
-    <span class="c1">#             + &quot;fva_&quot;</span>
-    <span class="c1">#             + model.id</span>
-    <span class="c1">#             + &quot;.csv&quot;,</span>
-    <span class="c1">#             index_col=0,</span>
-    <span class="c1">#         )</span>
-    <span class="c1">#         log.info(df)</span>
-    <span class="c1">#         dfs.insert(i, df)</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="n">done_models</span> <span class="o">+</span> <span class="n">remaining_models</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="n">done_dfs</span> <span class="o">+</span> <span class="n">remaining_dfs</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing COMPM media for modles&quot;</span><span class="p">)</span>
-    <span class="c1"># mediums = compute_COMPM(</span>
-    <span class="c1">#     [models[i] for i in range(len(models)) if models_mask[i] == 1],</span>
-    <span class="c1">#     [dfs[i] for i in range(len(dfs)) if models_mask[i] == 1],</span>
-    <span class="c1"># )</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing COMPM media for models&quot;</span><span class="p">)</span>
     <span class="n">mediums</span> <span class="o">=</span> <span class="n">compute_COMPM</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">dfs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">medium</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">mediums</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-            <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;medium&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;COMPM_&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span>
+            <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;medium&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_COMPM&quot;</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span>
         <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">medium</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plotting fva results&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">dfs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span> <span class="o">==</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span>
+            <span class="ow">and</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_full_fba_plot&quot;</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;*.pdf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plots are already computed&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
         <span class="n">plot_full_fva</span><span class="p">(</span>
             <span class="n">df</span><span class="p">,</span>
             <span class="n">PATH</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
             <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="s2">&quot;full_fva_plot&quot;</span>
             <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+            <span class="o">+</span> <span class="s2">&quot;_full_fba_plot&quot;</span>
             <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span> <span class="o">==</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span>
+            <span class="ow">and</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_medium_fva_plot&quot;</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;*.pdf&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plots are already computed&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
         <span class="n">plot_medium_fva_range</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
             <span class="n">PATH</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
             <span class="o">+</span> <span class="s2">&quot;flux_analysis&quot;</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="s2">&quot;medium_fva_plot&quot;</span>
             <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+            <span class="o">+</span> <span class="s2">&quot;_medium_fva_plot&quot;</span>
             <span class="o">+</span> <span class="s2">&quot;.pdf&quot;</span><span class="p">,</span>
             <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">fva_fraction</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing Uptake Sekretions + Transports&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing Uptake Secretions + Transports&quot;</span><span class="p">)</span>
     <span class="n">uptakes</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sekretions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
         <span class="c1"># Transport reactions</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">check_transport</span><span class="p">:</span>
-            <span class="n">transport_check</span> <span class="o">=</span> <span class="n">table_ex_transport</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-            <span class="n">transport_check</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
-                <span class="n">PATH</span>
-                <span class="o">+</span> <span class="n">SEPERATOR</span>
-                <span class="o">+</span> <span class="s2">&quot;sekretion_uptake&quot;</span>
-                <span class="o">+</span> <span class="n">SEPERATOR</span>
-                <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
-                <span class="o">+</span> <span class="s2">&quot;_transport_summary.csv&quot;</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_transport_summary&quot;</span>
+            <span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">transport_check</span> <span class="o">=</span> <span class="n">table_ex_transport</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+                <span class="n">transport_check</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                    <span class="n">PATH</span>
+                    <span class="o">+</span> <span class="n">SEPERATOR</span>
+                    <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span>
+                    <span class="o">+</span> <span class="n">SEPERATOR</span>
+                    <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span>
+                    <span class="o">+</span> <span class="s2">&quot;_transport_summary.csv&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Sekretion uptakes</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">sekretion_uptake</span> <span class="o">==</span> <span class="s2">&quot;fva&quot;</span><span class="p">:</span>
@@ -355,23 +399,36 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">uptake</span><span class="p">,</span> <span class="n">sekretion</span> <span class="o">=</span> <span class="n">sekretion_uptake_fba</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Model: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">uptake</span><span class="p">)</span><span class="si">}</span><span class="s2"> uptakes and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sekretions</span><span class="p">)</span><span class="si">}</span><span class="s2"> sekretions.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Model: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">uptake</span><span class="p">)</span><span class="si">}</span><span class="s2"> uptakes and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sekretions</span><span class="p">)</span><span class="si">}</span><span class="s2"> secretions.&quot;</span>
         <span class="p">)</span>
         <span class="n">uptakes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">uptake</span><span class="p">)</span>
         <span class="n">sekretions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sekretion</span><span class="p">)</span>
 
         <span class="c1"># Plots for uptake sensitivity!</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_growth_sensitivity</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">uptake</span><span class="p">)</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
-            <span class="n">PATH</span>
-            <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="s2">&quot;growth&quot;</span>
-            <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_growth_sensitivity.pdf&quot;</span>
-        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">sekretion_uptake</span> <span class="o">==</span> <span class="n">old_cfg</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">sekretion_uptake</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;growth&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_uptake_growth_sensitivity&quot;</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_growth_sensitivity</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">uptake</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+                <span class="n">PATH</span>
+                <span class="o">+</span> <span class="n">SEPERATOR</span>
+                <span class="o">+</span> <span class="s2">&quot;growth&quot;</span>
+                <span class="o">+</span> <span class="n">SEPERATOR</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_growth_sensitivity.pdf&quot;</span>
+            <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+                <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_secretion_summary&quot;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Already computed secretion uptake&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Comparing flux interchange between </span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">uptake_sekretion_table</span> <span class="o">=</span> <span class="n">compute_uptake_sekretion_table</span><span class="p">(</span>
                 <span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
@@ -384,14 +441,16 @@
             <span class="n">uptake_sekretion_table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
                 <span class="n">PATH</span>
                 <span class="o">+</span> <span class="n">SEPERATOR</span>
-                <span class="o">+</span> <span class="s2">&quot;sekretion_uptake&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span>
                 <span class="o">+</span> <span class="n">SEPERATOR</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_sekretion_summary.csv&quot;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">models</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_uptake_secretion_summary.csv&quot;</span>
             <span class="p">)</span>
 
-    <span class="c1"># if models_mask.sum() &lt; len(models):</span>
-    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting venn diagrams for uptake sekretion overlaps&quot;</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting venn diagrams for uptake secretion overlaps&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+        <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;uptake_secretion_overlap_plot&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
 
         <span class="n">fig</span> <span class="o">=</span> <span class="n">uptake_sekretion_venn_diagrams</span><span class="p">(</span>
             <span class="n">models</span><span class="p">,</span>
@@ -403,13 +462,55 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
             <span class="n">PATH</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="s2">&quot;sekretion_uptake&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span>
             <span class="o">+</span> <span class="n">SEPERATOR</span>
-            <span class="o">+</span> <span class="s2">&quot;uptake_sekretion_overlap_plot.pdf&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;uptake_secretion_overlap_plot.pdf&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Already computed secretion uptake plots&quot;</span><span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Plotting expected community interactions&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+        <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;expected_community_interactions&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">expected_community_interaction</span><span class="p">(</span>
+            <span class="n">models</span><span class="p">,</span>
+            <span class="n">uptakes</span><span class="p">,</span>
+            <span class="n">sekretions</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="n">PATH</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span>
+            <span class="o">+</span> <span class="n">SEPERATOR</span>
+            <span class="o">+</span> <span class="s2">&quot;expected_community_interactions.pdf&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Already computed expecate community interactions&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+        <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;cross_feeding_plot&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing cross feeding&quot;</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">cross_feed_venn_diagrams</span><span class="p">(</span>
+            <span class="n">models</span><span class="p">,</span>
+            <span class="n">uptakes</span><span class="p">,</span>
+            <span class="n">sekretions</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">cmap</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;secretion_uptake&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;cross_feeding_plot.pdf&quot;</span>
         <span class="p">)</span>
 
     <span class="c1"># if models_mask.sum() &lt; len(models):</span>
-    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+        <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;similarity&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;jacard_similarities&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing Jacard Similarities&quot;</span><span class="p">)</span>
         <span class="n">df_met</span><span class="p">,</span> <span class="n">df_rec</span><span class="p">,</span> <span class="n">df_ro</span> <span class="o">=</span> <span class="n">jaccard_similarity_matrices</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
         <span class="n">df_met</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
@@ -440,8 +541,11 @@
             <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;similarity&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;similarity_summary.pdf&quot;</span>
         <span class="p">)</span>
 
-    <span class="c1"># if models_mask.sum() &lt; len(models):</span>
-    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computed scaled medium growth plot&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_for_substring_in_folder</span><span class="p">(</span>
+        <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;growth&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">&quot;scaled_medium_growth_plot&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Computing scaled medium growth plot&quot;</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">scaled_medium_growth_plot</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_scaled_medium_growth</span><span class="p">(</span>
@@ -455,6 +559,8 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
             <span class="n">PATH</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;growth&quot;</span> <span class="o">+</span> <span class="n">SEPERATOR</span> <span class="o">+</span> <span class="s2">&quot;scaled_medium_growth_plot.pdf&quot;</span>
         <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Already computed scaled medium growth plot&quot;</span><span class="p">)</span>
 
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Job finished in </span><span class="si">{</span><span class="n">end_time</span><span class="o">-</span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span></div>

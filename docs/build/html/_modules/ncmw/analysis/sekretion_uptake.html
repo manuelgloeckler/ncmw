@@ -171,15 +171,14 @@
 
 
 <div class="viewcode-block" id="transport_reactions"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.transport_reactions">[docs]</a><span class="k">def</span> <span class="nf">transport_reactions</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;This function return a list of potential transport reactions</span>
+    <span class="sd">&quot;&quot;&quot;This function return a list of potential transport reactions, we define a</span>
+<span class="sd">    transport reaction as a reaction which contains metabolites from atleast two different compartments!</span>
 
-<span class="sd">    NOTE: This is a cheap heuristic</span>
+<span class="sd">        Args:</span>
+<span class="sd">            model (Model): A cobra model</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        model (Model): A cobra model</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        list: List of names that potentially are transport reaction</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of names that potentially are transport reaction</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">compartment_name</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">id</span> <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">compartments</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
     <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
@@ -192,7 +191,7 @@
 
 
 <div class="viewcode-block" id="table_ex_transport"><a class="viewcode-back" href="../../../api/ncmw.analysis.html#ncmw.analysis.sekretion_uptake.table_ex_transport">[docs]</a><span class="k">def</span> <span class="nf">table_ex_transport</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This method heuristically checks if all exchange reaction has an associated transporter</span>
+    <span class="sd">&quot;&quot;&quot;This method checks if all exchange reaction has an associated transporter</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model (Model): Cobra model</span>

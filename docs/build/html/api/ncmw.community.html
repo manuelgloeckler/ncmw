@@ -283,7 +283,7 @@ accounts a single model</p>
 <span id="ncmw-community-community-analysis-module"></span><h2>ncmw.community.community_analysis module<a class="headerlink" href="#module-ncmw.community.community_analysis" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.community_weight_posterior">
-<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">community_weight_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#community_weight_posterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.community_weight_posterior" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">community_weight_posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_simulations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cooperative_tradeoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dirichlet'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#community_weight_posterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.community_weight_posterior" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -362,7 +362,7 @@ if <span class="math notranslate nohighlight">\(G_i\)</span> is the growth of mo
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight">
 <span class="sig-prename descclassname"><span class="pre">ncmw.community.community_analysis.</span></span><span class="sig-name descname"><span class="pre">compute_pairwise_growth_relation_per_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">community_model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><span class="pre">ncmw.community.community_models.CommunityModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#int" title="(in Python v3.8)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.array</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.array</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.array</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/community/community_analysis.html#compute_pairwise_growth_relation_per_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_analysis.compute_pairwise_growth_relation_per_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>We compar the pairwise growth relation as following: Be <span class="math notranslate nohighlight">\(\alpha \in
+<dd><p>We compare the pairwise growth relation as following: Be <span class="math notranslate nohighlight">\(\alpha \in
 [0,1]\)</span> and <span class="math notranslate nohighlight">\(G_i, G_j\)</span> the growth expression for model i and j. Then we
 maximize the community objective <span class="math notranslate nohighlight">\(\alpha G_i + (1-\alpha)G_j\)</span> and report the
 growth values.</p>
@@ -422,9 +422,9 @@ interaction is wheighted more.</p></li>
 <dd><p>Bases: <a class="reference internal" href="#ncmw.community.community_models.CommunityModel" title="ncmw.community.community_models.CommunityModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ncmw.community.community_models.CommunityModel</span></code></a></p>
 <p>This is a community model, which treats the community as a bag of all reactions that at least one the species has.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.computeCOOPM">
-<span class="sig-name descname"><span class="pre">computeCOOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.computeCOOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.computeCOOPM" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method computes the COOPM medium</p>
+<dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.compute_COOPM">
+<span class="sig-name descname"><span class="pre">compute_COOPM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">MBR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.compute_COOPM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.compute_COOPM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the COOPM medium</p>
 </dd></dl>
 
 <dl class="py method">
@@ -433,14 +433,94 @@ interaction is wheighted more.</p></li>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.cooperative_tradeoff">
+<span class="sig-name descname"><span class="pre">cooperative_tradeoff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.cooperative_tradeoff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.cooperative_tradeoff" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Performs a cooperative tradeoff optimization strategy, which requires two</dt><dd><p>steps: First a FBA solution is obtain, we call it MBR. Then we minimize the
+L2 norm of a vector containing all individual growths under the constraint
+that the community objective is greater than <span class="math notranslate nohighlight">\(lpha \cdot MBR\)</span></p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>alpha</strong> – Tradeoff value, must be between 0 and 1.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of the community objective
+individual_growth: List of individual growths
+solution: Cobra solution object, containing fluxes for all reactions</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>community_growth</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.flux_variability_analysis">
+<span class="sig-name descname"><span class="pre">flux_variability_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loopless</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_of_optimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pfba_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.flux_variability_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.flux_variability_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the minimum and maximum possible flux value for each reaction.</p>
+<p>Parameters:
+loopless (boolean, optional):</p>
+<blockquote>
+<div><p>Whether to return only loopless solutions. This is significantly
+slower. Please also refer to the notes.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>fraction_of_optimum (float, optional) :</dt><dd><p>Must be &lt;= 1.0. Requires that the objective value is at least the
+fraction times maximum objective value. A value of 0.85 for instance
+means that the objective has to be at least at 85% percent of its
+maximum.</p>
+</dd>
+<dt>pfba_factor (float, optional):</dt><dd><p>Add an additional constraint to the model that requires the total sum
+of absolute fluxes must not be larger than this value times the
+smallest possible sum of absolute fluxes, i.e., by setting the value
+to 1.1 the total sum of absolute fluxes must not be more than
+10% larger than the pFBA solution. Since the pFBA solution is the
+one that optimally minimizes the total flux sum, the <code class="docutils literal notranslate"><span class="pre">pfba_factor</span></code>
+should, if set, be larger than one. Setting this value may lead to
+more realistic predictions of the effective flux bounds.</p>
+</dd>
+<dt>processes (int, optional):</dt><dd><p>The number of parallel processes to run. If not explicitly passed,
+will be set from the global configuration singleton.</p>
+</dd>
+</dl>
+<p>Returns
+pandas.DataFrame</p>
+<blockquote>
+<div><p>A data frame with reaction identifiers as the index and two columns:
+- maximum: indicating the highest possible flux
+- minimum: indicating the lowest possible flux</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.load">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.optimize">
-<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.optimize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method return the current objective value and additional information</p>
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs FBA on the community model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enforce_survival</strong> – Must be between 0 and 1. It constraint the community such</p></li>
+<li><p><strong>all member must have atleast X % of the community growth e.g. if</strong> (<em>that</em>) – </p></li>
+<li><p><strong>survival=1 then all members must have the same fraction of the total</strong> (<em>enforce</em>) – </p></li>
+<li><p><strong>growth.</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of the community objective
+individual_growth: List of individual growths
+solution: Cobra solution object, containing fluxes for all reactions</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>community_growth</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -448,6 +528,12 @@ interaction is wheighted more.</p></li>
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>This saves the model using pickle. For other format overwrite this
 function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.save_as_sbml">
+<span class="sig-name descname"><span class="pre">save_as_sbml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.save_as_sbml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.save_as_sbml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will save the community model as sbml</p>
 </dd></dl>
 
 <dl class="py method">
@@ -459,7 +545,7 @@ accounts a single model</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.slim_optimize">
-<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.slim_optimize" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">slim_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.slim_optimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.slim_optimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the current community objective</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -473,7 +559,7 @@ accounts a single model</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.BagOfReactionsModel.summary">
-<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.summary" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cooperative_tradeoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#BagOfReactionsModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.BagOfReactionsModel.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method should report a summary of the model</p>
 </dd></dl>
 
@@ -555,7 +641,7 @@ accounts a single model</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ncmw.community.community_models.</span></span><span class="sig-name descname"><span class="pre">ShuttleCommunityModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_exchanges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">ncmw.community.community_models.</span></span><span class="sig-name descname"><span class="pre">ShuttleCommunityModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shared_exchanges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ncmw.community.community_models.BagOfReactionsModel" title="ncmw.community.community_models.BagOfReactionsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ncmw.community.community_models.BagOfReactionsModel</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.build_community">
@@ -564,8 +650,9 @@ accounts a single model</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.load" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the model</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.save">
@@ -576,8 +663,25 @@ function</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ncmw.community.community_models.ShuttleCommunityModel.summary">
-<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method should report a summary of the model</p>
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enforce_survival</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cooperative_tradeoff</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/functions.html#float" title="(in Python v3.8)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/community/community_models.html#ShuttleCommunityModel.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.community.community_models.ShuttleCommunityModel.summary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Creates a community summary. We list all exchanges between members of the</dt><dd><p>community and between the environment.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enforce_survival</strong> – Enforce a minimium percentage of growth for each member.</p></li>
+<li><p><strong>cooperative_tradeoff</strong> – Perform cooperative tradeoff.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Table of fluxes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

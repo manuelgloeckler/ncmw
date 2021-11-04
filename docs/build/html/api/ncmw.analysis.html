@@ -246,7 +246,7 @@ If argument is “None”, then it will be recomputed based on the given models.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.medium.compute_exchange_medium">
-<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_exchange_medium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_exchange_medium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_exchange_medium" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ncmw.analysis.medium.</span></span><span class="sig-name descname"><span class="pre">compute_exchange_medium</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fvas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ncmw/analysis/medium.html#compute_exchange_medium"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.medium.compute_exchange_medium" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -372,7 +372,7 @@ list: List of sekretion reactions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.table_ex_transport">
 <span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">table_ex_transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.3.4)"><span class="pre">pandas.core.frame.DataFrame</span></a><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#table_ex_transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.table_ex_transport" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method heuristically checks if all exchange reaction has an associated transporter</p>
+<dd><p>This method checks if all exchange reaction has an associated transporter</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>model</strong> (<em>Model</em>) – Cobra model</p>
@@ -389,19 +389,16 @@ list: List of sekretion reactions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ncmw.analysis.sekretion_uptake.transport_reactions">
 <span class="sig-prename descclassname"><span class="pre">ncmw.analysis.sekretion_uptake.</span></span><span class="sig-name descname"><span class="pre">transport_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">cobra.core.model.Model</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../_modules/ncmw/analysis/sekretion_uptake.html#transport_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ncmw.analysis.sekretion_uptake.transport_reactions" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function return a list of potential transport reactions</p>
-<p>NOTE: This is a cheap heuristic</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>model</strong> (<em>Model</em>) – A cobra model</p>
+<dd><p>This function return a list of potential transport reactions, we define a
+transport reaction as a reaction which contains metabolites from atleast two different compartments!</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>model (Model): A cobra model</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of names that potentially are transport reaction</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#list" title="(in Python v3.8)">list</a></p>
+<dt>Returns:</dt><dd><p>list: List of names that potentially are transport reaction</p>
 </dd>
 </dl>
+</div></blockquote>
 </dd></dl>
 
 </div>

@@ -421,7 +421,6 @@
     <span class="n">mass_charge_balance</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">check_mass_balance</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="n">consistent_model</span> <span class="o">=</span> <span class="n">fastcc</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">consistent_model</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="s2">&quot;_consistent&quot;</span>
     <span class="n">blocked_reactions_consistent</span> <span class="o">=</span> <span class="n">cobra</span><span class="o">.</span><span class="n">flux_analysis</span><span class="o">.</span><span class="n">find_blocked_reactions</span><span class="p">(</span>
         <span class="n">consistent_model</span>
     <span class="p">)</span>
