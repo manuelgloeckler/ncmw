@@ -1,4 +1,5 @@
-[![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/323376678)
+[![License (MIT Licence)](https://img.shields.io/badge/license-LGPLv3.0-blue.svg?style=plastic)](http://opensource.org/licenses/LGPL-3.0)
+[![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/377459650)
 
 NCMW (Nasal community modeling workflow)
 ========================================
