@@ -9,7 +9,7 @@
   ],
   "description": "<p><code>pymCADRE</code> is an advanced re-implementation of the metabolic Context-specificity Assessed by Deterministic Reaction Evaluation (mCADRE) algorithm in Python. It constructs tissue-specific metabolic models by leveraging gene expression data and literature-based evidence, along with network topology information.",
   "access_right": "open",
-  "license": "MI",
+  "license": "MIT Licence",
   "keywords": [
     "python",
     "constraint-based modeling",
