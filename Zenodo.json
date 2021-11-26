@@ -1,0 +1,26 @@
+{
+  "upload_type": "Package",
+  "title": "NCMW: A Python Package to Analyze Metabolic Interactions in the Nasal Microbiome",
+  "creators": [
+    {
+      "orcid": "0000-0002-0248-6679",
+      "affiliation": "Eberhard Karls University of Tübingen, Institute for Bioinformatics and Medical Informatics, Tübingen",
+    }
+  ],
+  "description": "<p><code>pymCADRE</code> is an advanced re-implementation of the metabolic Context-specificity Assessed by Deterministic Reaction Evaluation (mCADRE) algorithm in Python. It constructs tissue-specific metabolic models by leveraging gene expression data and literature-based evidence, along with network topology information.",
+  "access_right": "open",
+  "license": "MI",
+  "keywords": [
+    "python",
+    "constraint-based modeling",
+    "genome-scale modeling",
+    "nasal Microbial community",
+    "flux balance analysis",
+    "sbml model",
+    "Staphylococcus aureus"
+  ],
+  "contributors": [],
+  "communities": [],
+  "grants": []
+}
+
