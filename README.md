@@ -61,8 +61,8 @@ Quick Start
 
 ### Scripts
 
-The scripts will automatically produce some results, that is
-:   -   **ncmw\_setup**:
+The scripts will automatically produce some results, that is:
+    -   **ncmw\_setup**:
         :   -   Will set the default bounds as specified in
                 data/configs, as well as the medium as specified in
                 data/medium.
