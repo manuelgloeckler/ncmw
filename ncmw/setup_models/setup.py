@@ -13,7 +13,6 @@ from ncmw.utils import (
     get_biomass_reaction,
     DATA_PATH,
 )
-from copy import deepcopy
 
 
 def gapfill_model(
@@ -33,7 +32,7 @@ def gapfill_model(
         Model: Cobra model that has growth if algorithm succeeds
         list: List of reactions that were added
     """
-    model = deepcopy(model)
+    model = model.copy()
     growth = model.slim_optimize()
     if growth > eps:
         # Already has growth gapfilling is unnecessary
@@ -61,11 +60,11 @@ def gapfill_model(
         solution = cobra.flux_analysis.gapfill(
             model, fill_model, demand_reactions=demand_reactions, **kwargs
         )[-1]
-        filled_model = deepcopy(model)
+        filled_model = model.copy()
         filled_model.add_reactions(solution)
     except:
         warn("The model still has no growth... . We try an alternative")
-        filled_model = deepcopy(model)
+        filled_model = model.copy()
         _, rec = gapfill_medium(model)
 
         try:
@@ -111,14 +110,22 @@ def gapfill_medium(model: Model, eps: float = 1e-1) -> Tuple[Model, List]:
         Model: Cobra model with extended medium
         list: List of extended metabolites
     """
-    model_help = deepcopy(model)
-    # if model_help.slim_optimize() > eps:
-    #     # Already feasible model.
-    #     return model, []
+    model_help = model.copy()
+    try:
+        if model_help.slim_optimize() > eps:
+            # Already feasible model.
+            return model, []
+    except:
+        pass
+
+    # Turn on all exchanges
+    for ex in model_help.exchanges:
+        ex.lower_bound = -10
     # We can gapfill any exchange reaction that currently is not in the medium
     gapfillable = set([ex.id for ex in model_help.exchanges]).difference(
         set(model.medium.keys())
     )
+
     # print(f"There are {len(gapfillable)} many metabolites to fill the medium")
 
     biomass = get_biomass_reaction(model_help)

@@ -262,7 +262,17 @@ def run_community(cfg: DictConfig) -> None:
             log.info("Computing COOPM medium")
             kwargs = cfg.community.coopm_params
             m.medium = all_medias["compm"]
-            coopm = m.compute_COOPM(m.slim_optimize(), **kwargs)
+            mbr = m.slim_optimize()
+            if cfg.community.coopm_params["enforce_survival"] > 0:
+                for i in range(len(m.models)):
+                    if m.single_optimize(i) == 0:
+                        cfg.community.coopm_params["enforce_survival"] = 0
+                        log.info(
+                            "We set enforce survival = 0, as not all models within the community can grow!"
+                        )
+
+            log.info(f"Growth on COMPM: {mbr}")
+            coopm = m.compute_COOPM(mbr, **cfg.community.coopm_params)
             all_medias["coopm"] = coopm
         for medium_name, medium in all_medias.items():
             path_to_save = (
@@ -343,9 +353,7 @@ def run_community(cfg: DictConfig) -> None:
                 m.medium = medium
                 log.info("Compute pairwise growth relationships for different weights.")
                 fig = plot_pairwise_growth_relation_per_weight(
-                    m,
-                    cfg.visualization.names,
-                    **cfg.community.pairwise_growth_params,
+                    m, cfg.visualization.names, **cfg.community.pairwise_growth_params,
                 )
                 fig.savefig(
                     path_to_save + SEPERATOR + "pairwise_growth_relationship.pdf"

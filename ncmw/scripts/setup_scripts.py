@@ -9,7 +9,6 @@ import time
 import random
 import numpy as np
 import pandas as pd
-from copy import deepcopy
 
 import sys, os
 import glob
@@ -38,7 +37,7 @@ def run_setup_hydra(cfg: DictConfig) -> None:
 def run_setup(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
     cobra_loger = logging.getLogger()
-    cobra_loger.setLevel(logging.WARNING)
+    cobra_loger.setLevel(logging.ERROR)
     log.setLevel(logging.INFO)
     log.info(OmegaConf.to_yaml(cfg))
     log.info(f"Hostname: {socket.gethostname()}")
@@ -105,7 +104,6 @@ def run_setup(cfg: DictConfig) -> None:
                 models_already_done.append(models[i])
                 log.info(f"Already done model construction for {models[i].id}")
 
-
     gapfill_dict = {"Id": [], "Additions": [], "Growth": []}
     for i, model_i in enumerate(models):
         if model_i in models_already_done:
@@ -116,7 +114,7 @@ def run_setup(cfg: DictConfig) -> None:
                 f"Set default configs {cfg.setup.configs} and medium {cfg.setup.medium} for {model_i.id}"
             )
             model = set_default_configs_and_snm3_medium(
-                deepcopy(model_i), cfg.setup.configs, cfg.setup.medium
+                model_i.copy(), cfg.setup.configs, cfg.setup.medium
             )
         else:
             log.info(f"Keep model {model_i.id} as they are")
@@ -161,7 +159,7 @@ def run_setup(cfg: DictConfig) -> None:
 
     df = pd.DataFrame(gapfill_dict)
     df.to_csv(PATH + SEPERATOR + "gapfill" + SEPERATOR + "gapfill_report.csv")
-    
+
     # Fastcc after gapfill !
     if cfg.setup.fastcc:
         log.info(f"Improve models with FastCC: {cfg.setup.fastcc}")
