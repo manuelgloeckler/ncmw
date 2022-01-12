@@ -1,4 +1,4 @@
-from .community_models import BagOfReactionsModel, ShuttleCommunityModel
+from .community_models import BagOfReactionsModel, ShuttleCommunityModel, HierarchicalCommunityModel
 
 from .community_analysis import (
     compute_pairwise_growth_relation_per_weight,
