@@ -1,6 +1,6 @@
 [![License (MIT Licence)](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/377459650)
-[![Download count](https://img.shields.io/github/downloads//manuelgloeckler/ncmw)
+[![Download count](https://img.shields.io/github/downloads//manuelgloeckler/ncmw/total.svg?style=plastic)
 
 NCMW (Nasal community modeling workflow)
 ========================================
