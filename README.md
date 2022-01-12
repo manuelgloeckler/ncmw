@@ -5,8 +5,6 @@ A metabolic modeling workflow for communities of organisms in an nasal
 medium. This implements functionality to analyze the interaction of
 metabolic models within a community.
 
-The full documentation can be found on:
-<https://manuelgloeckler.github.io/ncmw/>
 
 [![License (MIT Licence)](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/377459650)
@@ -21,6 +19,13 @@ The full documentation can be found on:
 *Full documentaion page*: [https://manuelgloeckler.github.io/ncmw/](https://manuelgloeckler.github.io/ncmw/)
 
 *Repository*: [https://github.com/manuelgloeckler/ncmw](https://github.com/manuelgloeckler/ncmw)
+
+
+► Getting started with NCMW
+----------------------------
+
+Please see the full documentaion as a user manual at https://manuelgloeckler.github.io/ncmw/
+
 
 Installation
 ------------
@@ -103,3 +108,12 @@ The scripts will automatically produce some results, that is:
                 observed growth.
 
 
+
+☮ Licensing and distribution
+----------------------------
+
+NCMW is Copyright (C) 2021-2022 by the following organization:
+
+The University of Tuebingen, Germany
+
+NCMW is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation.
