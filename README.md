@@ -1,7 +1,3 @@
-[![License (MIT Licence)](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
-[![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/377459650)
-![Download count](https://img.shields.io/github/downloads/manuelgloeckler/ncmw/total.svg?style=plastic)
-
 NCMW (Nasal community modeling workflow)
 ========================================
 
@@ -11,6 +7,20 @@ metabolic models within a community.
 
 The full documentation can be found on:
 <https://manuelgloeckler.github.io/ncmw/>
+
+[![License (MIT Licence)](https://img.shields.io/badge/license-MIT-blue.svg?style=plastic)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/377459650.svg)](https://zenodo.org/badge/latestdoi/377459650)
+![Lines of Code](https://img.shields.io/tokei/lines/github/manuelgloeckler/ncmw?color=orange&style=plastic)
+![Download count](https://img.shields.io/github/downloads/manuelgloeckler/ncmw/total.svg?style=plastic)
+
+----
+*Authors*: [Manuel Glöckler](https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/systems-biology/team/),
+[Reihaneh Mostolizadeh](https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/systems-biology/team/dr-reihaneh-mostolizadeh/)
+
+
+*Full documentaion page*: [https://manuelgloeckler.github.io/ncmw/](https://manuelgloeckler.github.io/ncmw/)
+
+*Repository*: [https://github.com/manuelgloeckler/ncmw](https://github.com/manuelgloeckler/ncmw)
 
 Installation
 ------------
