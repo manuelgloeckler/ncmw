@@ -30,7 +30,7 @@ Please see the full documentaion as a user manual at https://manuelgloeckler.git
 Installation
 ------------
 
-Please clone the repository using `git clone URL` . The package and all the dependencies can be installed via pip. Just enter:
+Please clone the repository using `git clone https://github.com/manuelgloeckler/ncmw.git` . The package and all the dependencies can be installed via pip. Just enter:
 :   `pip install -e ncmw`
 
 when you are in the same directory as the pacakage. This will install
