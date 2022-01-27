@@ -14,6 +14,7 @@ import sys, os
 import glob
 import pickle
 
+STATUS_KEY = "__finished_run__"
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
 
@@ -34,7 +35,69 @@ def run_setup_hydra(cfg: DictConfig) -> None:
     run_setup(cfg)
 
 
+def create_setup_folder_backbone(setup_folder, project_folder):
+    """Creates the backbone folder system used by the script
+    
+    Args:
+        setup_folder: Path to the setup folder, here contents is placed
+        project_folder: Path to the parent directory
+
+    """
+    try:
+        if not os.path.exists(project_folder):
+            os.mkdir(project_folder)
+        if not os.path.exists(setup_folder):
+            os.mkdir(setup_folder)
+        if not os.path.exists(setup_folder + SEPERATOR + "snm3_models"):
+            os.mkdir(setup_folder + SEPERATOR + "snm3_models")
+        if not os.path.exists(setup_folder + SEPERATOR + "quality_report"):
+            os.mkdir(setup_folder + SEPERATOR + "quality_report")
+        if not os.path.exists(setup_folder + SEPERATOR + "gapfill"):
+            os.mkdir(setup_folder + SEPERATOR + "gapfill")
+    except ValueError:
+        raise ValueError(
+            "Could not generate output directory, maybe we do not have permission's to do so?"
+        )
+
+
+def check_if_already_done(log, cfg, old_cfg, setup_folder, models):
+    """ Checks if an identical run was performed before
+    
+    Args:
+        log: Logger to report findings.
+        cfg: Current configs.
+        old_cfg: Old configs.
+        setup_folder: Setup folder path.
+        models: List of models.
+    
+    Returns:
+        list: Models for which setup is already finished.
+    
+    """
+    FINISHED_previous_run = old_cfg._content[STATUS_KEY]
+    if not FINISHED_previous_run and not cfg.overwrite_all:
+        log.info("Detected an unfinished previous run, thus recompute any quantities.")
+        return []
+    models_already_done = []
+    for filepath in glob.iglob(
+        setup_folder + SEPERATOR + "snm3_models" + SEPERATOR + "*.xml"
+    ):
+        for i in range(len(models)):
+            if (
+                models[i].id in filepath
+                and not cfg.overwrite_all
+                and cfg.setup.fastcc == old_cfg.setup.fastcc
+                and cfg.setup.set_bounds_and_medium
+                == old_cfg.setup.set_bounds_and_medium
+                and cfg.setup.gapfill == old_cfg.setup.gapfill
+            ):
+                models_already_done.append(models[i])
+                log.info(f"Already done model construction for {models[i].id}")
+    return models_already_done
+
+
 def run_setup(cfg: DictConfig) -> None:
+    """ Setup script called by hydra """
     log = logging.getLogger(__name__)
     cobra_loger = logging.getLogger()
     cobra_loger.setLevel(logging.ERROR)
@@ -53,31 +116,19 @@ def run_setup(cfg: DictConfig) -> None:
     PATH_res = get_result_path(name)
     PATH = PATH_res + SEPERATOR + "setup"
 
-    try:
-        if not os.path.exists(PATH_res):
-            os.mkdir(PATH_res)
-        if not os.path.exists(PATH):
-            os.mkdir(PATH)
-        if not os.path.exists(PATH + SEPERATOR + "snm3_models"):
-            os.mkdir(PATH + SEPERATOR + "snm3_models")
-        if not os.path.exists(PATH + SEPERATOR + "quality_report"):
-            os.mkdir(PATH + SEPERATOR + "quality_report")
-        if not os.path.exists(PATH + SEPERATOR + "gapfill"):
-            os.mkdir(PATH + SEPERATOR + "gapfill")
-    except ValueError:
-        raise ValueError(
-            "Could not generate output directory, maybe we do not have permission's to do so?"
-        )
+    # Creates folder structure
+    create_setup_folder_backbone(PATH, PATH_res)
 
     # Load configurations over previous runs
     if os.path.exists(PATH + SEPERATOR + ".configs"):
         with open(PATH + SEPERATOR + ".configs", "rb") as f:
             old_cfg = pickle.load(f)
+            if STATUS_KEY not in old_cfg._content:
+                old_cfg._content[STATUS_KEY] = False
+
     else:
         old_cfg = cfg
-
-    with open(PATH + SEPERATOR + ".configs", "wb") as f:
-        pickle.dump(cfg, f)
+        old_cfg._content[STATUS_KEY] = False
 
     log.info(f"Generating result directory in {PATH}")
 
@@ -90,19 +141,7 @@ def run_setup(cfg: DictConfig) -> None:
         log.info(f"Metabolites: {len(model.metabolites)}")
 
     # Check if models allready exists then stop
-    models_already_done = []
-    for filepath in glob.iglob(PATH + SEPERATOR + "snm3_models" + SEPERATOR + "*.xml"):
-        for i in range(len(models)):
-            if (
-                models[i].id in filepath
-                and not cfg.overwrite_all
-                and cfg.setup.fastcc == old_cfg.setup.fastcc
-                and cfg.setup.set_bounds_and_medium
-                == old_cfg.setup.set_bounds_and_medium
-                and cfg.setup.gapfill == old_cfg.setup.gapfill
-            ):
-                models_already_done.append(models[i])
-                log.info(f"Already done model construction for {models[i].id}")
+    models_already_done = check_if_already_done(log, cfg, old_cfg, PATH, models)
 
     gapfill_dict = {"Id": [], "Additions": [], "Growth": []}
     for i, model_i in enumerate(models):
@@ -158,7 +197,7 @@ def run_setup(cfg: DictConfig) -> None:
         models[i] = model
 
     df = pd.DataFrame(gapfill_dict)
-    df.to_csv(PATH + SEPERATOR + "gapfill" + SEPERATOR + "gapfill_report.csv")
+    df.to_csv(PATH + SEPERATOR + "gapfill" + SEPERATOR + "gapfill_report.csv", mode="a")
 
     # Fastcc after gapfill !
     if cfg.setup.fastcc:
@@ -187,7 +226,7 @@ def run_setup(cfg: DictConfig) -> None:
         models = consistent_models
 
     if cfg.setup.memote_evaluation:
-        # Start two memote jobs in parallel
+        # Start five memote jobs in parallel
         log.info("Computing memote reports, this can take several minutes...")
         i = 0
         for model in models:
@@ -217,6 +256,10 @@ def run_setup(cfg: DictConfig) -> None:
 
             if (i % 5) == 0:
                 p.wait()
+
+    with open(PATH + SEPERATOR + ".configs", "wb") as f:
+        cfg._content[STATUS_KEY] = True
+        pickle.dump(cfg, f)
 
     end_time = time.time()
     runtime = end_time - start_time

@@ -4,7 +4,8 @@ import libsbml
 import os
 import cobra
 
-class HierarchicalModel():
+
+class HierarchicalModel:
     """Hierarchical community model
 
     This class uses LibSBML and the comp package for SBML to generate a community model
@@ -15,22 +16,23 @@ class HierarchicalModel():
     e.g. within COBRA!
     
     """
+
     def __init__(self, name="Community"):
-        sbmlns = SBMLNamespaces(3,1)
-        sbmlns.addPackageNamespace("comp",1)
-        sbmlns.addPackageNamespace("fbc",2)
+        sbmlns = SBMLNamespaces(3, 1)
+        sbmlns.addPackageNamespace("comp", 1)
+        sbmlns.addPackageNamespace("fbc", 2)
         document = SBMLDocument(sbmlns)
         document.setPackageRequired("comp", True)
         document.setPackageRequired("fbc", False)
 
-        self.sbml_doc = document 
+        self.sbml_doc = document
         self.model = self.sbml_doc.createModel(name)
         self.model.setName(name)
         self.model.getPlugin("fbc").setStrict(True)
         self.models = []
         self.models_ref = []
 
-    def add_model(self,source:str, id:str=None):
+    def add_model(self, source: str, id: str = None):
         """Does add a new model to the community
         
         Args:
@@ -48,7 +50,7 @@ class HierarchicalModel():
 
         self.models_ref.append(id)
 
-        m1 = ExternalModelDefinition(3,1)
+        m1 = ExternalModelDefinition(3, 1)
         m1.setId(id)
         m1.setSource(source)
         dplugin = self.sbml_doc.getPlugin("comp")
@@ -72,7 +74,6 @@ class HierarchicalModel():
                         medium[id] = abs(p.getValue())
         return medium
 
-
     def getIds(self):
         """ Returns the model ids"""
         ids = []
@@ -93,7 +94,7 @@ class HierarchicalModel():
         """
         return self.model.getPlugin("comp").getSubmodel(idx)
 
-    def getModel(self,idx):
+    def getModel(self, idx):
         """ Returns the original model"""
         return self.models[idx]
 
@@ -105,8 +106,8 @@ class HierarchicalModel():
         """ Returns the metabolites from the original model"""
         return [e.getId() for e in self.models[idx].getListOfSpecies()]
 
-    def getCompartmentsFromModel(self,idx):
-        """Retruns the compartments from the original model""" 
+    def getCompartmentsFromModel(self, idx):
+        """Retruns the compartments from the original model"""
         return [c.getId() for c in self.models[idx].getListOfCompartments()]
 
     def getExchangesFromModel(self, idx):
@@ -121,8 +122,8 @@ class HierarchicalModel():
                 i += 1
         return rec
 
-    def getExternalMetabolites(self,idx):
-        """Retruns all external metabolites from the original model""" 
+    def getExternalMetabolites(self, idx):
+        """Retruns all external metabolites from the original model"""
         met = self.getMetabolitesFromModel(idx)
         i = 0
         while i < len(met):
@@ -139,7 +140,11 @@ class HierarchicalModel():
         for idx in range(len(self.models)):
             ex.extend(self.getExchangesFromModel(idx))
         return list(set(ex))
-    
+
+    def getExternalMetabolitesWithExchange(self):
+        exchanges = self.getAllExchanges()
+        return ["M_" + e[5:] for e in exchanges]
+
     def getAllExternalMetabolites(self):
         """ Retruns the union of all external metabolites"""
         ex = []
@@ -148,7 +153,7 @@ class HierarchicalModel():
         return list(set(ex))
 
     def getAllBiomassFunctons(self):
-        """ Returns all biomass functions.""" 
+        """ Returns all biomass functions."""
         biomass_functions = []
         for ids, m in zip(self.models_ref, self.models):
             mfbc = m.getPlugin("fbc")
@@ -157,14 +162,16 @@ class HierarchicalModel():
             biomass_functions.append(ids + "__" + reaction_id)
         return biomass_functions
 
-    def getModelRefContainMetabolites(self, met:str):
+    def getModelRefContainMetabolites(self, met: str):
         refs = []
         for i in range(len(self.models)):
             if met in self.getMetabolitesFromModel(i):
                 refs.append(self.models_ref[i])
         return refs
 
-    def collapse_compartments(self, name:str, model_ref:str, compartments:list, **kwargs):
+    def collapse_compartments(
+        self, name: str, model_ref: str, compartments: list, **kwargs
+    ):
         """ Collapses the compartments to a single one!"""
         c = self.add_compartment(name, **kwargs)
         for comp in compartments:
@@ -172,25 +179,30 @@ class HierarchicalModel():
         return c
 
     def removeAllExchangesFromModel(self, idx):
-        """Reomoves old exchange reactions """ 
+        """Reomoves old exchange reactions """
         s1 = self.getSubmodel(idx)
         exchanges = self.getExchangesFromModel(idx)
         for e in exchanges:
             self.delete(s1, e)
 
-    def addExternalEnvironment(self, shuttle_lower_bound=-50, shuttle_upper_bound=50):
+    def addExternalEnvironment(self, shuttle_lower_bound=-50, shuttle_upper_bound=1000):
         """ Adds an new external environment with new exchange reactions """
         _ = self.add_compartment("e", "external")
         mets = self.getAllExternalMetabolites()
         for m in mets:
             self.add_metabolite(m, "e")
             within_models = self.getModelRefContainMetabolites(m)
-            _ = self.add_reaction("EX_" + m[2:], {m:1}, dict())
+            _ = self.add_reaction("EX_" + m[2:], {m: 1}, dict())
             for model in within_models:
-                _ = self.add_reaction(f"SH__{model}_"+m, {m:1}, {f"{model}__{m}":1}, lower_bound=shuttle_lower_bound, upper_bound=shuttle_upper_bound)
+                _ = self.add_reaction(
+                    "SH_" + m[2:] + f"__{model}",
+                    {f"{model}__{m}": 1},
+                    {m: 1},
+                    lower_bound=shuttle_lower_bound,
+                    upper_bound=shuttle_upper_bound,
+                )
 
-
-    def delete(self,submodel, id_ref:str):
+    def delete(self, submodel, id_ref: str):
         """Deletes the corresponding id_ref from a given submodel
 
         NOTE: The element is deleted within the community not in the original model itself
@@ -205,7 +217,7 @@ class HierarchicalModel():
         deleted.setIdRef(id_ref)
         submodel.addDeletion(deleted)
 
-    def replace(self, element, model_ref:str, id_ref:str):
+    def replace(self, element, model_ref: str, id_ref: str):
         """Replaces a element of the original one with a substitute within the community
     
         Args:
@@ -239,7 +251,7 @@ class HierarchicalModel():
             fluxObjective.setReaction(b)
             fluxObjective.setCoefficient(c)
 
-    def add_compartment(self,id,name="", meta_id="", constant=True, size=1):
+    def add_compartment(self, id, name="", meta_id="", constant=True, size=1):
         """Adds a new compartment to the community
         
         Args:
@@ -261,7 +273,7 @@ class HierarchicalModel():
         comp.setSize(size)
         return comp
 
-    def add_parameter(self, id:str, value, constant=True):
+    def add_parameter(self, id: str, value, constant=True):
         """A name parameter e.g. can be used to save the default medium within the model.
         
         Args:
@@ -271,13 +283,20 @@ class HierarchicalModel():
         
         
         """
-        p = Parameter(3,1)
+        p = Parameter(3, 1)
         p.setId(id)
         p.setValue(value)
         p.setConstant(constant)
         self.model.addParameter(p)
 
-    def add_metabolite(self, id:str, compartment:str, boundary:bool=False, substance_units:bool=True, constant:bool=True):
+    def add_metabolite(
+        self,
+        id: str,
+        compartment: str,
+        boundary: bool = False,
+        substance_units: bool = True,
+        constant: bool = True,
+    ):
         """Adds a metabolites to the community
         
         Args:
@@ -299,7 +318,16 @@ class HierarchicalModel():
         species.setConstant(constant)
         return species
 
-    def add_reaction(self, id:str, reactants:dict, products:dict, lower_bound=-10, upper_bound=1000,reversible=True, constant=False):
+    def add_reaction(
+        self,
+        id: str,
+        reactants: dict,
+        products: dict,
+        lower_bound=-10,
+        upper_bound=1000,
+        reversible=True,
+        constant=False,
+    ):
         """Adds a reaction to the community
         
         Args:
@@ -322,24 +350,24 @@ class HierarchicalModel():
         reaction = self.model.createReaction()
         reaction.setId(id)
         reaction.setReversible(reversible)
-        for key,val in reactants.items():
+        for key, val in reactants.items():
             reactant = reaction.createReactant()
             reactant.setSpecies(key)
             reactant.setStoichiometry(val)
             reactant.setConstant(constant)
-        for key,val in products.items():
+        for key, val in products.items():
             product = reaction.createProduct()
             product.setSpecies(key)
             product.setStoichiometry(val)
             product.setConstant(constant)
 
-        self.add_parameter(id+ "_lb", lower_bound)
-        self.add_parameter(id+ "_ub", upper_bound)
+        self.add_parameter(id + "_lb", lower_bound)
+        self.add_parameter(id + "_ub", upper_bound)
 
         rplug = reaction.getPlugin("fbc")
-        rplug.setLowerFluxBound(id+"_lb")
+        rplug.setLowerFluxBound(id + "_lb")
         rplug.setUpperFluxBound(id + "_ub")
-        
+
         return reaction
 
     def convert_to_cobra(self, path="test.xml", delete_file_after=True):
@@ -366,7 +394,7 @@ class HierarchicalModel():
         sbmldoc = self.sbml_doc
 
         props = ConversionProperties()
-        props.addOption('flatten comp', True) 
+        props.addOption("flatten comp", True)
         converter = libsbml.CompFlatteningConverter()
         converter.setDocument(sbmldoc)
 
@@ -374,8 +402,8 @@ class HierarchicalModel():
         if status != 0:
             raise ValueError("Not a valid hierarchical model")
 
-        writer  = SBMLWriter()
-        writer.writeSBML(sbmldoc, path)        
+        writer = SBMLWriter()
+        writer.writeSBML(sbmldoc, path)
 
     def save(self, path):
         writeSBMLToFile(self.sbml_doc, path)
@@ -405,4 +433,4 @@ def generate_hierarchical_community_model(model_paths, weights=None):
     model.setCommunityObjective(weights, model.getAllBiomassFunctons())
 
     return model
-        
+

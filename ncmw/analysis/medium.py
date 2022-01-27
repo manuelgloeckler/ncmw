@@ -57,7 +57,10 @@ def compute_COMPM(models: list, fvas: list = None) -> List:
         for key in medium:
             if key in df.index:
                 flux = df.loc[key].minimum
-                medium[key] = -flux
+                if flux < 0:
+                    medium[key] = -flux
+                else:
+                    medium[key] = 0
         mediums.append(medium)
 
     for model, medium in zip(models, mediums):
@@ -65,8 +68,8 @@ def compute_COMPM(models: list, fvas: list = None) -> List:
             max_growth = m.slim_optimize()
             m.medium = medium
             growth = m.slim_optimize()
-            assert np.isclose(
-                max_growth, growth
+            assert (
+                growth >= max_growth - 1e-10
             ), "In the COMPM medium all community members must reach maximum growth rate, check the input!"
 
     return mediums

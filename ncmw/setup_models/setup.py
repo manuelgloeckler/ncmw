@@ -217,7 +217,7 @@ def set_default_configs_and_snm3_medium(
     return model
 
 
-def score_memote(model_path: str, report_path: str, solver_timout: int = 120) -> None:
+def score_memote(model_path: str, report_path: str, solver_timout: str = "120") -> None:
     """Generates a memote evaluation report for the model quality.
 
     NOTE: This typically requires a rather consistent model, otherwise it breaks.
@@ -226,7 +226,7 @@ def score_memote(model_path: str, report_path: str, solver_timout: int = 120) ->
     Args:
         str: Path to the model file: Typically SBML format
         str: Path to the model file: Typically SBML format
-        int: Time in seconds until the solver timeouts.
+        str: Time in seconds until the solver timeouts.
     """
     try:
         p = subprocess.Popen(

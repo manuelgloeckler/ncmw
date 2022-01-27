@@ -177,7 +177,7 @@ class BagOfReactionsModel(CommunityModel):
         missing_metabolites = dict()
         for m, val in medium.items():
             if m in exchanges:
-                present_metabolites[m] = val 
+                present_metabolites[m] = val
             else:
                 missing_metabolites[m] = val
         self.community_model.medium = present_metabolites
@@ -284,11 +284,7 @@ class BagOfReactionsModel(CommunityModel):
         return constraint_growth
 
     def flux_variability_analysis(
-        self,
-        loopless=False,
-        fraction_of_optimum=1.0,
-        pfba_factor=None,
-        processes=None,
+        self, loopless=False, fraction_of_optimum=1.0, pfba_factor=None, processes=None,
     ):
         """Determine the minimum and maximum possible flux value for each reaction.
 
@@ -577,8 +573,7 @@ class ShuttleCommunityModel(BagOfReactionsModel):
         return "SH_" + met + "__" + model_id
 
     def _get_shuttle_id_shift(self, model_id):
-        return 3 
-
+        return 3
 
     def summary(self, enforce_survival: float = 0, cooperative_tradeoff: float = None):
         """Creates a community summary. We list all exchanges between members of the
@@ -614,9 +609,11 @@ class ShuttleCommunityModel(BagOfReactionsModel):
         vals = np.zeros((len(non_zero_ids), len(self.models) + 1))
         shuttle_reactions_ids = [s.id for s in self.shuttle_reactions]
         for i in range(len(non_zero_ids)):
-            met = non_zero_ids[i][self._get_shuttle_id_shift(self.model_ids[0]):]
+            met = non_zero_ids[i][self._get_shuttle_id_shift(self.model_ids[0]) :]
             for j in range(len(self.models)):
-                shuttle_id = self._generate_shuttle_id_from_met_id(met, self.model_ids[j])
+                shuttle_id = self._generate_shuttle_id_from_met_id(
+                    met, self.model_ids[j]
+                )
                 if shuttle_id in shuttle_reactions_ids:
                     vals[i, j] = sol[shuttle_id]
         vals[:, -1] = np.array(non_zero_flux)
@@ -722,7 +719,7 @@ class ShuttleCommunityModel(BagOfReactionsModel):
             for met in new_external_metabolites:
                 if (
                     met.id in [met.id for met in model.metabolites]
-                    and f"EX_{met.id}" in self.shared_exchanges
+                    and f"EX_{met.id}"  # in self.shared_exchanges
                 ):
                     met2 = community_model.metabolites.get_by_id(
                         met.id + "__" + model.id
@@ -753,9 +750,7 @@ class ShuttleCommunityModel(BagOfReactionsModel):
                 f"EX_{met.id}"
             ).flux_expression
             cons = community_model.problem.Constraint(
-                exchange - sum(present_shuttles),
-                lb=0,
-                ub=1000,
+                exchange - sum(present_shuttles), lb=0, ub=1000,
             )
             shuttle_constraints.append(cons)
         community_model.add_cons_vars(shuttle_constraints)
@@ -837,9 +832,11 @@ class ShuttleCommunityModel(BagOfReactionsModel):
 
 class HierarchicalCommunityModel(ShuttleCommunityModel):
     def __init__(self, model_paths, *args, **kwargs):
-        self.model_paths = model_paths 
+        self.model_paths = model_paths
 
-        self.community_model_writer = generate_hierarchical_community_model(self.model_paths)
+        self.community_model_writer = generate_hierarchical_community_model(
+            self.model_paths
+        )
         self.community_model = self.community_model_writer.convert_to_cobra()
         self.models = self.community_model_writer.models
         self.model_ids = self.community_model_writer.getIds()
@@ -860,8 +857,12 @@ class HierarchicalCommunityModel(ShuttleCommunityModel):
 
         self._weights = np.ones(len(self.models))
         self.biomass_id = self.community_model_writer.getAllBiomassFunctons()
-        self.biomass_reactions = [self.community_model.reactions.get_by_id(g) for g in self.biomass_id]
-        self.shuttle_reactions = [r for r in self.community_model.reactions if r.id[:3] == "SH_"]
+        self.biomass_reactions = [
+            self.community_model.reactions.get_by_id(g) for g in self.biomass_id
+        ]
+        self.shuttle_reactions = [
+            r for r in self.community_model.reactions if r.id[:3] == "SH_"
+        ]
         self.shuttle_reactions_id = [s.id for s in self.shuttle_reactions]
         self._metabolites = self.community_model.metabolites
         self._reactions = self.community_model.reactions
@@ -874,22 +875,22 @@ class HierarchicalCommunityModel(ShuttleCommunityModel):
         if self.shuttle_regularization:
             self._add_shuttle_regularization()
 
-    def _get_model_id_from_shuttle_id(self, str):
-        ids =  str.split("__")[1]
-        for id in self.model_ids:
-            if id in ids:
-                return id
+    # def _get_model_id_from_shuttle_id(self, str):
+    #     ids = str.split("__")[1]
+    #     for id in self.model_ids:
+    #         if id in ids:
+    #             return id
 
-    def _get_shuttle_id_shift(self, model_id):
-        return 3
+    # def _get_shuttle_id_shift(self, model_id):
+    #     return 3
 
-    def _generate_shuttle_id_from_met_id(self, met, model_id):
-        return "SH__" + model_id + "_M_" + met 
+    # def _generate_shuttle_id_from_met_id(self, met, model_id):
+    #     return "SH__" + model_id + "_M_" + met
 
     def save_as_sbml(self, path, hierarchical=True):
         """This will save the community model as sbml"""
         if hierarchical:
             self.community_model_writer.save(path)
         else:
-            self.community_model_writer.save_flatten(path) 
-        
+            self.community_model_writer.save_flatten(path)
+

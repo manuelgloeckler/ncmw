@@ -107,6 +107,19 @@ def get_biomass_reaction(model):
 
 
 def check_for_substring_in_folder(PATH: str, substring: str, type: str = "*") -> bool:
+    """Checks if a substring is contained within the file names contianed in a given folder.
+    
+    
+    
+    Args:
+        PATH: Path to the folder
+        substring: Substring to search for
+        type: Specific file type
+    
+    Returns:
+        bool: If it is present or not
+    
+    """
     for filepath in glob.iglob(PATH + SEPERATOR + type):
         if substring in filepath:
             return True
