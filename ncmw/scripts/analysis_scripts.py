@@ -61,7 +61,7 @@ def run_analysis(cfg: DictConfig) -> None:
     log.setLevel(logging.INFO)
     global_loger = logging.getLogger()
     global_loger.setLevel(logging.WARNING)
-    log.info(OmegaConf.to_yaml(cfg))
+    log.info(OmegaConf.to_yaml([cfg]))
     log.info(f"Hostname: {socket.gethostname()}")
 
     seed = cfg.seed

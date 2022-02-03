@@ -102,7 +102,7 @@ class CommunityModel(ABC):
         """This method return the current objective value and additional information"""
         pass
 
-    def computeCOOPM(self, MBR, fraction=0.1, enforce_survival=True):
+    def compute_COOPM(self, MBR, fraction=0.1, enforce_survival=True):
         """This method computes the COOPM medium"""
         raise NotImplementedError(
             "This method is not implemented fro your current model"
@@ -229,38 +229,34 @@ class BagOfReactionsModel(CommunityModel):
         ), "We requrie a solver cabable to optimize quadratic programs i.e. use cplex."
         assert alpha <= 1 and alpha > 0, "This hyperparameter has to be between 0 and 1"
 
+        # We make a copy because switching between LP and QP problems can become expensive.
+        model = deepcopy(self.community_model)
+        biomass_reactions = [model.reactions.get_by_id(i.id) for i in self.biomass_reactions]
         min_community_growth = alpha * MBR
         constraint_growth = [
-            self.community_model.problem.Constraint(
+            model.problem.Constraint(
                 sum(
                     [
                         self._weights[i] * r.flux_expression
-                        for r in self.biomass_reactions
+                        for r in biomass_reactions
                     ]
                 ),
                 lb=min_community_growth,
             )
-            for i, f in enumerate(self.biomass_reactions)
+            for i, f in enumerate(biomass_reactions)
         ]
-        self.community_model.objective = -sum(
-            [r.flux_expression ** 2 for r in self.biomass_reactions]
+        model.objective = -sum(
+            [r.flux_expression ** 2 for r in biomass_reactions]
         )
-        self.community_model.add_cons_vars(constraint_growth)
-        self.community_model.solver.update()
-        sol = self.community_model.optimize()
-        single_growths = [sol[r.id] for r in self.biomass_reactions]
+        model.add_cons_vars(constraint_growth)
+        model.solver.update()
+        sol = model.optimize()
+        single_growths = [sol[r.id] for r in biomass_reactions]
         community_growth = sum(
-            [self.weights[i] * sol[r.id] for i, r in enumerate(self.biomass_reactions)]
+            [self.weights[i] * sol[r.id] for i, r in enumerate(biomass_reactions)]
         )
         sol.objective_value = community_growth
-        self.community_model.remove_cons_vars(constraint_growth)
-        self.community_model.objective = sum(
-            [
-                self.weights[i] * r.flux_expression
-                for i, r in enumerate(self.biomass_reactions)
-            ]
-        )
-        self.community_model.solver.update()
+        del model
         return community_growth, single_growths, sol
 
     def _add_enforce_survival_constraints(self, percent):

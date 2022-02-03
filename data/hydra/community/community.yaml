@@ -5,24 +5,26 @@ shuttle_reaction_params:
   shuttle_reaction_lower_bound: -50
   shuttle_reaction_upper_bound: 1000
   shuttle_regularization: True
-  shuttle_regularization_factor: 1000
+  shuttle_regularization_factor: 10000
 main_weights: "ones"
-base_models: "setup"
+models_folder: "setup" # Either 'setup' or a path
 save_models: True
 save_as_sbml: True
 coopm_params:
   fraction: 0.1
   enforce_survival: 0.01
+medium_strict_subset_of_default: False
 medium:
   default: True
   compm: True
   coopm: True
 optimize_params:
   enforce_survival: 0
-conpute_community_fva: True
+compute_community_fva: True
 community_fva_params:
   fraction_of_optimum: 0.9
   processes: 4
+cooperative_tradeoff: True
 cooperative_tradeoff_params:
   alpha: 0.9
 pairwise_growth: True

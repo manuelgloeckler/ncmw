@@ -1,5 +1,7 @@
 import hydra
+from ncmw import community
 from omegaconf import DictConfig, OmegaConf
+import cobra
 
 import logging
 import socket
@@ -65,86 +67,96 @@ from ncmw.utils import (
 def run_community_hydra(cfg: DictConfig) -> None:
     run_community(cfg)
 
+def create_community_folder_backbone(community_folder:str, project_folder:str) -> None:
+    """Creates the backbone folder system used by the script
+    
+    Args:
+        community_folder: Path to the community folder, here contents is placed
+        project_folder: Path to the parent directory
 
-def run_community(cfg: DictConfig) -> None:
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.INFO)
-    cobra_loger = logging.getLogger()
-    cobra_loger.setLevel(logging.ERROR)
-    log.info(OmegaConf.to_yaml(cfg))
-    log.info(f"Hostname: {socket.gethostname()}")
-
-    seed = cfg.seed
-    random.seed(seed)
-    np.random.seed(seed)
-    log.info(f"Random seed: {seed}")
-
-    start_time = time.time()
-    name = cfg.name
-
-    PATH_res = get_result_path(name)
-    PATH = PATH_res + SEPERATOR + "community"
-    log.info(f"Working directory: {PATH}")
+    """
     try:
-        if not os.path.exists(PATH_res):
-            os.mkdir(PATH_res)
-        if not os.path.exists(PATH):
-            os.mkdir(PATH)
-        if not os.path.exists(PATH + SEPERATOR + "community_models"):
-            os.mkdir(PATH + SEPERATOR + "community_models")
-        if not os.path.exists(PATH + SEPERATOR + "medium"):
-            os.mkdir(PATH + SEPERATOR + "medium")
-        if not os.path.exists(PATH + SEPERATOR + "weight_inference"):
-            os.mkdir(PATH + SEPERATOR + "weight_inference")
-        if not os.path.exists(PATH + SEPERATOR + "experiments_BagOfReactionsModel"):
-            os.mkdir(PATH + SEPERATOR + "experiments_BagOfReactionsModel")
-        if not os.path.exists(PATH + SEPERATOR + "experiments_ShuttleCommunityModel"):
-            os.mkdir(PATH + SEPERATOR + "experiments_ShuttleCommunityModel")
-        log.info("Created folder structure successfully")
+        if not os.path.exists(project_folder):
+            os.mkdir(project_folder)
+        if not os.path.exists(community_folder):
+            os.mkdir(community_folder)
+        if not os.path.exists(community_folder + SEPERATOR + "community_models"):
+            os.mkdir(community_folder + SEPERATOR + "community_models")
+        if not os.path.exists(community_folder + SEPERATOR + "medium"):
+            os.mkdir(community_folder + SEPERATOR + "medium")
+        if not os.path.exists(community_folder + SEPERATOR + "weight_inference"):
+            os.mkdir(community_folder + SEPERATOR + "weight_inference")
+        if not os.path.exists(community_folder + SEPERATOR + "experiments_BagOfReactionsModel"):
+            os.mkdir(community_folder + SEPERATOR + "experiments_BagOfReactionsModel")
+        if not os.path.exists(community_folder + SEPERATOR + "experiments_ShuttleCommunityModel"):
+            os.mkdir(community_folder + SEPERATOR + "experiments_ShuttleCommunityModel")
     except:
-        pass
-
-    # Load configurations over previous runs
-    if os.path.exists(PATH + SEPERATOR + ".configs"):
-        with open(PATH + SEPERATOR + ".configs", "rb") as f:
+        raise ValueError("Could not generate output directory, maybe we do not have permission's to do so?")
+        
+def load_old_configs(community_folder:str, cfg:str) -> DictConfig:
+    """This will load the old config file to avoid recomputation.
+    
+    Args:
+        community_folder: Folder in which the community results are placed.
+        cfg: Current config file to dump (is after this run the new old_config).
+    
+    Returns:
+        DictConfig: Old configurations.
+    
+    """
+    if os.path.exists(community_folder + SEPERATOR + ".configs"):
+        with open(community_folder + SEPERATOR + ".configs", "rb") as f:
             old_cfg = pickle.load(f)
     else:
         old_cfg = cfg
 
-    with open(PATH + SEPERATOR + ".configs", "wb") as f:
+    with open(community_folder + SEPERATOR + ".configs", "wb") as f:
         pickle.dump(cfg, f)
+    return old_cfg
 
-    log.info("Loading models from setup")
-    if cfg.community.base_models == "setup":
-        try:
-            models = get_models(
-                "snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR
-            )
-        except:
-            raise ValueError(
-                "We require snm3 models for the next steps, please run the setup! Alternative specifiy comunity.base_models with a path to the models you want to use"
-            )
-    else:
-        try:
-            models = get_models("", prefix=cfg.community.base_models)
-        except:
-            raise ValueError(f"No models found at {cfg.community.base_models}")
+def set_solver_disable_functionalities_if_needed(cfg:DictConfig, log:logging.Logger) -> DictConfig:
+    """This will set the solver to cplex, the default we recommend for this task.
+    Otherwise it will disable some functionality, which we encountered to be not
+    supported/hard for other solvers
+    
+    
+    
+    Args:
+        cfg: Config file
+        log: Logger to return logs.
+    
+    Returns:
+        DictConfig: Updated configs
+    
+    """
+    cobra_config = cobra.Configuration()
+    try: 
+        cobra_config.solver = "cplex"
+    except Exception as e:
+        log.warn(f"We recommend cplex as solver, but it seems to be not installed on your system. We disable, cooperative tradeoff and community fva for other solvers. The error was {e}")
+    
+        cfg.community.compute_community_fva = False
+        cfg.community.cooperative_tradeoff = False
 
+    return cfg
+    
+def generate_community_models(models, cfg, old_cfg, log, community_path):
     log.info("Generating community models")
     community_models = []
     if cfg.community.bag_of_reactions_model:
         path = (
-            PATH
+            community_path
             + SEPERATOR
             + "community_models"
             + SEPERATOR
             + "BagOfReactionsModel.pkl"
         )
+        # Either loading or reinitializing the community model
         if (
             check_for_substring_in_folder(
-                PATH + SEPERATOR + "community_models", "BagOfReactionsModel.pkl"
+                community_path + SEPERATOR + "community_models", "BagOfReactionsModel.pkl"
             )
-            and old_cfg.community.base_models == cfg.community.base_models
+            and old_cfg.community.models_folder == cfg.community.models_folder
         ):
             log.info("Loading BagOfReactions community model")
             m = BagOfReactionsModel.load(path)
@@ -161,7 +173,7 @@ def run_community(cfg: DictConfig) -> None:
             community_models += [BagOfReactionsModel(models)]
     if cfg.community.shuttle_reactions_model:
         path = (
-            PATH
+            community_path
             + SEPERATOR
             + "community_models"
             + SEPERATOR
@@ -173,9 +185,9 @@ def run_community(cfg: DictConfig) -> None:
             old_cfg.community.shuttle_reaction_params["shared_reactions"] = None
         if (
             check_for_substring_in_folder(
-                PATH + SEPERATOR + "community_models", "ShuttleCommunityModel.pkl"
+                community_path + SEPERATOR + "community_models", "ShuttleCommunityModel.pkl"
             )
-            and old_cfg.community.base_models == cfg.community.base_models
+            and old_cfg.community.models_folder == cfg.community.models_folder
             and all(
                 [
                     old_cfg.community.shuttle_reaction_params[key]
@@ -185,8 +197,8 @@ def run_community(cfg: DictConfig) -> None:
             )
         ):
             log.info("Loading shuttle reactions model")
-            m = type(m).load(path)
-            ids = [mod.id for mod in m.models]
+            m = ShuttleCommunityModel.load(path)
+            ids = [mod.id for mod in models]
             correct = True
             for model in models:
                 correct = correct and (model.id in ids)
@@ -210,7 +222,218 @@ def run_community(cfg: DictConfig) -> None:
                 m.models
             ), "The custom main weights must be a iterable of floats for each member of the community!"
         m.weights = weights
+    return community_models
 
+def reset(old_community_model, PATH):
+    new_model = type(old_community_model).load(PATH + SEPERATOR + "community_models" + SEPERATOR + str(type(old_community_model).__name__) + ".pkl")
+    new_model.medium = old_community_model.medium 
+    new_model.weights = old_community_model.weights
+    return new_model
+    
+
+def generate_medias(community_model, cfg:DictConfig, log, community_path, result_path):
+    all_medias = {}
+    default = set(get_mediums("medium")[cfg.setup.medium].keys())
+
+    if cfg.community.medium["default"]:
+        log.info("Computing default for community")
+        # Also save default medium
+        medium = community_model.medium
+        if cfg.community.medium_strict_subset_of_default:
+            medium = dict([(k,v) for k,v in medium.items() if k in default])
+        all_medias["default"] = medium
+        path = community_path + SEPERATOR + "medium" + SEPERATOR + "DEFAULT" + ".json"
+        with open(path, "w+") as f:
+            json.dump(community_model.medium, f)
+        log.info(f"Saving default: {path}")
+
+
+    if cfg.community.medium["compm"] or cfg.community.medium["coopm"]:
+        log.info("Computing COMPM for community")
+        medium_prefix = result_path + SEPERATOR + "analysis" + SEPERATOR
+        mediums = get_mediums("medium", medium_prefix)
+        COMPM = dict()
+        for medium in mediums.values():
+            for key, val in medium.items():
+                COMPM[key] = float(abs(val))
+        all_medias["compm"] = COMPM
+        if cfg.community.medium_strict_subset_of_default:
+            COMPM = dict([(k,v) for k,v in COMPM.items() if k in default])
+        if cfg.community.medium["compm"]:
+            path = community_path + SEPERATOR + "medium" + SEPERATOR + "COMPM" + ".json"
+            with open(path, "w+") as f:
+                json.dump(COMPM, f)
+            log.info(f"Saving COMPMs: {path}")
+
+    return all_medias
+
+def generate_coopm_medium(community_model, all_medias, cfg, log:logging.Logger, community_path):
+    log.info("Computing COOPM medium")
+    # COOPM computed using COMPM as base medium!
+    community_model.medium = all_medias["compm"]
+    mbr = community_model.slim_optimize()
+    if cfg.community.coopm_params["enforce_survival"] > 0:
+        for i in range(len(community_model.models)):
+            if community_model.single_optimize(i) == 0:
+                cfg.community.coopm_params["enforce_survival"] = 0
+                log.warning(
+                    "We set enforce survival = 0, as not all models within the community can grow!"
+                )
+
+    log.info(f"Growth on COMPM: {mbr}")
+    coopm = community_model.compute_COOPM(mbr, **cfg.community.coopm_params)
+    all_medias["coopm"] = coopm
+    path = community_path + SEPERATOR + "medium" + SEPERATOR + f"{type(community_model).__name__}_COOPM" + ".json"
+    with open(path, "w+") as f:
+        json.dump(coopm, f)
+    log.info(f"Saving COOPMS: {path}")
+    return coopm
+
+def flux_analysis(community_model, models, medium_name, cfg, log, PATH, path_to_save):
+    log.info(f"Community FBA/FVA results on medium: {medium_name}")
+    df_growth_summary = pd.DataFrame()
+
+    if cfg.community.compute_community_fva:
+        log.info("Computing FVA")
+        fraction_of_optimal = cfg.community.cooperative_tradeoff_params["alpha"]
+        try:
+            # This may fail for several numerical reasions -> Infeasible Error from solver.
+            df_fva = community_model.flux_variability_analysis(
+                **cfg.community.community_fva_params
+            )
+            df_fva.columns = [
+                f"minimum (fraction of optimal: {fraction_of_optimal})",
+                f"maximum (fraction of optimal: {fraction_of_optimal})",
+            ]
+        except:
+            log.warning("Flux variability analysis failed, we will disable it.")
+            cfg.community.compute_community_fva= False
+            df_fva = pd.DataFrame()
+            community_model = reset(community_model, PATH)
+
+    else:
+        df_fva = pd.DataFrame()
+   
+    # FBA results
+    growth, single_growths, sol = community_model.optimize(**cfg.community.optimize_params)
+    log.info(
+        f"Achieved community growth:{growth}, with individual growth: {single_growths}"
+    )
+    df_growth_summary["Weights"] = list(community_model.weights) + [None]
+    df_growth_summary["FBA Growth"] = single_growths + [growth]
+    df_fba = sol.to_frame()
+    # Cooperative tradeoff results if necessray
+    if cfg.community.cooperative_tradeoff:
+        (
+            growth_tradeoff,
+            single_growths_tradeoff,
+            sol_tradeoff,
+        ) = community_model.cooperative_tradeoff(**cfg.community.cooperative_tradeoff_params)
+   
+        log.info(
+            f"Achieved community growth with cooperative tradeoff:{growth_tradeoff}, with individual growth: {single_growths_tradeoff}"
+        )
+    
+        df_growth_summary[
+            "Cooperative tradeoff Growth"
+        ] = single_growths_tradeoff + [growth_tradeoff]
+
+        df_fba_cooperative_tradeoff = sol_tradeoff.to_frame()
+
+    df_growth_summary.index = [m.id for m in models] + ["Community growth"]
+    df_growth_summary.to_csv(path_to_save + SEPERATOR + f"growth_analysis.csv")
+
+    
+    
+
+    df_fva["FBA"] = df_fba["fluxes"]
+    if cfg.community.cooperative_tradeoff:
+        df_fva[
+        f"Cooperative tradeoff (alpha: {cfg.community.cooperative_tradeoff_params.alpha}"
+        ] = df_fba_cooperative_tradeoff["fluxes"]
+
+    log.info("Saving all flux analysis")
+    df_fva.to_csv(path_to_save + SEPERATOR + f"flux_analysis.csv")
+
+def pairwise_growth(community_model, cfg, log, path_to_save):
+    log.info("Compute pairwise growth relationships for different weights.")
+    fig = plot_pairwise_growth_relation_per_weight(
+        community_model, cfg.visualization.names, **cfg.community.pairwise_growth_params,
+    )
+    fig.savefig(
+        path_to_save + SEPERATOR + "pairwise_growth_relationship.pdf"
+    )
+
+def community_flux_summary(community_model, cfg, path_to_save):
+    summary_1 = community_model.summary(**cfg.community.optimize_params)
+    summary_1.to_csv(path_to_save + SEPERATOR + f"flux_summary.csv")
+
+    fig = plot_community_summary(community_model, summary_1, cfg.visualization.names)
+    fig.savefig(path_to_save + SEPERATOR + f"community_summary.pdf")
+
+    if cfg.community.cooperative_tradeoff:
+        summary_2 = community_model.summary(
+            cooperative_tradeoff=cfg.community.cooperative_tradeoff_params[
+                "alpha"
+            ]
+        )
+        summary_2.to_csv(path_to_save + SEPERATOR + f"flux_summary_cooperative_tradeoff.csv")
+        fig = plot_community_summary(community_model, summary_2, cfg.visualization.names)
+        fig.savefig(path_to_save + SEPERATOR + f"community_summary_cooperative_tradeoff.pdf")
+        return summary_1, summary_2
+
+    return summary_1, None
+
+def run_community(cfg: DictConfig) -> None:
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
+    cobra_loger = logging.getLogger()
+    cobra_loger.setLevel(logging.ERROR)
+    log.info(OmegaConf.to_yaml(cfg))
+    log.info(f"Hostname: {socket.gethostname()}")
+
+    seed = cfg.seed
+    random.seed(seed)
+    np.random.seed(seed)
+    log.info(f"Random seed: {seed}")
+
+    start_time = time.time()
+    name = cfg.name
+
+
+    PATH_res = get_result_path(name)
+    PATH = PATH_res + SEPERATOR + "community"
+
+    cfg = set_solver_disable_functionalities_if_needed(cfg, log)
+
+    #Creates folder structure
+    log.info(f"Working directory: {PATH}")
+    create_community_folder_backbone(PATH, PATH_res)
+    log.info("Successfully created folder backbone.")
+
+    # Load configurations over previous runs
+    old_cfg = load_old_configs(PATH, cfg)
+
+    log.info("Loading models from setup")
+    if cfg.community.models_folder == "setup":
+        try:
+            models = get_models(
+                "snm3_models", prefix=PATH_res + SEPERATOR + "setup" + SEPERATOR
+            )
+        except:
+            raise ValueError(
+                "We require snm3 models for the next steps, please run the setup! Alternative specifiy comunity.models_folder with a path to the models you want to use"
+            )
+    else:
+        try:
+            models = get_models("", prefix=cfg.community.models_folder)
+        except:
+            raise ValueError(f"No models found at {cfg.community.models_folder}")
+
+    # Generating community models
+    community_models = generate_community_models(models,cfg,old_cfg, log, PATH)
+    
+    # Saving community models
     log.info(f"Saving models: {cfg.community.save_models}")
     if cfg.community.save_models:
         for m in community_models:
@@ -231,50 +454,18 @@ def run_community(cfg: DictConfig) -> None:
             log.info(f"Saving community models as sbml: {path}")
 
     # Medias
-    all_medias = {}
+    all_medias = generate_medias(community_models[-1], cfg, log, PATH, PATH_res)
 
-    if cfg.community.medium["default"]:
-        log.info("Computing default for community")
-        # Also save default medium
-        all_medias["default"] = m.medium
-        path = PATH + SEPERATOR + "medium" + SEPERATOR + "DEFAULT" + ".json"
-        with open(path, "w+") as f:
-            json.dump(m.medium, f)
-        log.info(f"Saving default: {path}")
-
-    if cfg.community.medium["compm"] or cfg.community.medium["coopm"]:
-        log.info("Computing COMPM for community")
-        medium_prefix = PATH_res + SEPERATOR + "analysis" + SEPERATOR
-        mediums = get_mediums("medium", medium_prefix)
-        COMPM = dict()
-        for medium in mediums.values():
-            for key, val in medium.items():
-                COMPM[key] = float(abs(val))
-        all_medias["compm"] = COMPM
-        if cfg.community.medium["compm"]:
-            path = PATH + SEPERATOR + "medium" + SEPERATOR + "COMPM" + ".json"
-            with open(path, "w+") as f:
-                json.dump(COMPM, f)
-            log.info(f"Saving COMPMs: {path}")
-
+    # Now perform experiments for all community models and so on.
     for m in community_models:
         if cfg.community.medium["coopm"]:
-            log.info("Computing COOPM medium")
-            kwargs = cfg.community.coopm_params
-            m.medium = all_medias["compm"]
-            mbr = m.slim_optimize()
-            if cfg.community.coopm_params["enforce_survival"] > 0:
-                for i in range(len(m.models)):
-                    if m.single_optimize(i) == 0:
-                        cfg.community.coopm_params["enforce_survival"] = 0
-                        log.info(
-                            "We set enforce survival = 0, as not all models within the community can grow!"
-                        )
-
-            log.info(f"Growth on COMPM: {mbr}")
-            coopm = m.compute_COOPM(mbr, **cfg.community.coopm_params)
+            # These are different for different community models!
+            coopm = generate_coopm_medium(m, all_medias, cfg,log, PATH)
             all_medias["coopm"] = coopm
         for medium_name, medium in all_medias.items():
+            # Set correct medium
+            m.medium = medium
+            # Get path to save
             path_to_save = (
                 PATH
                 + SEPERATOR
@@ -285,146 +476,63 @@ def run_community(cfg: DictConfig) -> None:
             )
             if not os.path.exists(path_to_save):
                 os.mkdir(path_to_save)
-            log.info(f"Community FBA/FVA results on medium: {medium_name}")
-            df_growth_summary = pd.DataFrame()
-
-            m = type(m).load(
-                PATH
-                + SEPERATOR
-                + "community_models"
-                + SEPERATOR
-                + f"{type(m).__name__}.pkl"
-            )
-            m.medium = medium
-
-            log.info("Computing FVA")
-            fraction_of_optimal = cfg.community.cooperative_tradeoff_params["alpha"]
-            if cfg.community.conpute_community_fva:
-                df_fva = m.flux_variability_analysis(
-                    **cfg.community.community_fva_params
-                )
-                df_fva.columns = [
-                    f"minimum (fraction of optimal: {fraction_of_optimal})",
-                    f"maximum (fraction of optimal: {fraction_of_optimal})",
-                ]
-            else:
-                df_fva = pd.DataFrame()
-            # TODO after cooperative tradeoff or somthing this gets stuck in a loop for
-            # some reason....................
-            growth, single_growths, sol = m.optimize(**cfg.community.optimize_params)
-            (
-                growth_tradeoff,
-                single_growths_tradeoff,
-                sol_tradeoff,
-            ) = m.cooperative_tradeoff(**cfg.community.cooperative_tradeoff_params)
-            log.info(
-                f"Achieved community growth:{growth}, with individual growth: {single_growths}"
-            )
-            log.info(
-                f"Achieved community growth with cooperative tradeoff:{growth_tradeoff}, with individual growth: {single_growths_tradeoff}"
-            )
-            df_growth_summary["Weights"] = list(m.weights) + [None]
-            df_growth_summary["FBA Growth"] = single_growths + [growth]
-            df_growth_summary[
-                "Cooperative tradeoff Growth"
-            ] = single_growths_tradeoff + [growth_tradeoff]
-            df_growth_summary.index = [m.id for m in models] + ["Community growth"]
-            df_growth_summary.to_csv(path_to_save + SEPERATOR + f"growth_analysis.csv")
-
-            df_fba = sol.to_frame()
-            df_fba_cooperative_tradeoff = sol_tradeoff.to_frame()
-
-            df_fva["FBA"] = df_fba["fluxes"]
-            df_fva[
-                f"Cooperative tradeoff (fraction of optimal: {fraction_of_optimal}"
-            ] = df_fba_cooperative_tradeoff["fluxes"]
-            log.info("Saving all flux analysis")
-            df_fva.to_csv(path_to_save + SEPERATOR + f"flux_analysis.csv")
+            
+            flux_analysis(m, models, medium_name, cfg, log, PATH, path_to_save)
 
             if cfg.community.pairwise_growth:
-                # we reload it here as it, check why need
-                m = type(m).load(
-                    PATH
-                    + SEPERATOR
-                    + "community_models"
-                    + SEPERATOR
-                    + f"{type(m).__name__}.pkl"
-                )
-                m.medium = medium
-                log.info("Compute pairwise growth relationships for different weights.")
-                fig = plot_pairwise_growth_relation_per_weight(
-                    m, cfg.visualization.names, **cfg.community.pairwise_growth_params,
-                )
-                fig.savefig(
-                    path_to_save + SEPERATOR + "pairwise_growth_relationship.pdf"
-                )
+                pairwise_growth(m, cfg, log ,path_to_save)
+            
             if m._type == "compartmentalized" and isinstance(m, ShuttleCommunityModel):
-                m = type(m).load(
-                    PATH
-                    + SEPERATOR
-                    + "community_models"
-                    + SEPERATOR
-                    + f"{type(m).__name__}.pkl"
-                )
-                m.medium = medium
+                log.info("Compute flux summary")
+                summary_1, summary_2 = community_flux_summary(m, cfg, path_to_save)
 
-                summary_1 = m.summary(**cfg.community.optimize_params)
-                summary_1.to_csv(path_to_save + SEPERATOR + f"flux_summary.csv")
-                fig = plot_community_summary(m, summary_1, cfg.visualization.names)
-                fig.savefig(path_to_save + SEPERATOR + f"community_summary.pdf")
-
-                summary_2 = m.summary(
-                    cooperative_tradeoff=cfg.community.cooperative_tradeoff_params[
-                        "alpha"
-                    ]
-                )
-                summary_2.to_csv(path_to_save + SEPERATOR + f"flux_summary.csv")
-                fig = plot_community_summary(m, summary_2, cfg.visualization.names)
-                fig.savefig(path_to_save + SEPERATOR + f"community_summary.pdf")
+                log.info(f"Summary: {summary_1}")
+                log.info(f"Summary cooperative tradeof: {summary_2}")
 
                 log.info(f"Compute community visualization")
-                fig2 = plot_community_interaction(
+                fig = plot_community_interaction(
                     m, summary_1, names=cfg.visualization.names
                 )
-                fig2.savefig(path_to_save + SEPERATOR + "community_exchange.pdf")
-                fig2 = plot_community_uptake_graph(
+                fig.savefig(path_to_save + SEPERATOR + "community_exchange.pdf", bbox_inches="tight")
+                fig = plot_community_uptake_graph(
                     m, summary_1, names=cfg.visualization.names
                 )
-                fig2.savefig(
-                    path_to_save + SEPERATOR + "community_uptake.png", dpi=1000
+                fig.savefig(
+                    path_to_save + SEPERATOR + "community_uptake.png", dpi=1000, bbox_inches="tight"
                 )
 
-                fig2 = plot_species_interaction(
+                fig = plot_species_interaction(
                     m, summary_1, names=cfg.visualization.names
                 )
-                fig2.savefig(path_to_save + SEPERATOR + "species_interaction.pdf")
+                fig.savefig(path_to_save + SEPERATOR + "species_interaction.pdf", bbox_inches="tight")
 
-                fig2 = plot_community_interaction(
-                    m, summary_2, names=cfg.visualization.names
-                )
-                fig2.savefig(
-                    path_to_save
-                    + SEPERATOR
-                    + "community_exchange_cooperative_tradeoff.pdf"
-                )
-                fig2 = plot_community_uptake_graph(
-                    m, summary_2, names=cfg.visualization.names
-                )
-                fig2.savefig(
-                    path_to_save
-                    + SEPERATOR
-                    + "community_uptake_cooperative_tradeoff.png",
-                    dpi=1000,
-                )
+                if cfg.community.cooperative_tradeoff:
+                    fig = plot_community_interaction(
+                        m, summary_2, names=cfg.visualization.names
+                    )
+                    fig.savefig(
+                        path_to_save
+                        + SEPERATOR
+                        + "community_exchange_cooperative_tradeoff.pdf", bbox_inches="tight"
+                    )
+                    fig = plot_community_uptake_graph(
+                        m, summary_2, names=cfg.visualization.names
+                    )
+                    fig.savefig(
+                        path_to_save
+                        + SEPERATOR
+                        + "community_uptake_cooperative_tradeoff.png",
+                        dpi=1000, bbox_inches="tight"
+                    )
 
-                fig2 = plot_species_interaction(
-                    m, summary_2, names=cfg.visualization.names
-                )
-                fig2.savefig(
-                    path_to_save
-                    + SEPERATOR
-                    + "species_interaction_cooperative_tradeoff.pdf"
-                )
+                    fig = plot_species_interaction(
+                        m, summary_2, names=cfg.visualization.names
+                    )
+                    fig.savefig(
+                        path_to_save
+                        + SEPERATOR
+                        + "species_interaction_cooperative_tradeoff.pdf", bbox_inches="tight"
+                    )
 
     log.info("Compute weight posteriors")
     if cfg.community.compute_infer_weights:
@@ -454,6 +562,13 @@ def run_community(cfg: DictConfig) -> None:
                 enforce_survival=cfg.community.infer_weights.enforce_survival,
                 cooperative_tradeoff=alpha,
             )
+
+            df1 = pd.DataFrame(weights.numpy(), columns=[f"Weight: {m.id}" for m in models])
+            df2 = pd.DataFrame(growths.numpy(), columns=[f"Growth: {m.id}" for m in models])
+
+            simulations = pd.concat([df1,df2], axis=1)
+            simulations.to_csv(PATH + SEPERATOR + "weight_inference"
+                + SEPERATOR + type(m).__name__ +  f"simulations.csv")
 
             fig = plot_weight_growth_pairplot(
                 m, weights, growths, names=cfg.visualization.names

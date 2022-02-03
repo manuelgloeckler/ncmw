@@ -117,6 +117,7 @@ def run_setup(cfg: DictConfig) -> None:
     PATH = PATH_res + SEPERATOR + "setup"
 
     # Creates folder structure
+    log.info(f"Generating result directory in {PATH}")
     create_setup_folder_backbone(PATH, PATH_res)
 
     # Load configurations over previous runs
@@ -130,7 +131,7 @@ def run_setup(cfg: DictConfig) -> None:
         old_cfg = cfg
         old_cfg._content[STATUS_KEY] = False
 
-    log.info(f"Generating result directory in {PATH}")
+    
 
     models_folder = cfg.setup.models
     log.info(f"Loading all models in the folder {DATA_PATH}{models_folder}")
@@ -260,7 +261,7 @@ def run_setup(cfg: DictConfig) -> None:
     with open(PATH + SEPERATOR + ".configs", "wb") as f:
         cfg._content[STATUS_KEY] = True
         pickle.dump(cfg, f)
-
+    del cfg._content[STATUS_KEY]
     end_time = time.time()
     runtime = end_time - start_time
     log.info(f"Finished Workflow in {runtime} seconds")

@@ -43,7 +43,6 @@ def test_get_default_medium():
         elif "EX_fe" in key:
             assert val == 0.1
         else:
-            print(key, val)
             assert val == 10
 
 

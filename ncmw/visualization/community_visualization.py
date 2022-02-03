@@ -334,6 +334,7 @@ def plot_pairwise_growth_relation_per_weight(model, names: dict = dict(), h=100)
 
     """
     N = len(model.models)
+    old_weights = deepcopy(model.weights)
     growth_dict = dict()
     alphas = None
     for i in range(N):
@@ -372,4 +373,5 @@ def plot_pairwise_growth_relation_per_weight(model, names: dict = dict(), h=100)
             if j < N - 1:
                 axes[j, i].axis("off")
     fig.tight_layout()
+    model.weights = old_weights
     return fig

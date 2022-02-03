@@ -30,11 +30,11 @@ def run_ncmw(cfg: DictConfig) -> None:
         run1(cfg)
 
     if cfg.run_analysis:
-        log.info("Running analysis")
+        log.info("Running analysis...")
         run2(cfg)
 
     if cfg.run_community:
-        log.info("Running community")
+        log.info("Running community...")
         run3(cfg)
 
     end_time = time.time()
