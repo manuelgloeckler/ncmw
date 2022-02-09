@@ -14,7 +14,6 @@ import shutil
 
 import sphinx_rtd_theme
 import nbsphinx
-import m2r2
 
 # -- Path setup --------------------------------------------------------------
 
