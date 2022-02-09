@@ -3,7 +3,7 @@ name: ncmw
 # execute this workflow automatically when a we push to master
 on:
   push:
-    branches: [ auto_doc ]
+    branches: [ main ]
  
 jobs:
  
@@ -19,7 +19,7 @@ jobs:
       run: |
         apt-get update
         apt-get install -y git
-        git clone --depth 1 --branch auto_doc "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
+        git clone --depth 1 --branch main "https://token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" .
       shell: bash
  
     - name: Execute script to build our documentation and update pages
