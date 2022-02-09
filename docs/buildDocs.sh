@@ -1,32 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@manuelgloeckler 
-manuelgloeckler
-/
-workflows_rtd_doc
-Public
-Code
-Issues
-Pull requests
-Actions
-Projects
-Wiki
-Security
-Insights
-More
-workflows_rtd_doc/docs/buildDocs.sh
-@manuelgloeckler
-manuelgloeckler updated build docs
-Latest commit dd839c5 2 days ago
- History
- 1 contributor
-Executable File  87 lines (64 sloc)  2.52 KB
-   
 #!/bin/bash
 set -x
 ################################################################################
@@ -114,16 +85,3 @@ popd # return to main repo sandbox root
  
 # exit cleanly
 exit 0
-© 2022 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Loading complete
