@@ -91,6 +91,7 @@ def test_create_consistent_model(model):
     assert m.slim_optimize() > 1e-10
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("model_path", get_model_paths("models"))
 def test_score_memote(model_path):
     test_output = (

@@ -1,6 +1,7 @@
 from ncmw.community.community_models import CommunityModel
 from typing import List, Tuple
 import numpy as np
+from numpy.typing import ArrayLike as Array
 import pandas as pd
 
 import networkx as nx
@@ -11,7 +12,7 @@ from sbi.inference import SNLE
 
 def compute_species_interaction_weights(
     model: CommunityModel, df: pd.DataFrame, alpha: float = 1.0
-):
+) -> Array:
     """Compute interaction between two species. The values lie between -1 (negative
     interaction) and + 1 postitive interaction. Be :math:`p_{ij}` the number of
     metabolites produced by i and consumed by j. Be :math:`c_{ij}` the number of
@@ -26,7 +27,7 @@ def compute_species_interaction_weights(
                interaction is wheighted more.
 
     Returns:
-        np.array: N x N matrix of interaction weights between species.
+        Array: N x N matrix of interaction weights between species.
 
     """
     N = len(model.models)
@@ -107,12 +108,12 @@ def compute_community_interaction_graph(model, df):
 
 
 def community_weight_posterior(
-    model,
-    enforce_survival=0.0,
-    num_simulations=10000,
-    cooperative_tradeoff=None,
-    noise=0.05,
-    prior="dirichlet",
+    model: CommunityModel,
+    enforce_survival:float=0.0,
+    num_simulations:int=10000,
+    cooperative_tradeoff: float=None,
+    noise:float=0.05,
+    prior:str="dirichlet",
 ):
     N = len(model.models)
 
@@ -156,7 +157,7 @@ def community_weight_posterior(
 
 def compute_pairwise_growth_relation_per_weight(
     community_model: CommunityModel, idx1: int, idx2: int, h: int = 200
-) -> Tuple[np.array, np.array, np.array]:
+) -> Tuple[Array, Array, Array]:
     """We compare the pairwise growth relation as following: Be :math:`\\alpha \in
     [0,1]` and :math:`G_i, G_j` the growth expression for model i and j. Then we
     maximize the community objective :math:`\\alpha G_i + (1-\\alpha)G_j` and report the

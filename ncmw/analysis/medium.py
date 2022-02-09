@@ -3,7 +3,7 @@ import pandas as pd
 from cobra.medium import minimal_medium
 from cobra.flux_analysis import flux_variability_analysis
 
-from typing import Iterable, Callable, List, Dict
+from typing import Iterable, Optional, List
 import numpy as np
 
 
@@ -25,7 +25,7 @@ def compute_fvas(models: Iterable, fraction: float) -> List:
     return dfs
 
 
-def compute_COMPM(models: list, fvas: list = None) -> List:
+def compute_COMPM(models: list, fvas: Optional[list] = None) -> List:
     r"""Computes the COMPM medium, given all the fva results. The COMPM is defined as
     the medium, in which all models can achive their maximum biomass rate (MBR) if they are alone.
 
@@ -74,25 +74,3 @@ def compute_COMPM(models: list, fvas: list = None) -> List:
 
     return mediums
 
-
-def compute_exchange_medium(models, fvas, default=10):
-    if fvas is None:
-        fvas = compute_fvas(models, 1.0)
-    df = pd.concat(list(fvas))
-    df = df.groupby(df.index).min()
-    mediums = []
-    for model in models:
-        medium = model.medium
-        for key in medium:
-            if key in df.index:
-                medium[key] = default
-        mediums.append(medium)
-
-    for model, medium in zip(models, mediums):
-        with model as m:
-            max_growth = m.slim_optimize()
-            m.medium = medium
-            growth = m.slim_optimize()
-            assert np.isclose(
-                max_growth, growth
-            ), "In the COMPM medium all community members must reach maximum growth rate, check the input!"

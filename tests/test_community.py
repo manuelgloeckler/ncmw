@@ -23,7 +23,7 @@ def test_community_models(community):
     N = len(model.models)
     growth = model.slim_optimize()
     assert growth > 0
-    growth2, single_growths = model.optimize()
+    growth2, single_growths, sol = model.optimize()
     assert abs(growth2 - growth) < 1e-3
     # Test necessary functionality
     try:
@@ -36,15 +36,16 @@ def test_community_models(community):
     except:
         assert False
     try:
-        summary = model.summary()
-        assert isinstance(summary, DataFrame)
-        coopm = model.computeCOOPM(0.1)
+        if isinstance(model, ShuttleCommunityModel):
+            summary = model.summary()
+            assert isinstance(summary, DataFrame)
+        coopm = model.compute_COOPM(0.1)
         assert isinstance(coopm, dict)
-        coopm = model.computeCOOPM(growth, enforce_survival=False)
+        coopm = model.compute_COOPM(growth, enforce_survival=False)
         assert isinstance(coopm, dict)
-        summary = model.compute_convex_combination(np.ones(N) / N, maxbiomass=0.1)
-        assert np.isclose(growth, 0.1)
-        assert isinstance(summary, DataFrame)
+        # summary = model.compute_convex_combination(np.ones(N) / N, maxbiomass=0.1)
+        # assert np.isclose(growth, 0.1)
+        # assert isinstance(summary, DataFrame)
     except:
         assert False
 
