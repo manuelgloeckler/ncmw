@@ -130,5 +130,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 outputs
+docs_old
 
 

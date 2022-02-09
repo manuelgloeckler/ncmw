@@ -14,6 +14,7 @@ import shutil
 
 import sphinx_rtd_theme
 import nbsphinx
+import m2r2
 
 # -- Path setup --------------------------------------------------------------
 
@@ -25,7 +26,6 @@ __location__ = os.path.join(
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.join(__location__, ".."))
-
 
 # -- Run sphinx-apidoc -------------------------------------------------------
 # This hack is necessary since RTD does not issue `sphinx-apidoc` before running
@@ -42,10 +42,7 @@ except ImportError:
 
 output_dir = os.path.join(__location__, "api")
 module_dir = os.path.join(__location__, "../ncmw")
-try:
-    shutil.rmtree(output_dir)
-except FileNotFoundError:
-    pass
+
 
 try:
     import sphinx
@@ -55,14 +52,16 @@ try:
     )
     cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
 
-    args = cmd_line.split(" ")
-    if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
-        # This is a rudimentary parse_version to avoid external dependencies
-        args = args[1:]
+    # args = cmd_line.split(" ")
+    # if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
+    #     # This is a rudimentary parse_version to avoid external dependencies
+    #     args = args[1:]
+    os.system(cmd_line)
 
-    apidoc.main(args)
+    #apidoc.main(args)
 except Exception as e:
     print("Running `sphinx-apidoc` failed!\n{}".format(e))
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -83,6 +82,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_rtd_theme",
+    "m2r2",
     "nbsphinx",
 ]
 
@@ -95,7 +95,7 @@ nbsphinx_execute_arguments = [
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -105,7 +105,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "ncmw"
-copyright = "2021, manumanu12345"
+copyright = "2021, manuelgloeckler"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -193,8 +193,8 @@ else:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["static"]
-html_style = "style.css"
+html_static_path = ["_static"]
+# html_style = "style.css"
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

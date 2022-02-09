@@ -1,7 +1,0 @@
-.. _community:
-
-=======
-Community
-=======
-
-.. include:: ../community.ipynb

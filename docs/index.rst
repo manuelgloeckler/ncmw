@@ -17,6 +17,7 @@ Contents
    Setup <setup>
    Analysis <analysis>
    Community <community>
+   Hierarchical <hierarchical_model_composition>
    License <license>
    Changelog <changelog>
    Module Reference <api/modules>

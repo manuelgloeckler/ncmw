@@ -1,0 +1,7 @@
+ 
+*.swp
+/_build
+/doctrees
+/_static
+/_templates
+/api
