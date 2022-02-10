@@ -18,6 +18,7 @@ Contents
    Analysis <analysis>
    Community <community>
    Hierarchical <hierarchical_model_composition>
+   Script Parameters <script_parameters>
    License <license>
    Changelog <changelog>
    Module Reference <api/modules>
