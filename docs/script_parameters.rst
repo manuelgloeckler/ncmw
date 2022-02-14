@@ -5,26 +5,25 @@ Script parameters
 In this section, we will describe the possible parameters for the workflow scripts. Further we will quickly introduce how to change parameters.
 
 The default parameters are listed in `data/hydra` within .yml files. To run the whole workflow just open your terminal of choice and write
-.. code-block:: ruby
 
-   ncmw
+.. code-block:: ruby
+  ncmw
 
 It will lsit all parameters at the beginning, you can verify that these are exactly the on listed within the files. Thus one way to modify the parameters is to simply modify these files!
 
 Yet, in some cases we may not want to permanetly change a default value, but just for one run. In this case we can overwrite the parameters within the terminal. For example to create a new project we can just modify the command using
-.. code-block:: ruby
 
-   ncmw name="other_name"
+.. code-block:: ruby
+  ncmw name="other_name"
 
 Note that `name` is one of the general parameters and thus can be set directly. Lets also consider how to change parmeters from setup or community. Lets say we want to disable "fastcc" because our models are already curated and further do not want to produce results based on the BagOfReactions Community model, then we can use 
-.. code-block:: ruby
 
-   ncmw setup.fastcc=false community.bag_of_reactions_model=false
+.. code-block:: ruby
+  ncmw setup.fastcc=false community.bag_of_reactions_model=false
 
 We can also directly add some new parameters, this maybe usefull to extend the "names" i.e 
 .. code-block:: ruby
-
-   ncmw '+visualization.names?{"id":"name"}'
+  ncmw '+visualization.names?{"id":"name"}'
 
 General parameters for any of the scripts:
 * name: The name of the project. This will affect the folder name within the result folder, the default name is "default_project_name"
