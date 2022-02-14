@@ -3,7 +3,8 @@ NCMW (Nasal community modeling workflow)
 ========================================
 
 This is the documentation of **NCMW**. A package and workflow for investigating the community interaction between metabolic models in the nasal microbiome.
-Test
+
+This documentation will give a small overview over the package usecase and will showcase an example application.
 
 
 
@@ -26,6 +27,7 @@ Contents
 
 Indices and tables
 ==================
+The functions and modules are documented here.
 
 * :ref:`genindex`
 * :ref:`modindex`
