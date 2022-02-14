@@ -6,9 +6,9 @@ In this section, we will describe the possible parameters for the workflow scrip
 
 The default parameters are listed in `data/hydra` within .yml files. To run the whole workflow just open your terminal of choice and write
 
-.. code-block::
+.. code-block:: ruby
 
-   ncmw
+   Some Ruby code.
 
 
 It will lsit all parameters at the beginning, you can verify that these are exactly the on listed within the files. Thus one way to modify the parameters is to simply modify these files!
@@ -28,7 +28,7 @@ Note that `name` is one of the general parameters and thus can be set directly. 
 We can also directly add some new parameters, this maybe usefull to extend the "names" i.e 
 
 .. code-block::
-  
+
    ncmw '+visualization.names={"id":"name"}'
 
 General parameters for any of the scripts:
