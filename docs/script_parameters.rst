@@ -7,25 +7,27 @@ In this section, we will describe the possible parameters for the workflow scrip
 The default parameters are listed in `data/hydra` within .yml files. To run the whole workflow just open your terminal of choice and write
 
 .. code-block:: ruby
-  ncmw
+   ncmw
 
 It will lsit all parameters at the beginning, you can verify that these are exactly the on listed within the files. Thus one way to modify the parameters is to simply modify these files!
 
 Yet, in some cases we may not want to permanetly change a default value, but just for one run. In this case we can overwrite the parameters within the terminal. For example to create a new project we can just modify the command using
 
 .. code-block:: ruby
-  ncmw name="other_name"
+   ncmw name="other_name"
 
 Note that `name` is one of the general parameters and thus can be set directly. Lets also consider how to change parmeters from setup or community. Lets say we want to disable "fastcc" because our models are already curated and further do not want to produce results based on the BagOfReactions Community model, then we can use 
 
 .. code-block:: ruby
-  ncmw setup.fastcc=false community.bag_of_reactions_model=false
+   ncmw setup.fastcc=false community.bag_of_reactions_model=false
 
 We can also directly add some new parameters, this maybe usefull to extend the "names" i.e 
+
 .. code-block:: ruby
-  ncmw '+visualization.names?{"id":"name"}'
+   ncmw '+visualization.names={"id":"name"}'
 
 General parameters for any of the scripts:
+
 * name: The name of the project. This will affect the folder name within the result folder, the default name is "default_project_name"
 * seed: The random seed, which is used by any random operation (default = 1).
 * eps: That's a cutoff growth on which we perform e.g. gap filling (default= 0.01)
@@ -46,6 +48,7 @@ Now there are some parameters for the setup:
 * models: The folder name of the models (default models)
 
 Next, there are some parameters for analysis:
+
 * fva_fraction: The fraction of optimal growth that must be achieved in FVA. (default 1.)
 * sekretion_uptake: Wheather to compute secretion and uptake (default true)
 * require_setup: Wheather we require that setup was run before (default true)
@@ -96,6 +99,7 @@ Now also the community has several parameters which can be set:
   * competitive_tradeoff_alpha: Parameterse used in competitive tradeoff (default 0.9)
 
 Last but not least we add parameters for the visualization:
+
 * scaled_medium_growth_plot:
   * min_scale: The minimal medium scale value (default 0.1)
   * max_scale: The maximum medium scale value (default 100)
