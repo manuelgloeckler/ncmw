@@ -1,5 +1,4 @@
 import cobra
-import cobra.test
 from cobra.core import Model
 from typing import Tuple, List
 import pandas as pd
@@ -40,16 +39,14 @@ def gapfill_model(
 
     if isinstance(fill_model_base, Model):
         fill_model = fill_model_base
-    elif fill_model_base == "ecoli" or fill_model_base == "salmonella":
-        test_model = cobra.test.create_test_model(fill_model_base)
-        fill_model = cobra.Model("universal_reactions")
-        fill_model.add_reactions(test_model.reactions)
     elif fill_model_base == "base":
         test_model = cobra.io.read_sbml_model(
             DATA_PATH + "/gapfill_baseline/" + "model.xml"
         )
         fill_model = cobra.Model("universal_reactions")
         fill_model.add_reactions(test_model.reactions)
+    else:
+        raise NotImplementedError()
 
     if "demand_reactions" in kwargs:
         demand_reactions = kwargs.pop("demand_reactions")
