@@ -108,17 +108,17 @@ def get_biomass_reaction(model):
 
 def check_for_substring_in_folder(PATH: str, substring: str, type: str = "*") -> bool:
     """Checks if a substring is contained within the file names contianed in a given folder.
-    
-    
-    
+
+
+
     Args:
         PATH: Path to the folder
         substring: Substring to search for
         type: Specific file type
-    
+
     Returns:
         bool: If it is present or not
-    
+
     """
     for filepath in glob.iglob(PATH + SEPERATOR + type):
         if substring in filepath:
@@ -141,8 +141,11 @@ def get_models(folder: str, prefix=DATA_PATH):
         elif filename.endswith(".mat"):
             model = load_matlab_model(directory + SEPERATOR + filename)
         elif filename.startswith("."):
+            model = None
             pass
         else:
             raise ValueError("Unknown format")
-        models.append(model)
+
+        if model is not None:
+            models.append(model)
     return models
