@@ -11,7 +11,7 @@ metabolic models within a community.
 ![Download count](https://img.shields.io/github/downloads/manuelgloeckler/ncmw/total.svg?style=plastic)
 
 
-<img align="right" src="Nasal_Cavity.png" width="170"/> 
+<img align="right" src="Nasal_Cavity.png" width="200"/> 
 
 ----
 *Authors*: [Manuel Glöckler](https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/systems-biology/team/),
