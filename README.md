@@ -10,6 +10,7 @@ metabolic models within a community.
 ![Lines of Code](https://img.shields.io/tokei/lines/github/manuelgloeckler/ncmw?color=orange&style=plastic)
 ![Download count](https://img.shields.io/github/downloads/manuelgloeckler/ncmw/total.svg?style=plastic)
 
+<img align="right" src="Nasal_Cavity.pdf" alt="drawing" width="170"/> 
 ----
 *Authors*: [Manuel Glöckler](https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/systems-biology/team/),
 [Reihaneh Mostolizadeh](https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/systems-biology/team/dr-reihaneh-mostolizadeh/)
