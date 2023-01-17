@@ -23,9 +23,9 @@ metabolic models within a community.
 
 *Citation*: Please cite us 
 
-[1] [https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full](https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full)
+[1] NCMW: A Python Package to Analyze Metabolic Interactions in the Nasal Microbiome [https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full](https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full)
 
-[2] [https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full](https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full)
+[2] Towards the human nasal microbiome: Simulating D. pigrum and S. aureus [https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full](https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full)
 
 ► Getting started with NCMW
 ----------------------------
