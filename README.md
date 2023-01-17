@@ -22,7 +22,9 @@ metabolic models within a community.
 *Repository*: [https://github.com/manuelgloeckler/ncmw](https://github.com/manuelgloeckler/ncmw)
 
 *Citation*: Please cite us 
+
 [1] [https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full](https://www.frontiersin.org/articles/10.3389/fbinf.2022.827024/full)
+
 [2] [https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full](https://www.frontiersin.org/articles/10.3389/fcimb.2022.925215/full)
 
 ► Getting started with NCMW
