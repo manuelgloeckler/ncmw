@@ -1,7 +1,6 @@
 from copy import deepcopy
 import cobra
 import numpy as np
-from py import process
 import scipy
 
 

@@ -11,9 +11,10 @@ import socket
 import time
 import random
 import numpy as np
+import os
 
 
-@hydra.main(config_path="../../data/hydra", config_name="config.yaml")
+@hydra.main(config_path=os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + "/data/hydra", config_name="config.yaml")
 def run_ncmw(cfg: DictConfig) -> None:
     log = logging.getLogger(__name__)
     log.info(OmegaConf.to_yaml(cfg))

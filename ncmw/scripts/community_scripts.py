@@ -15,6 +15,8 @@ from copy import deepcopy
 
 import sys, os
 import json, pickle
+from ncmw.community.community_models import HierarchicalCommunityModel
+from ncmw.community.hierarchical_model_composition import generate_hierarchical_community_model
 
 file_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(file_dir)
@@ -209,6 +211,12 @@ def generate_community_models(models, cfg, old_cfg, log, community_path):
         else:
             log.info("Building shuttle reactions model")
             community_models += [ShuttleCommunityModel(models, **kwargs)]
+    if cfg.community.hierarchical_model:
+            log.info("Building hierarchical model")
+            kwargs = cfg.community.shuttle_reaction_params
+            model_paths = get_model_paths(cfg.setup.models)
+            model = HierarchicalCommunityModel(model_paths, **kwargs)
+            community_models += [model]
 
     log.info(f"Set correct weights: {cfg.community.main_weights}")
     for m in community_models:
@@ -438,7 +446,11 @@ def run_community(cfg: DictConfig) -> None:
     if cfg.community.save_models:
         for m in community_models:
             path = PATH + SEPERATOR + "community_models" + SEPERATOR + type(m).__name__
-            m.save(path)
+            try:
+                # Hirarchical is not pickable
+                m.save(path)
+            except:
+                pass
             log.info(f"Saving community models: {path}")
     if cfg.community.save_as_sbml:
         for m in community_models:

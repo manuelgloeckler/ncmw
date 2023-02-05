@@ -1,5 +1,6 @@
 bag_of_reactions_model: True
 shuttle_reactions_model: True
+hierarchical_model: True
 shuttle_reaction_params:
   shared_reactions: None
   shuttle_reaction_lower_bound: -50
