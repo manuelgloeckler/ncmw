@@ -36,7 +36,7 @@ Installation
 ------------
 
 Please clone the repository using `git clone https://github.com/manuelgloeckler/ncmw.git` . The package and all the dependencies can be installed via `pip`.
-The only requirement that is not installed is some solver that can minimize quadratic objectives and is supported by Pycobra.
+The only requirement that is not installed is some solver that can minimize quadratic objectives and is supported by Pycobra. This is for example "cplex", which can be installed via `pip install cplex`, but requires a license (required for COOPM analysis). 
 
 After having cloned the repository, please enter the following command in the same directory where the cloned repository is located:
 

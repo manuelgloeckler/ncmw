@@ -7,7 +7,11 @@ import pandas as pd
 import networkx as nx
 
 import torch
-from sbi.inference import SNLE
+import warnings
+try:
+    from sbi.inference import SNLE
+except:
+    pass
 
 
 def compute_species_interaction_weights(
@@ -115,6 +119,7 @@ def community_weight_posterior(
     noise:float=0.05,
     prior:str="dirichlet",
 ):
+    warnings.warn("This function is deprecated as dependencies became incompatible with the version of the package... . You can still use the function in a separate environment.")
     N = len(model.models)
 
     def simulator(thetas):
@@ -150,7 +155,7 @@ def community_weight_posterior(
     _ = inf.append_simulations(thetas, xs).train()
     posterior = inf.build_posterior(
         sample_with="vi",
-        vi_parameters={"flow": "spline_autoregressive", "bound": 15, "num_bins": 15},
+        vi_parameters={"q": "nsf"},
     )
     return posterior, thetas, xs
 

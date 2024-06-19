@@ -7,6 +7,13 @@
     Learn more under: https://pyscaffold.org/
 """
 from setuptools import setup
+import os
+
+# Install without deps using pip 
+call = "pip install --no-deps sbi @ git+https://github.com/sbi-dev/sbi.git"
+call2 = "pip install --no-deps arviz==0.12"
+os.system(call) 
+os.system(call2)
 
 if __name__ == "__main__":
     try:

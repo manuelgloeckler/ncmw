@@ -14,7 +14,10 @@ from networkx.drawing.layout import circular_layout, bipartite_layout
 import networkx as nx
 import torch
 from copy import deepcopy
-from sbi.analysis import pairplot
+try:
+    from sbi.analysis import pairplot
+except:
+    pass
 import pandas as pd
 
 
@@ -119,6 +122,7 @@ def plot_posterior_samples_for_observation(model, posterior, observation):
             list : A list of figures for each observation.
 
     """
+    warnings.warn("This function is deprecated as dependencies became incompatible with the version of the package... . You can still use the function in a separate environment.")
     x_o = torch.tensor(observation).float()
     posterior.set_default_x(x_o)
     posterior.train(loss="elbo", warm_up_rounds=100)

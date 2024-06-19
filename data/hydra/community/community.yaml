@@ -18,7 +18,7 @@ medium_strict_subset_of_default: False
 medium:
   default: True
   compm: True
-  coopm: True
+  coopm: False # Install CPlex to use this option
 optimize_params:
   enforce_survival: 0
 compute_community_fva: True
@@ -31,7 +31,7 @@ cooperative_tradeoff_params:
 pairwise_growth: True
 pairwise_growth_params:
   h: 100
-compute_infer_weights: True
+compute_infer_weights: False # Deprecated due to dependency conflicts
 infer_weights:
   simulations_for_different_weights: 2000
   observed_individual_biomass: balanced

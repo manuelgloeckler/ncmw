@@ -92,6 +92,8 @@ def create_community_folder_backbone(community_folder:str, project_folder:str) -
             os.mkdir(community_folder + SEPERATOR + "experiments_BagOfReactionsModel")
         if not os.path.exists(community_folder + SEPERATOR + "experiments_ShuttleCommunityModel"):
             os.mkdir(community_folder + SEPERATOR + "experiments_ShuttleCommunityModel")
+        if not os.path.exists(community_folder + SEPERATOR + "experiments_HierarchicalCommunityModel"):
+            os.mkdir(community_folder + SEPERATOR + "experiments_HierarchicalCommunityModel")
     except:
         raise ValueError("Could not generate output directory, maybe we do not have permission's to do so?")
         
